@@ -71,8 +71,8 @@ body {
 .domain-container {
   margin-top: 10px;
   padding: 10px;
-  /* border-top: 1px dashed #adadad; */
   border-bottom: 1px dashed #adadad;
+  /* border-bottom: 1px dashed #208bff; */
   border-radius: 1px;
   /* background-color: #f9f9f9; */
   box-shadow: inset 10px -10px 30px rgba(128, 128, 128, 0.234);
@@ -94,6 +94,13 @@ body {
   color: #888;
   text-align: center;
   margin-top: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 /* Domain title styling */

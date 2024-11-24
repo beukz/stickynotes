@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Add domain title with a visit button
         const domainTitle = document.createElement("h3");
         domainTitle.textContent = domain;
+        domainTitle.className = "ap-sn-site-title";
         domainContainer.appendChild(domainTitle);
 
         const visitDomainButton = document.createElement("button");

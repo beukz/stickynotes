@@ -3,7 +3,7 @@
 
   window.onload = function () {
     try {
-      injectExternalCSS();
+
       injectNewNoteButton();
       loadNotes();
       observeUrlChanges(); // Watch for dynamic URL changes
@@ -12,17 +12,6 @@
     }
   };
 
-  function injectExternalCSS() {
-    try {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href =
-        "https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css";
-      document.head.appendChild(link);
-    } catch (error) {
-      console.error("Error injecting external CSS:", error);
-    }
-  }
 
   function injectNewNoteButton() {
     try {
@@ -32,7 +21,8 @@
       button.style.position = "fixed";
       button.style.zIndex = "9999";
       // button.style.top = "10px";
-      // button.style.left = "10px";
+      // button.style.right = "10px";
+      button.style.display = 'none';
       document.body.appendChild(button);
 
       // Add click event listener for "New Note" button

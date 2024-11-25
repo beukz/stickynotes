@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (notesContainer.innerHTML === "") {
         const noNotesMessage = document.createElement("div");
         noNotesMessage.className = "no-notes-message";
-        noNotesMessage.textContent = "No sticky notes saved yet!";
+        noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
         notesContainer.appendChild(noNotesMessage);
       }
     });

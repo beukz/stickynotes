@@ -27,7 +27,11 @@
     Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   --titleFont: "Inter", sans-serif;
-  --borderColor: rgba(128, 128, 128, 0.586);
+  --borderColor: rgba(128, 128, 128, 0.416);
+
+  --divider: rgba(128, 128, 128, 0.705);
+  --defaultColor: rgb(133, 133, 133);
+  --appVersion: #b3b3b3;
 }
 
 /* General body styling */
@@ -95,12 +99,12 @@ body {
   text-align: center;
   margin-top: 20px;
   position: absolute;
-  top: 50%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  -webkit-user-select: none;
+  /* -webkit-user-select: none;
   -moz-user-select: none;
-  user-select: none;
+  user-select: none; */
 }
 
 /* Domain title styling */
@@ -217,16 +221,30 @@ h3.ap-sn-site-title {
   box-shadow: 0 0 5px var(--borderColor);
 }
 
+.ap-sn-version-product {
+  display: flex;
+  align-items: center;
+}
+
+.ap-sn-divider {
+  margin: 0 10px;
+  height: 15px;
+  padding: 0.2px;
+  background-color: var(--divider);
+  color: var();
+}
+
 .ap-sn-footer-box p.app-from {
   font-size: 0.75rem;
+  color: var(--defaultColor);
 }
 
 .ap-sn-footer-box p a {
-  color: black;
+  color: var(--defaultColor);
 }
 
 .app-version {
-  color: #b3b3b3;
+  color: var(--appVersion);
   font-size: 0.6rem;
 }
 

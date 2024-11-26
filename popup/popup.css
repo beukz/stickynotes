@@ -11,6 +11,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Circular", sans-serif;
+  src: url("font/circular.ttc") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --stickyBG: #ffd165;
   --strickyContentBG: rgb(53, 53, 53);
@@ -25,9 +32,11 @@
 
   --defaultFont: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --cFont: 'Circular', sans-serif;
 
   --titleFont: "Inter", sans-serif;
-  --borderColor: rgba(128, 128, 128, 0.416);
+  /* --borderColor: rgba(128, 128, 128, 0.416); */
+  --borderColor:  rgba(128, 128, 128, 0.493);
 
   --divider: rgba(128, 128, 128, 0.705);
   --defaultColor: rgb(133, 133, 133);
@@ -49,6 +58,7 @@ body {
   min-height: 250px;
   max-height: 600px;
   overflow-y: auto;
+  /* display: none; */
 }
 
 .notes-container {
@@ -62,8 +72,12 @@ body {
   /* border-bottom: 1px solid black; */
   padding: 10px;
   width: 100%;
+  height: 45px;
   background-color: #fff;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .ap-sn-title {
@@ -74,7 +88,7 @@ body {
 /* Domain section styling */
 .domain-container {
   margin-top: 10px;
-  padding: 10px;
+  padding: 10px 10px 15px 10px;
   border-bottom: 1px dashed #adadad;
   /* border-bottom: 1px dashed #208bff; */
   border-radius: 1px;
@@ -89,7 +103,8 @@ body {
 
 .domain-container:last-child {
   /* border: 1px solid red; */
-  margin-bottom: 50px;
+  margin-bottom: 55px;
+  border-bottom: none;
 }
 
 /* Message when no notes are saved */
@@ -102,9 +117,9 @@ body {
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  /* -webkit-user-select: none;
+  -webkit-user-select: none;
   -moz-user-select: none;
-  user-select: none; */
+  user-select: none;
 }
 
 /* Domain title styling */
@@ -217,8 +232,10 @@ h3.ap-sn-site-title {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  height: 45px;
   padding: 10px;
   box-shadow: 0 0 5px var(--borderColor);
+  /* font-family: var(--cFont); */
 }
 
 .ap-sn-version-product {
@@ -246,6 +263,113 @@ h3.ap-sn-site-title {
 .app-version {
   color: var(--appVersion);
   font-size: 0.6rem;
+}
+
+/* notification button */
+button.ap-sn-noti-btn {
+  height: 25px;
+  width: 25px;
+  border: 1px solid grey;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.4);
+  transition: all 0.3s ease-out;
+  display: none;
+}
+
+button.ap-sn-noti-btn:hover {
+  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
+  transition: all 0.3s ease-out;
+}
+
+button.ap-sn-noti-btn i {
+  color: rgb(94, 94, 94);
+}
+
+/* message box | from HQ */
+.msg-box {
+  position: relative;
+  background-color: #fff;
+  width: 400px;
+  height: auto;
+  min-height: 250px;
+  max-height: 600px;
+  display: none;
+}
+
+.msg-box .ap-sn-title-box {
+  /* height: 45px; */
+}
+
+.msg-box .ap-sn-title-box button {
+  height: 25px;
+  width: 25px;
+  /* border: 1px solid rgba(128, 128, 128, 0.619); */
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+  border: none;
+}
+
+.msg-box .ap-sn-title-box button:hover {
+  /* box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
+  transition: all 0.3s ease-out; */
+}
+
+.msg-box .ap-sn-title-box button i {
+  font-size: 1.1rem;
+  position: relative;
+  top: 1px;
+  color: rgb(101, 101, 101);
+}
+
+.ap-sn-msg {
+  padding: 10px;
+}
+
+.ap-msg:first-child {
+  margin-top: 50px;
+}
+
+.ap-msg:last-child {
+  margin-bottom: 35px;
+  border-bottom: none;
+}
+
+.ap-msg {
+  margin-bottom: 20px;
+  border-bottom: 1px dashed grey;
+  padding: 0 0 10px 0;
+}
+
+h3.ap-msg-title {
+  font-size: 1rem;
+  margin: 0 0 5px 0;
+  color: rgb(50, 50, 50);
+}
+
+p.ap-msg-text {
+  font-size: 0.9rem;
+  color: rgb(87, 87, 87);
+}
+
+.ap-sn-error-report-box {
+  position: fixed;
+  background-color: #fff;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 0 5px var(--borderColor);
+  padding: 10px;
+}
+
+.ap-sn-error-report-box p {
+  font-size: 0.8rem;
+  color: grey;
+}
+
+.ap-sn-error-report-box p a {
+  color: grey;
+  font-weight: 500;
 }
 
 /* ===================== */
@@ -396,6 +520,7 @@ h3.ap-sn-site-title {
   font-size: 0.85rem;
   z-index: 0;
   line-height: 1.5;
+  font-family: var(--cFont);
 
   /* scrollbar-width: thin;
   scrollbar-color: #7d7d7d #f2f2f2;  */

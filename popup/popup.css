@@ -20,6 +20,7 @@
 
 :root {
   --stickyBG: #ffd165;
+  --textColor: #333333;
   --strickyContentBG: rgb(53, 53, 53);
   --mainHoverColor: #a0d1e8;
   --sColor: #a0d1e844;
@@ -47,6 +48,7 @@
 body {
   font-family: var(--defaultFont);
   font-size: var(--defaultFontSize);
+  color: var(--textColor);
 }
 
 /* sticky box */
@@ -81,7 +83,7 @@ body {
 }
 
 .ap-sn-title {
-  font-size: var(--h1TitlteSize);
+  font-size: 1rem;
   font-family: var(--titleFont);
 }
 

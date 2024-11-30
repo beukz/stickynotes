@@ -1,9 +1,15 @@
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "createStickyNote") {
+    // Simulate the button click or keyboard shortcut function
+    createStickyNote();
+  }
+});
+
 (function () {
   let lastUrl = window.location.href; // Cache the last known URL
 
   window.onload = function () {
     try {
-
       injectNewNoteButton();
       loadNotes();
       observeUrlChanges(); // Watch for dynamic URL changes
@@ -12,17 +18,11 @@
     }
   };
 
-
   function injectNewNoteButton() {
     try {
       const button = document.createElement("button");
       button.id = "appedle-new-note-btn";
       button.textContent = "New Note (Ctrl + Q)";
-      button.style.position = "fixed";
-      button.style.zIndex = "9999";
-      // button.style.top = "10px";
-      // button.style.right = "10px";
-      button.style.display = 'none';
       document.body.appendChild(button);
 
       // Add click event listener for "New Note" button
@@ -30,8 +30,17 @@
 
       // Add keyboard shortcut (Ctrl + Q) to create a new note
       document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === "q") {
+        // Check for Ctrl + Q (Windows/Linux) or Cmd + Q (macOS)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "q") {
           createStickyNote();
+          e.preventDefault(); // Prevent default action if needed
+        }
+      });      
+
+      // Listen for right-click menu action
+      chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === "createStickyNote") {
+          createStickyNote(); // Reuse the same function
         }
       });
     } catch (error) {
@@ -53,7 +62,9 @@
 
         const notes = data[urlKey] || [];
         removeAllStickyNotes(); // Ensure no leftover notes from the previous URL
-        notes.forEach((note) => createStickyNote(note.content, note.top, note.left));
+        notes.forEach((note) =>
+          createStickyNote(note.content, note.top, note.left)
+        );
       });
     } catch (error) {
       console.error("Error in loadNotes:", error);
@@ -199,7 +210,9 @@
 
   function removeAllStickyNotes() {
     try {
-      document.querySelectorAll(".sticky-note").forEach((note) => note.remove());
+      document
+        .querySelectorAll(".sticky-note")
+        .forEach((note) => note.remove());
     } catch (error) {
       console.error("Error removing all sticky notes:", error);
     }

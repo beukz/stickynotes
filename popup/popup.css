@@ -163,6 +163,7 @@ h3.ap-sn-site-title {
   /* box-shadow: 0 0px 2px rgba(0, 0, 0, 0.1); */
   line-height: 1.5;
   border-radius: 4px;
+  word-break: break-word;
 }
 
 .note-item:hover {

@@ -1,13 +1,20 @@
-chrome.runtime.onInstalled.addListener(async () => {
+// background/background.js
+console.log('Service Worker is running!');
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("pages/installed.html") });
+});
+
+// Handle context menu creation and clicks
+chrome.runtime.onInstalled.addListener(() => {
   let shortcutLabel = "Ctrl + Q"; // Default for Windows/Linux
-  
+
   if (navigator.userAgentData) {
     const platform = navigator.userAgentData.platform;
     if (platform && platform.toLowerCase().includes("mac")) {
       shortcutLabel = "⌘ + Q";
     }
   } else {
-    // Fallback for older browsers
     if (navigator.userAgent.toLowerCase().includes("mac")) {
       shortcutLabel = "⌘ + Q";
     }
@@ -15,7 +22,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   chrome.contextMenus.create({
     id: "addStickyNote",
-    title: `Add Sticky Note (${shortcutLabel})`,
+    title: `Create Sticky Note (${shortcutLabel})`,
     contexts: ["all"]
   });
 });

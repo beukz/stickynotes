@@ -1,10 +1,26 @@
-General body styling
-body {
-  font-family: Arial, sans-serif;
-  margin: 10px;
+/* * {
   padding: 0;
-  font-size: 14px;
-  background-color: #f4f4f4;
+  margin: 0;
+  box-sizing: border-box;
+} */
+
+@font-face {
+  font-family: "Inter", sans-serif;
+  src: url("font/Inter.ttc") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular", sans-serif;
+  src: url("font/circular.ttc") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* General body styling */
+body {
+
 }
 
 :root {
@@ -176,7 +192,7 @@ body {
 }
 
 /* Content area styling */
-.sticky-note .sticky-content {
+.sticky-content {
   overflow-y: auto;
   font-size: 14px;
   /* border: 1px solid red; */
@@ -246,5 +262,5 @@ body {
   background-color: rgb(239, 239, 239);
   cursor: pointer;
   z-index: 9999;
-  /* display: none; */
+  display: none;
 }

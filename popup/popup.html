@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <title>MLKV: Sticky Notes</title>
     <link rel="stylesheet" href="popup.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css"
-    />
-  </head>
-  <body>
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+</head>
+
+<body>
     <div class="sticky-box">
-      <div class="ap-sn-title-box">
-        <h1 class="ap-sn-title">Sticky Notes</h1>
-      </div>
+        <div class="ap-sn-title-box">
+            <h1 class="ap-sn-title">Sticky Notes</h1>
+        </div>
 
-      <div id="notes-container"></div>
+        <div id="notes-container"></div>
 
-      <!-- domain starts -->
-      <!-- <div class="domain-container">
+        <!-- domain starts -->
+        <!-- <div class="domain-container">
         <h3 class="ap-sn-site-title">https://post2blog.site</h3>
 
         <button class="visit-button">Visit</button>
@@ -75,17 +74,14 @@
         </div>
       </div> -->
 
-      <!-- ap sn footer -->
-      <div class="ap-sn-footer-box">
-        <div class="ap-sn-version-product">
-          <p class="app-version">v0.2</p>
-          <span class="ap-sn-divider"></span>
-          <p class="app-from">
-            A product from
-            <a
-              href="https://mlkv.xyz?utm_source=sticky-notes"
-              target="_blank"
-              >MLKV</a
+        <!-- ap sn footer -->
+        <div class="ap-sn-footer-box">
+            <div class="ap-sn-version-product">
+                <p class="app-version">v0.3</p>
+                <span class="ap-sn-divider"></span>
+                <p class="app-from">
+                    A product from
+                    <a href="https://mlkv.xyz?utm_source=sticky-notes" target="_blank">MLKV</a
             >
           </p>
         </div>
@@ -141,61 +137,53 @@ Let me know if this works as expected or if further adjustments are needed!
       <!-- error report box -->
       <div class="ap-sn-error-report-box">
         <p>Did you encounter an error? <a href="#">report it here</a></p>
-      </div>
+            </div>
 
-      <div class="ap-sn-title-box">
-        <h1 class="ap-sn-title">Notifications from HQ</h1>
+            <div class="ap-sn-title-box">
+                <h1 class="ap-sn-title">Notifications from HQ</h1>
 
-        <button class="ap-sn-msg-closeBtn">
+                <button class="ap-sn-msg-closeBtn">
           <i class="fi fi-rr-cross-small"></i>
         </button>
-      </div>
+            </div>
 
-      <!-- msg start -->
-      <div class="ap-sn-msg">
-        <div class="ap-msg">
-          <h3 class="ap-msg-title">
-            New Update for the Sticky Notes Extension
-          </h3>
-          <p class="ap-msg-text">
-            The latest update introduces dynamic URL support, ensuring sticky
-            notes update automatically on single-page applications. Dragging
-            functionality has been improved to keep notes within the viewport,
-            and auto-save has been optimized for reliable content editing.
-            Update now to enjoy these enhancements.
-          </p>
+            <!-- msg start -->
+            <div class="ap-sn-msg">
+                <div class="ap-msg">
+                    <h3 class="ap-msg-title">
+                        New Update for the Sticky Notes Extension
+                    </h3>
+                    <p class="ap-msg-text">
+                        The latest update introduces dynamic URL support, ensuring sticky notes update automatically on single-page applications. Dragging functionality has been improved to keep notes within the viewport, and auto-save has been optimized for reliable content
+                        editing. Update now to enjoy these enhancements.
+                    </p>
+                </div>
+
+                <div class="ap-msg">
+                    <h3 class="ap-msg-title">Sticky Notes Extension Patch Released</h3>
+                    <p class="ap-msg-text">
+                        An issue causing notes to occasionally not save properly has been resolved. This update ensures stable performance and reliable note-saving. Please update to avoid errors.
+                    </p>
+                </div>
+
+                <div class="ap-msg">
+                    <h3 class="ap-msg-title">Sticky Notes Extension Updated</h3>
+                    <p class="ap-msg-text">
+                        This update improves performance and stability, introduces smoother drag-and-drop functionality, and enhances note-saving reliability. Upgrade to experience these improvements.
+                    </p>
+                </div>
+
+                <div class="ap-msg">
+                    <h3 class="ap-msg-title">New Features Added to Sticky Notes 🙌</h3>
+                    <p class="ap-msg-text">
+                        The latest update includes improved note management, faster loading times, and better compatibility with dynamic websites. Make sure to update to the newest version.
+                    </p>
+                </div>
+            </div>
+            <!-- msg ends -->
         </div>
 
-        <div class="ap-msg">
-          <h3 class="ap-msg-title">Sticky Notes Extension Patch Released</h3>
-          <p class="ap-msg-text">
-            An issue causing notes to occasionally not save properly has been
-            resolved. This update ensures stable performance and reliable
-            note-saving. Please update to avoid errors.
-          </p>
-        </div>
+        <script src="popup.js"></script>
+</body>
 
-        <div class="ap-msg">
-          <h3 class="ap-msg-title">Sticky Notes Extension Updated</h3>
-          <p class="ap-msg-text">
-            This update improves performance and stability, introduces smoother
-            drag-and-drop functionality, and enhances note-saving reliability.
-            Upgrade to experience these improvements.
-          </p>
-        </div>
-
-        <div class="ap-msg">
-          <h3 class="ap-msg-title">New Features Added to Sticky Notes 🙌</h3>
-          <p class="ap-msg-text">
-            The latest update includes improved note management, faster loading
-            times, and better compatibility with dynamic websites. Make sure to
-            update to the newest version.
-          </p>
-        </div>
-      </div>
-      <!-- msg ends -->
-    </div>
-
-    <script src="popup.js"></script>
-  </body>
 </html>

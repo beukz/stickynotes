@@ -5,227 +5,236 @@
 } */
 
 @font-face {
-  font-family: "Inter", sans-serif;
-  src: url("font/Inter.ttc") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Inter", sans-serif;
+    src: url("font/Inter.ttc") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "Circular", sans-serif;
-  src: url("font/circular.ttc") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Circular", sans-serif;
+    src: url("font/circular.ttc") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
+
 
 /* General body styling */
-body {
 
-}
+body {}
 
 :root {
-  --stickyBG: #ffd165;
-  --strickyContentBG: rgb(53, 53, 53);
-  --mainHoverColor: #a0d1e8;
-  --sColor: #a0d1e844;
-  --dBtnColor: #ff6b6b;
-  --dBtnColorHover: #ff4f4f;
-
-  --h1TitlteSize: 1rem;
-  --noteFontSize: 0.8rem;
-  --defaultFontSize: 0.9rem;
-
-  --defaultFont: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --stickyBG: #ffd165;
+    --strickyContentBG: rgb(53, 53, 53);
+    --mainHoverColor: #a0d1e8;
+    --sColor: #a0d1e844;
+    --dBtnColor: #ff6b6b;
+    --dBtnColorHover: #ff4f4f;
+    --h1TitlteSize: 1rem;
+    --noteFontSize: 0.8rem;
+    --defaultFontSize: 0.9rem;
+    --defaultFont: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     --cFont: 'Circular', sans-serif;
-
-  --titleFont: "Inter", sans-serif;
-  /* --borderColor: rgba(128, 128, 128, 0.416); */
-  --borderColor:  rgba(128, 128, 128, 0.493);
-
-  --divider: rgba(128, 128, 128, 0.705);
-  --defaultColor: rgb(133, 133, 133);
-  --appVersion: #b3b3b3;
+    --titleFont: "Inter", sans-serif;
+    /* --borderColor: rgba(128, 128, 128, 0.416); */
+    --borderColor: rgba(128, 128, 128, 0.493);
+    --divider: rgba(128, 128, 128, 0.705);
+    --defaultColor: rgb(133, 133, 133);
+    --appVersion: #b3b3b3;
 }
 
 .note-item {
-  margin-top: 10px;
-  padding: 8px;
-  background-color: #fffa65;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 13px;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  line-height: 1.4;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #fffa65;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    line-height: 1.4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 
 /* Sticky Note styling */
+
 .sticky-note {
-  position: relative;
-  width: 300px;
-  height: auto;
-  /* min-height: 100px;
+    position: relative;
+    width: 300px;
+    height: auto;
+    /* min-height: 100px;
   max-height: 300px; */
-  border: 1px solid #ccccccb4;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: absolute; /* Absolute positioning for drag */
-  color: #000;
+    border: 1px solid #ccccccb4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    /* Absolute positioning for drag */
+    color: #000;
 }
 
+
 /* Top draggable area (handle) */
+
 .sticky-note .note-header {
-  background-color: var(--stickyBG);
-  cursor: move;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  position: absolute;
-  /* background-color: rgba(128, 128, 128, 0.271); */
-  width: 100%;
-  height: 32px;
-  z-index: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+    background-color: var(--stickyBG);
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    position: absolute;
+    /* background-color: rgba(128, 128, 128, 0.271); */
+    width: 100%;
+    height: 32px;
+    z-index: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 .sticky-note-menu-options {
-  position: absolute;
-  background-color: rgba(192, 94, 94, 0.467);
-  /* height: 100%;
+    position: absolute;
+    background-color: rgba(192, 94, 94, 0.467);
+    /* height: 100%;
   width: 100%; */
-  z-index: 1;
+    z-index: 1;
 }
 
+
 /* sticky note color pallets */
+
 .sticky-note-colors {
-  /* border: 1px solid red; */
-  display: flex;
-  align-items: center;
-  display: none;
+    /* border: 1px solid red; */
+    display: flex;
+    align-items: center;
+    display: none;
 }
 
 .sticky-note-color-pallets {
-  height: 50px;
-  width: 42.6px;
-  background-color: rgb(91, 88, 88);
-  /* margin: 1px; */
+    height: 50px;
+    width: 42.6px;
+    background-color: rgb(91, 88, 88);
+    /* margin: 1px; */
 }
 
 .sticky-note-color-pallets:hover {
-  background-color: rgba(255, 0, 0, 0.481);
+    background-color: rgba(255, 0, 0, 0.481);
 }
 
-.pallet-pink{
-  background-color: pink;
+.pallet-pink {
+    background-color: pink;
 }
 
 .sticky-cont-item img {
-  height: 12px;
-  /* color: #ddd; */
-  filter: brightness(0) invert(1);
+    height: 12px;
+    /* color: #ddd; */
+    filter: brightness(0) invert(1);
 }
 
+
 /* sticky note control box */
+
 .sticky-note-cont {
-  position: absolute;
-  bottom: 0;
-  border-top: 1px solid rgba(86, 86, 86, 0.697);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 3px;
-  background-color: var(--strickyContentBG);
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid rgba(86, 86, 86, 0.697);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    background-color: var(--strickyContentBG);
 }
 
 .sticky-cont-item {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 0 0 10px;
-  border-radius: 1px;
-  background-color: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 0 10px;
+    border-radius: 1px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
 }
 
 .sticky-cont-item:hover {
-  border: 1px solid rgba(128, 128, 128, 0.15);
-  background-color: rgba(128, 128, 128, 0.356);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    background-color: rgba(128, 128, 128, 0.356);
 }
 
 .sticky-cont-item:first-child {
-  margin: 0;
+    margin: 0;
 }
 
 .sticky-close-menu-box {
-  display: flex;
+    display: flex;
 }
 
-.ap-sticky-menu {
-}
+.ap-sticky-menu {}
 
 .ap-sticky-options {
-  /* background-color: rgba(128, 128, 128, 0.371); */
-  height: 32px;
-  width: 32px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* background-color: rgba(128, 128, 128, 0.371); */
+    height: 32px;
+    width: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ap-sticky-options:hover {
-  background-color: rgba(128, 128, 128, 0.23);
+    background-color: rgba(128, 128, 128, 0.23);
 }
 
 .ap-sticky-options img {
-  height: 15px;
+    height: 15px;
 }
 
-/* Content area styling */
-.sticky-content {
-  overflow-y: auto;
-  font-size: 14px;
-  /* border: 1px solid red; */
-  height: auto;
-  min-height: 100px;
-  max-height: 300px;
-  /* height: 89.1%; */
-  margin: 32px 0 0 0;
-  outline: none;
-  padding: 10px;
-  background-color: var(--strickyContentBG);
-  color: #d8d8d8;
-  font-size: 0.85rem;
-  z-index: 0;
-  line-height: 1.5;
-  font-family: var(--cFont);
 
-  /* scrollbar-width: thin;
+/* Content area styling */
+
+.sticky-content {
+    overflow-y: auto;
+    font-size: 14px;
+    /* border: 1px solid red; */
+    height: auto;
+    min-height: 100px;
+    max-height: 300px;
+    /* height: 89.1%; */
+    margin: 32px 0 0 0;
+    outline: none;
+    padding: 10px;
+    background-color: var(--strickyContentBG);
+    color: #d8d8d8;
+    font-size: 0.85rem;
+    z-index: 0;
+    line-height: 1.5;
+    font-family: var(--cFont);
+    /* scrollbar-width: thin;
   scrollbar-color: #7d7d7d #f2f2f2;  */
 }
 
 .sticky-note .sticky-content.placeholder {
-  color: #aaa; /* Placeholder text color */
-  font-style: italic; /* Optional: make the placeholder italic */
+    color: #aaa;
+    /* Placeholder text color */
+    font-style: italic;
+    /* Optional: make the placeholder italic */
 }
 
+
 /* For Webkit-based browsers (Chrome, Edge, Safari) */
+
 .sticky-note .sticky-content::-webkit-scrollbar {
-  width: 4px; /* Width of the scrollbar */
+    width: 4px;
+    /* Width of the scrollbar */
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-thumb {
-  background-color: #535353; /* Scrollbar thumb color 
+    background-color: #535353;
+    /* Scrollbar thumb color 
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-thumb:hover {
@@ -233,34 +242,38 @@ body {
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-track {
-  background-color: #b6b6b6;
+    background-color: #b6b6b6;
 }
 
+
 /* Delete button styling */
+
 .delete-note-btn {
-  border: none;
-  background-color: transparent;
+    border: none;
+    background-color: transparent;
 }
 
 .delete-note-btn i {
-  font-size: 0.9rem;
-  color: #000;
-}
- 
-.empty-sticky-div {
-  /* background-color: red; */
+    font-size: 0.9rem;
+    color: #000;
 }
 
+.empty-sticky-div {
+    /* background-color: red; */
+}
+
+
 /* ===================== */
+
 #appedle-new-note-btn {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  background-color: rgb(239, 239, 239);
-  cursor: pointer;
-  z-index: 9999;
-  display: none;
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    background-color: rgb(239, 239, 239);
+    cursor: pointer;
+    z-index: 9999;
+    display: none;
 }

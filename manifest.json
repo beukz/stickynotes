@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sticky Notes",
   "description": "Add sticky notes to any website, save them, and view them anytime!",
-  "version": "0.2",
+  "version": "0.3",
   "icons": {
     "128": "assets/pin.png"
   },

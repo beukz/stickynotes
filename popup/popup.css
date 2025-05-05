@@ -1,546 +1,586 @@
 * {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 @font-face {
-  font-family: "Inter", sans-serif;
-  src: url("font/Inter.ttc") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Inter", sans-serif;
+    src: url("font/Inter.ttc") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "Circular", sans-serif;
-  src: url("font/circular.ttc") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Circular", sans-serif;
+    src: url("font/circular.ttc") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 :root {
-  --stickyBG: #ffd165;
-  --textColor: #333333;
-  --strickyContentBG: rgb(53, 53, 53);
-  --mainHoverColor: #a0d1e8;
-  --sColor: #a0d1e844;
-  --dBtnColor: #ff6b6b;
-  --dBtnColorHover: #ff4f4f;
-
-  --h1TitlteSize: 1rem;
-  --noteFontSize: 0.8rem;
-  --defaultFontSize: 0.9rem;
-
-  --defaultFont: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --stickyBG: #ffd165;
+    --textColor: #333333;
+    --strickyContentBG: rgb(53, 53, 53);
+    --mainHoverColor: #a0d1e8;
+    --sColor: #a0d1e844;
+    --dBtnColor: #ff6b6b;
+    --dBtnColorHover: #ff4f4f;
+    --h1TitlteSize: 1rem;
+    --noteFontSize: 0.8rem;
+    --defaultFontSize: 0.9rem;
+    --defaultFont: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     --cFont: 'Circular', sans-serif;
-
-  --titleFont: "Inter", sans-serif;
-  /* --borderColor: rgba(128, 128, 128, 0.416); */
-  --borderColor:  rgba(128, 128, 128, 0.493);
-
-  --divider: rgba(128, 128, 128, 0.705);
-  --defaultColor: rgb(133, 133, 133);
-  --appVersion: #b3b3b3;
+    --titleFont: "Inter", sans-serif;
+    /* --borderColor: rgba(128, 128, 128, 0.416); */
+    --borderColor: rgba(128, 128, 128, 0.493);
+    --divider: rgba(128, 128, 128, 0.705);
+    --defaultColor: rgb(133, 133, 133);
+    --appVersion: #b3b3b3;
 }
+
 
 /* General body styling */
+
 body {
-  font-family: var(--defaultFont);
-  font-size: var(--defaultFontSize);
-  color: var(--textColor);
+    font-family: var(--defaultFont);
+    font-size: var(--defaultFontSize);
+    color: var(--textColor);
 }
+
 
 /* sticky box */
+
 .sticky-box {
-  position: relative;
-  width: 400px;
-  /* border: 1px solid black; */
-  height: auto;
-  min-height: 250px;
-  max-height: 600px;
-  overflow-y: auto;
-  /* display: none; */
+    position: relative;
+    width: 400px;
+    /* border: 1px solid black; */
+    height: auto;
+    min-height: 250px;
+    max-height: 600px;
+    overflow-y: auto;
+    /* display: none; */
 }
 
-.notes-container {
-}
+.notes-container {}
+
 
 /* popup title */
+
 .ap-sn-title-box {
-  position: fixed;
-  top: 0;
-  box-shadow: 0 0 5px var(--borderColor);
-  /* border-bottom: 1px solid black; */
-  padding: 10px;
-  width: 100%;
-  height: 45px;
-  background-color: #fff;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    position: fixed;
+    top: 0;
+    box-shadow: 0 0 5px var(--borderColor);
+    /* border-bottom: 1px solid black; */
+    padding: 10px;
+    width: 100%;
+    height: 45px;
+    background-color: #fff;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .ap-sn-title {
-  font-size: 1rem;
-  font-family: var(--titleFont);
+    font-size: 1rem;
+    font-family: var(--titleFont);
 }
 
+
 /* Domain section styling */
+
 .domain-container {
-  margin-top: 10px;
-  padding: 10px 10px 15px 10px;
-  border-bottom: 1px dashed #adadad;
-  /* border-bottom: 1px dashed #208bff; */
-  border-radius: 1px;
-  /* background-color: #f9f9f9; */
-  box-shadow: inset 10px -10px 30px rgba(128, 128, 128, 0.234);
+    margin-top: 10px;
+    padding: 10px 10px 15px 10px;
+    border-bottom: 1px dashed #adadad;
+    /* border-bottom: 1px dashed #208bff; */
+    border-radius: 1px;
+    /* background-color: #f9f9f9; */
+    box-shadow: inset 10px -10px 30px rgba(128, 128, 128, 0.234);
 }
 
 .domain-container:first-child {
-  /* border: 1px solid red; */
-  margin-top: 50px;
+    /* border: 1px solid red; */
+    margin-top: 50px;
 }
 
 .domain-container:last-child {
-  /* border: 1px solid red; */
-  margin-bottom: 55px;
-  border-bottom: none;
+    /* border: 1px solid red; */
+    margin-bottom: 55px;
+    border-bottom: none;
 }
+
 
 /* Message when no notes are saved */
+
 .no-notes-message {
-  font-size: 14px;
-  color: #888;
-  text-align: center;
-  margin-top: 20px;
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+    margin-top: 20px;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
+
 
 /* Domain title styling */
+
 h3.ap-sn-site-title {
-  font-size: 1rem;
-  color: #000000dc;
-  font-family: var(--titleFont);
+    font-size: 0.9rem;
+    color: #000000dc;
+    font-family: var(--titleFont);
 }
 
+.favicon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+
 /* Visit button styling */
+
 .visit-button {
-  display: inline-block;
-  margin-top: 5px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 12px;
-  text-transform: uppercase;
-  transition: background-color 0.3s ease;
-  /* hidden for now | not needed */
-  display: none;
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+    /* hidden for now | not needed */
+    display: none;
 }
 
 .visit-button:hover {
-  background-color: #0056b3;
+    background-color: #0056b3;
 }
 
 .note-item {
-  position: relative;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: rgba(128, 128, 128, 0.12);
-  font-size: var(--noteFontSize);
-  color: #333;
-  border: 1px solid #cccccc97;
-  /* box-shadow: 0 0px 2px rgba(0, 0, 0, 0.1); */
-  line-height: 1.5;
-  border-radius: 4px;
-  word-break: break-word;
+    position: relative;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(128, 128, 128, 0.12);
+    font-size: var(--noteFontSize);
+    color: #333;
+    border: 1px solid #cccccc97;
+    /* box-shadow: 0 0px 2px rgba(0, 0, 0, 0.1); */
+    line-height: 1.5;
+    border-radius: 4px;
+    word-break: break-word;
 }
 
 .note-item:hover {
-  background-color: var(--sColor);
+    background-color: var(--sColor);
 }
 
 .note-options {
-  display: flex;
-  position: absolute;
-  top: 0;
-  right: 0;
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .p-delete-note-btn {
-  border: none;
-  background-color: var(--dBtnColor);
-  color: #fff;
-  transition: all 0.3s ease-out;
+    border: none;
+    background-color: var(--dBtnColor);
+    color: #fff;
+    transition: all 0.3s ease-out;
 }
 
 .p-delete-note-btn:hover {
-  box-shadow: inset 0 0 20px #f02626;
-  transition: all 0.3s ease-out;
+    box-shadow: inset 0 0 20px #f02626;
+    transition: all 0.3s ease-out;
 }
 
+
 /* Visit Note button styling */
+
 .visit-note-button {
-  background-color: var(--mainHoverColor);
-  color: white;
-  border: none;
-  transition: background-color 0.3s ease;
-  transition: all 0.3s ease-out;
+    background-color: var(--mainHoverColor);
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    transition: all 0.3s ease-out;
 }
 
 .visit-note-button:hover {
-  box-shadow: inset 0 0 20px #2ab2f1;
-  transition: all 0.3s ease-out;
+    box-shadow: inset 0 0 20px #2ab2f1;
+    transition: all 0.3s ease-out;
 }
 
 .note-op-btn {
-  padding: 7px;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-size: 0.75rem;
+    padding: 7px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.75rem;
 }
 
 .note-options {
-  display: none;
+    display: none;
 }
 
 .note-options.active {
-  display: flex;
+    display: flex;
 }
 
 .note-options button:first-child {
-  border-radius: 0 0 0 10px;
+    border-radius: 0 0 0 10px;
 }
 
 .note-options button:last-child {
-  border-radius: 0 0 10px 0;
+    border-radius: 0 0 10px 0;
 }
 
+
 /* footer */
+
 .ap-sn-footer-box {
-  position: fixed;
-  bottom: 0;
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 45px;
-  padding: 10px;
-  box-shadow: 0 0 5px var(--borderColor);
-  /* font-family: var(--cFont); */
+    position: fixed;
+    bottom: 0;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 45px;
+    padding: 10px;
+    box-shadow: 0 0 5px var(--borderColor);
+    /* font-family: var(--cFont); */
 }
 
 .ap-sn-version-product {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .ap-sn-divider {
-  margin: 0 10px;
-  height: 15px;
-  padding: 0.2px;
-  background-color: var(--divider);
-  color: var();
+    margin: 0 10px;
+    height: 15px;
+    padding: 0.2px;
+    background-color: var(--divider);
+    color: var();
 }
 
 .ap-sn-footer-box p.app-from {
-  font-size: 0.75rem;
-  color: var(--defaultColor);
+    font-size: 0.75rem;
+    color: var(--defaultColor);
 }
 
 .ap-sn-footer-box p a {
-  color: var(--defaultColor);
+    color: var(--defaultColor);
 }
 
 .app-version {
-  color: var(--appVersion);
-  font-size: 0.6rem;
+    color: var(--appVersion);
+    font-size: 0.6rem;
 }
 
+
 /* notification button */
+
 button.ap-sn-noti-btn {
-  height: 25px;
-  width: 25px;
-  border: 1px solid grey;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.4);
-  transition: all 0.3s ease-out;
-  display: none;
+    height: 25px;
+    width: 25px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.4);
+    transition: all 0.3s ease-out;
+    display: none;
 }
 
 button.ap-sn-noti-btn:hover {
-  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
-  transition: all 0.3s ease-out;
+    box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
+    transition: all 0.3s ease-out;
 }
 
 button.ap-sn-noti-btn i {
-  color: rgb(94, 94, 94);
+    color: rgb(94, 94, 94);
 }
 
+
 /* message box | from HQ */
+
 .msg-box {
-  position: relative;
-  background-color: #fff;
-  width: 400px;
-  height: auto;
-  min-height: 250px;
-  max-height: 600px;
-  display: none;
+    position: relative;
+    background-color: #fff;
+    width: 400px;
+    height: auto;
+    min-height: 250px;
+    max-height: 600px;
+    display: none;
 }
 
 .msg-box .ap-sn-title-box {
-  /* height: 45px; */
+    /* height: 45px; */
 }
 
 .msg-box .ap-sn-title-box button {
-  height: 25px;
-  width: 25px;
-  /* border: 1px solid rgba(128, 128, 128, 0.619); */
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease-out;
-  border: none;
+    height: 25px;
+    width: 25px;
+    /* border: 1px solid rgba(128, 128, 128, 0.619); */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-out;
+    border: none;
 }
 
 .msg-box .ap-sn-title-box button:hover {
-  /* box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
+    /* box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.729);
   transition: all 0.3s ease-out; */
 }
 
 .msg-box .ap-sn-title-box button i {
-  font-size: 1.1rem;
-  position: relative;
-  top: 1px;
-  color: rgb(101, 101, 101);
+    font-size: 1.1rem;
+    position: relative;
+    top: 1px;
+    color: rgb(101, 101, 101);
 }
 
 .ap-sn-msg {
-  padding: 10px;
+    padding: 10px;
 }
 
 .ap-msg:first-child {
-  margin-top: 50px;
+    margin-top: 50px;
 }
 
 .ap-msg:last-child {
-  margin-bottom: 35px;
-  border-bottom: none;
+    margin-bottom: 35px;
+    border-bottom: none;
 }
 
 .ap-msg {
-  margin-bottom: 20px;
-  border-bottom: 1px dashed grey;
-  padding: 0 0 10px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed grey;
+    padding: 0 0 10px 0;
 }
 
 h3.ap-msg-title {
-  font-size: 1rem;
-  margin: 0 0 5px 0;
-  color: rgb(50, 50, 50);
+    font-size: 1rem;
+    margin: 0 0 5px 0;
+    color: rgb(50, 50, 50);
 }
 
 p.ap-msg-text {
-  font-size: 0.9rem;
-  color: rgb(87, 87, 87);
+    font-size: 0.9rem;
+    color: rgb(87, 87, 87);
 }
 
 .ap-sn-error-report-box {
-  position: fixed;
-  background-color: #fff;
-  bottom: 0;
-  width: 100%;
-  box-shadow: 0 0 5px var(--borderColor);
-  padding: 10px;
+    position: fixed;
+    background-color: #fff;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 0 5px var(--borderColor);
+    padding: 10px;
 }
 
 .ap-sn-error-report-box p {
-  font-size: 0.8rem;
-  color: grey;
+    font-size: 0.8rem;
+    color: grey;
 }
 
 .ap-sn-error-report-box p a {
-  color: grey;
-  font-weight: 500;
+    color: grey;
+    font-weight: 500;
 }
 
-/* ===================== */
 
 /* ===================== */
+
+
+/* ===================== */
+
 
 /* Sticky Note styling */
+
 .sticky-note {
-  position: relative;
-  width: 300px;
-  height: auto;
-  /* min-height: 100px;
+    position: relative;
+    width: 300px;
+    height: auto;
+    /* min-height: 100px;
   max-height: 300px; */
-  border: 1px solid #ccccccb5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: absolute; /* Absolute positioning for drag */
-  color: #000;
+    border: 1px solid #ccccccb5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    /* Absolute positioning for drag */
+    color: #000;
 }
 
+
 /* Top draggable area (handle) */
+
 .sticky-note .note-header {
-  background-color: var(--stickyBG);
-  cursor: move;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  position: absolute;
-  /* background-color: rgba(128, 128, 128, 0.271); */
-  width: 100%;
-  height: 32px;
-  z-index: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+    background-color: var(--stickyBG);
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    position: absolute;
+    /* background-color: rgba(128, 128, 128, 0.271); */
+    width: 100%;
+    height: 32px;
+    z-index: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 .sticky-note-menu-options {
-  position: absolute;
-  background-color: rgba(192, 94, 94, 0.467);
-  /* height: 100%;
+    position: absolute;
+    background-color: rgba(192, 94, 94, 0.467);
+    /* height: 100%;
   width: 100%; */
-  z-index: 1;
+    z-index: 1;
 }
 
+
 /* sticky note color pallets */
+
 .sticky-note-colors {
-  /* border: 1px solid red; */
-  display: flex;
-  align-items: center;
-  display: none;
+    /* border: 1px solid red; */
+    display: flex;
+    align-items: center;
+    display: none;
 }
 
 .sticky-note-color-pallets {
-  height: 50px;
-  width: 42.6px;
-  background-color: rgb(91, 88, 88);
-  /* margin: 1px; */
+    height: 50px;
+    width: 42.6px;
+    background-color: rgb(91, 88, 88);
+    /* margin: 1px; */
 }
 
 .sticky-note-color-pallets:hover {
-  background-color: rgba(255, 0, 0, 0.481);
+    background-color: rgba(255, 0, 0, 0.481);
 }
 
 .pallet-pink {
-  background-color: pink;
+    background-color: pink;
 }
 
+
 /* sticky note control box */
+
 .sticky-note-cont {
-  position: absolute;
-  bottom: 0;
-  border-top: 1px solid rgba(86, 86, 86, 0.697);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 3px;
-  background-color: var(--strickyContentBG);
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid rgba(86, 86, 86, 0.697);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    background-color: var(--strickyContentBG);
 }
 
 .sticky-cont-item {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 0 0 10px;
-  border-radius: 1px;
-  background-color: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 0 10px;
+    border-radius: 1px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
 }
 
 .sticky-cont-item:hover {
-  border: 1px solid rgba(128, 128, 128, 0.15);
-  background-color: rgba(128, 128, 128, 0.356);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    background-color: rgba(128, 128, 128, 0.356);
 }
 
 .sticky-cont-item:first-child {
-  margin: 0;
+    margin: 0;
 }
 
 .sticky-cont-item img {
-  height: 12px;
-  /* color: #ddd; */
-  filter: brightness(0) invert(1);
+    height: 12px;
+    /* color: #ddd; */
+    filter: brightness(0) invert(1);
 }
 
 .sticky-close-menu-box {
-  display: flex;
+    display: flex;
 }
 
-.ap-sticky-menu {
-}
+.ap-sticky-menu {}
 
 .ap-sticky-options {
-  /* background-color: rgba(128, 128, 128, 0.371); */
-  height: 32px;
-  width: 32px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* background-color: rgba(128, 128, 128, 0.371); */
+    height: 32px;
+    width: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ap-sticky-options:hover {
-  background-color: rgba(128, 128, 128, 0.23);
+    background-color: rgba(128, 128, 128, 0.23);
 }
 
 .ap-sticky-options img {
-  height: 15px;
+    height: 15px;
 }
 
-/* Content area styling */
-.sticky-note .sticky-content {
-  overflow-y: auto;
-  font-size: 14px;
-  /* border: 1px solid red; */
-  height: auto;
-  min-height: 100px;
-  max-height: 300px;
-  /* height: 89.1%; */
-  margin: 32px 0 0 0;
-  outline: none;
-  padding: 10px;
-  background-color: var(--strickyContentBG);
-  color: #d8d8d8;
-  font-size: 0.85rem;
-  z-index: 0;
-  line-height: 1.5;
-  font-family: var(--cFont);
 
-  /* scrollbar-width: thin;
+/* Content area styling */
+
+.sticky-note .sticky-content {
+    overflow-y: auto;
+    font-size: 14px;
+    /* border: 1px solid red; */
+    height: auto;
+    min-height: 100px;
+    max-height: 300px;
+    /* height: 89.1%; */
+    margin: 32px 0 0 0;
+    outline: none;
+    padding: 10px;
+    background-color: var(--strickyContentBG);
+    color: #d8d8d8;
+    font-size: 0.85rem;
+    z-index: 0;
+    line-height: 1.5;
+    font-family: var(--cFont);
+    /* scrollbar-width: thin;
   scrollbar-color: #7d7d7d #f2f2f2;  */
 }
 
 .sticky-note .sticky-content.placeholder {
-  color: #aaa; /* Placeholder text color */
-  font-style: italic; /* Optional: make the placeholder italic */
+    color: #aaa;
+    /* Placeholder text color */
+    font-style: italic;
+    /* Optional: make the placeholder italic */
 }
 
+
 /* For Webkit-based browsers (Chrome, Edge, Safari) */
+
 .sticky-note .sticky-content::-webkit-scrollbar {
-  width: 4px; /* Width of the scrollbar */
+    width: 4px;
+    /* Width of the scrollbar */
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-thumb {
-  background-color: #535353; /* Scrollbar thumb color 
+    background-color: #535353;
+    /* Scrollbar thumb color 
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-thumb:hover {
@@ -548,31 +588,35 @@ p.ap-msg-text {
 }
 
 .sticky-note .sticky-content::-webkit-scrollbar-track {
-  background-color: #b6b6b6;
+    background-color: #b6b6b6;
 }
 
+
 /* Delete button styling */
+
 .delete-note-btn {
-  border: none;
-  background-color: transparent;
+    border: none;
+    background-color: transparent;
 }
 
 .delete-note-btn i {
-  font-size: 0.9rem;
-  color: #000;
+    font-size: 0.9rem;
+    color: #000;
 }
 
+
 /* ===================== */
+
 #appedle-new-note-btn {
-  position: fixed;
-  bottom: 100px;
-  left: 10px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  /* background-color: rgb(239, 239, 239); */
-  background-color: rgb(240, 240, 240);
-  cursor: pointer;
-  z-index: 9999;
-  display: none;
+    position: fixed;
+    bottom: 100px;
+    left: 10px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    /* background-color: rgb(239, 239, 239); */
+    background-color: rgb(240, 240, 240);
+    cursor: pointer;
+    z-index: 9999;
+    display: none;
 }

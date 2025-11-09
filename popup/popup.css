@@ -47,6 +47,8 @@ body {
     font-family: var(--defaultFont);
     font-size: var(--defaultFontSize);
     color: var(--textColor);
+    width: 400px;
+    overflow-x: hidden;
 }
 
 
@@ -61,6 +63,25 @@ body {
     max-height: 600px;
     overflow-y: auto;
     /* display: none; */
+}
+
+/* Custom Scrollbar for notes container */
+.sticky-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sticky-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sticky-box::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 20px;
+    border: 1px solid #f1f1f1;
+}
+
+.sticky-box::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
 }
 
 .notes-container {}
@@ -242,7 +263,7 @@ h3.ap-sn-site-title {
 .note-item:first-child {
     margin-top: 10px; /* Give it some space from the header */
     border-top: none; /* Remove the straight top border */
-    padding-top: 15px; /* Add padding to push content down from the wave */
+    padding-top: 20px; /* Add padding to push content down from the wave */
 }
 
 .note-item:first-child::before {

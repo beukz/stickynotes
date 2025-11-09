@@ -97,7 +97,6 @@ body {
     /* border-bottom: 1px dashed #208bff; */
     border-radius: 1px;
     /* background-color: #f9f9f9; */
-    box-shadow: inset 10px -10px 30px rgba(128, 128, 128, 0.234);
 }
 
 .domain-container:first-child {
@@ -186,10 +185,14 @@ h3.ap-sn-site-title {
 }
 
 .note-options {
-    display: flex;
+    display: none;
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.note-item:hover .note-options {
+    display: flex;
 }
 
 .p-delete-note-btn {
@@ -225,14 +228,6 @@ h3.ap-sn-site-title {
     cursor: pointer;
     text-transform: uppercase;
     font-size: 0.75rem;
-}
-
-.note-options {
-    display: none;
-}
-
-.note-options.active {
-    display: flex;
 }
 
 .note-options button:first-child {

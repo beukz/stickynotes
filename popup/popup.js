@@ -35,12 +35,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Only render notes if there's actual data in storage.
+            // Otherwise, the mock data in popup.html will be displayed.
+            if (Object.keys(data).length === 0) {
+                return; // Do nothing, leave mock HTML as is.
+            }
+
+            const notesData = data;
+
             // Clear existing content
             notesContainer.innerHTML = "";
 
             // Group notes by domain
             const groupedNotes = {};
-            for (const [url, notes] of Object.entries(data)) {
+            for (const [url, notes] of Object.entries(notesData)) {
                 const mainDomain = getMainDomain(url);
                 if (!mainDomain) continue; // Skip invalid URLs
                 if (!groupedNotes[mainDomain]) groupedNotes[mainDomain] = [];
@@ -122,15 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         // Append the note item to the domain container
                         domainContainer.appendChild(noteItem);
-
-                        // Add event listener to toggle 'active' class for note options
-                        noteItem.addEventListener("mouseenter", () => {
-                            noteOptions.classList.add("active");
-                        });
-
-                        noteItem.addEventListener("mouseleave", () => {
-                            noteOptions.classList.remove("active");
-                        });
                     });
                 });
 
@@ -186,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             } else {
                 // Update the remaining notes
-                chrome.storage.local.set({
+                chrome.storage.local.set({ 
                         [url]: updatedNotes,
                     },
                     () => {

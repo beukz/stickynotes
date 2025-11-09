@@ -1,6 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
     const notesContainer = document.getElementById("notes-container");
 
+    // Mock data for development when chrome.storage is not available
+    const mockNotesData = {
+        "https://developer.chrome.com/docs/extensions": [{
+            content: "This is a mock note about Chrome extensions. Great for UI development!",
+            top: "150px",
+            left: "200px",
+        }, ],
+        "https://www.google.com/search?q=mock+data": [{
+            content: "A sticky note for Google! This is a sample note to show how content is displayed.",
+            top: "100px",
+            left: "50px",
+        }, {
+            content: "Another note on Google. You can have multiple notes per page. <b>HTML content</b> like bold text is also supported.",
+            top: "300px",
+            left: "250px",
+        }, ],
+        "https://mlkv.xyz/": [{
+            content: "This is a note on mlkv.xyz. The popup groups notes by the main domain.",
+            top: "220px",
+            left: "400px",
+        }, ],
+    };
+
     /**
      * Extracts the main domain from a given URL.
      * @param {string} url - The URL to process.
@@ -8,12 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     function getMainDomain(url) {
         try {
-            if (!url.startsWith("https://") && !url.startsWith("https://")) {
-                // Assume http:// for URLs without a protocol
+            if (!url.startsWith("https://") && !url.startsWith("http://")) {
+                // Assume https:// for URLs without a protocol
                 url = `https://${url}`;
             }
             const urlObj = new URL(url);
-            // return `${urlObj.protocol}//${urlObj.hostname}`;
             return urlObj.hostname;
         } catch (error) {
             console.warn("Invalid URL encountered:", url, error);
@@ -23,129 +45,154 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /**
      * Renders notes in the popup, grouped by their main domain.
-     * Filters out domains with no notes.
+     * @param {object} notesData - The notes data from storage or mock data.
+     */
+    function renderNotes(notesData) {
+        notesContainer.innerHTML = "";
+
+        if (Object.keys(notesData).length === 0) {
+            const noNotesMessage = document.createElement("div");
+            noNotesMessage.className = "no-notes-message";
+            noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
+            notesContainer.appendChild(noNotesMessage);
+            return;
+        }
+
+        const groupedNotes = {};
+        for (const [url, notes] of Object.entries(notesData)) {
+            const mainDomain = getMainDomain(url);
+            if (!mainDomain) continue;
+            if (!groupedNotes[mainDomain]) groupedNotes[mainDomain] = [];
+            groupedNotes[mainDomain].push({
+                url,
+                notes
+            });
+        }
+
+        for (const [domain, entries] of Object.entries(groupedNotes)) {
+            const totalNotes = entries.reduce((sum, entry) => sum + entry.notes.length, 0);
+            if (totalNotes === 0) continue;
+
+            const domainContainer = document.createElement("div");
+            domainContainer.className = "domain-container";
+
+            const domainHeader = document.createElement("div");
+            domainHeader.className = "domain-header";
+
+            const domainTitle = document.createElement("h3");
+            domainTitle.className = "ap-sn-site-title";
+
+            const favicon = document.createElement("img");
+            favicon.src = `https://www.google.com/s2/favicons?domain=${domain}`;
+            favicon.className = "favicon";
+            domainTitle.appendChild(favicon);
+
+            const domainText = document.createTextNode(domain);
+            domainTitle.appendChild(domainText);
+
+            const chevron = document.createElement("i");
+            chevron.className = "fi fi-rr-angle-small-down chevron-icon";
+
+            domainHeader.appendChild(domainTitle);
+            domainHeader.appendChild(chevron);
+
+            const notesList = document.createElement("div");
+            notesList.className = "notes-list";
+
+            // Create a wrapper for the notes to enable smooth collapse/expand animation
+            const notesWrapper = document.createElement("div");
+            notesWrapper.className = "notes-wrapper";
+
+            domainHeader.addEventListener("click", () => {
+                domainContainer.classList.toggle("collapsed");
+            });
+
+            domainContainer.appendChild(domainHeader);
+            domainContainer.appendChild(notesList);
+            notesList.appendChild(notesWrapper); // The wrapper is the single child of the grid container
+
+            entries.forEach(({
+                url,
+                notes
+            }) => {
+                notes.forEach((note) => {
+                    const noteItem = document.createElement("div");
+                    noteItem.className = "note-item";
+
+                    const noteContent = document.createElement("span");
+                    noteContent.innerHTML = note.content;
+                    noteItem.appendChild(noteContent);
+
+                    const noteOptions = document.createElement("div");
+                    noteOptions.className = "note-options";
+
+                    const visitNoteButton = document.createElement("button");
+                    visitNoteButton.className = "visit-note-button note-op-btn";
+                    visitNoteButton.innerHTML = '<i class="fi fi-rr-arrow-up-right-from-square"></i>';
+                    visitNoteButton.title = "Go to Note";
+                    visitNoteButton.addEventListener("click", () => {
+                        chrome.tabs.create({
+                            url
+                        });
+                    });
+
+                    // Disable button in dev mode if chrome APIs are not available
+                    if (typeof chrome === "undefined" || typeof chrome.tabs === "undefined") {
+                        visitNoteButton.disabled = true;
+                        visitNoteButton.title = "Navigation is disabled in development mode.";
+                    }
+                    noteOptions.appendChild(visitNoteButton);
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.className = "p-delete-note-btn note-op-btn";
+                    deleteButton.innerHTML = '<i class="fi fi-rr-trash"></i>';
+                    deleteButton.title = "Delete Note";
+                    deleteButton.addEventListener("click", () => {
+                        deleteNote(url, note);
+                    });
+
+                    // Disable button in dev mode if chrome APIs are not available
+                    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
+                        deleteButton.disabled = true;
+                        deleteButton.title = "Deletion is disabled in development mode.";
+                    }
+                    noteOptions.appendChild(deleteButton);
+
+                    noteItem.appendChild(noteOptions);
+                    notesWrapper.appendChild(noteItem); // Append notes to the wrapper
+                });
+            });
+
+            notesContainer.appendChild(domainContainer);
+        }
+
+        if (notesContainer.innerHTML === "") {
+            const noNotesMessage = document.createElement("div");
+            noNotesMessage.className = "no-notes-message";
+            noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
+            notesContainer.appendChild(noNotesMessage);
+        }
+    }
+
+    /**
+     * Loads notes from storage, or uses mock data if storage is unavailable.
      */
     function loadNotes() {
-        chrome.storage.local.get(null, (data) => {
-            if (chrome.runtime.lastError) {
-                console.error(
-                    "Error retrieving notes from storage:",
-                    chrome.runtime.lastError
-                );
-                return;
-            }
-
-            // Only render notes if there's actual data in storage.
-            // Otherwise, the mock data in popup.html will be displayed.
-            if (Object.keys(data).length === 0) {
-                return; // Do nothing, leave mock HTML as is.
-            }
-
-            const notesData = data;
-
-            // Clear existing content
-            notesContainer.innerHTML = "";
-
-            // Group notes by domain
-            const groupedNotes = {};
-            for (const [url, notes] of Object.entries(notesData)) {
-                const mainDomain = getMainDomain(url);
-                if (!mainDomain) continue; // Skip invalid URLs
-                if (!groupedNotes[mainDomain]) groupedNotes[mainDomain] = [];
-                groupedNotes[mainDomain].push({ url, notes });
-            }
-
-            // Render each domain and its notes
-            for (const [domain, entries] of Object.entries(groupedNotes)) {
-                // Skip rendering domains with no notes
-                const totalNotes = entries.reduce(
-                    (sum, entry) => sum + entry.notes.length,
-                    0
-                );
-                if (totalNotes === 0) continue;
-
-                // Create domain container
-                const domainContainer = document.createElement("div");
-                domainContainer.className = "domain-container";
-
-                // Add domain title with a visit button
-                const domainTitle = document.createElement("h3");
-                // domainTitle.textContent = domain;
-                domainTitle.className = "ap-sn-site-title";
-
-                // Create favicon image
-                const favicon = document.createElement("img");
-                favicon.src = `https://www.google.com/s2/favicons?domain=${domain}`;
-                favicon.className = "favicon";
-                domainTitle.appendChild(favicon);
-
-                const domainText = document.createTextNode(domain);
-                domainTitle.appendChild(domainText);
-
-                domainContainer.appendChild(domainTitle);
-
-                const visitDomainButton = document.createElement("button");
-                visitDomainButton.className = "visit-button";
-                visitDomainButton.textContent = "Visit";
-                visitDomainButton.addEventListener("click", () => {
-                    chrome.tabs.create({ url: domain });
-                });
-                domainContainer.appendChild(visitDomainButton);
-
-                // Add notes under the domain
-                entries.forEach(({ url, notes }) => {
-                    notes.forEach((note) => {
-                        const noteItem = document.createElement("div");
-                        noteItem.className = "note-item";
-
-                        // Note content
-                        const noteContent = document.createElement("span");
-                        noteContent.innerHTML = note.content; // Preserve formatting
-                        noteItem.appendChild(noteContent);
-
-                        // Note options container (delete, etc.)
-                        const noteOptions = document.createElement("div");
-                        noteOptions.className = "note-options"; // Initially hidden, CSS will manage visibility
-
-                        // Visit specific note page button inside note options
-                        const visitNoteButton = document.createElement("button");
-                        visitNoteButton.className = "visit-note-button note-op-btn";
-                        visitNoteButton.textContent = "Go to Note";
-                        visitNoteButton.addEventListener("click", () => {
-                            chrome.tabs.create({ url });
-                        });
-                        noteOptions.appendChild(visitNoteButton);
-
-                        // Delete button inside note options
-                        const deleteButton = document.createElement("button");
-                        deleteButton.className = "p-delete-note-btn note-op-btn";
-                        deleteButton.textContent = "Delete";
-                        deleteButton.addEventListener("click", () => {
-                            deleteNote(url, note);
-                        });
-                        noteOptions.appendChild(deleteButton);
-
-                        // Append the note options to the note item
-                        noteItem.appendChild(noteOptions);
-
-                        // Append the note item to the domain container
-                        domainContainer.appendChild(noteItem);
-                    });
-                });
-
-                // Append the domain container to the notes container
-                notesContainer.appendChild(domainContainer);
-            }
-
-            // If no notes are found, display a message
-            if (notesContainer.innerHTML === "") {
-                const noNotesMessage = document.createElement("div");
-                noNotesMessage.className = "no-notes-message";
-                noNotesMessage.textContent =
-                    "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
-                notesContainer.appendChild(noNotesMessage);
-            }
-        });
+        // Check if we are in a real extension environment
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(null, (data) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error retrieving notes:", chrome.runtime.lastError);
+                    // Optionally render an error message in the UI
+                    return;
+                }
+                renderNotes(data);
+            });
+        } else {
+            // Fallback to mock data for local development/testing
+            console.warn("chrome.storage.local API not available. Loading mock data for development.");
+            renderNotes(mockNotesData);
+        }
     }
 
     /**

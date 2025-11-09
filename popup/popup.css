@@ -1,3 +1,4 @@
+@import url('https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css');
 * {
     padding: 0;
     margin: 0;
@@ -92,11 +93,77 @@ body {
 
 .domain-container {
     margin-top: 10px;
-    padding: 10px 10px 15px 10px;
+    padding: 0 10px;
     border-bottom: 1px dashed #adadad;
-    /* border-bottom: 1px dashed #208bff; */
     border-radius: 1px;
-    /* background-color: #f9f9f9; */
+}
+
+.domain-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 0;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.domain-container.collapsed .chevron-icon {
+    transform: rotate(-90deg);
+}
+
+.notes-list {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease-out;
+}
+
+.notes-wrapper {
+    overflow: hidden;
+    padding-bottom: 15px;
+}
+
+.domain-container.collapsed .notes-list {
+    grid-template-rows: 0fr;
+}
+
+.domain-container.collapsed {
+    border-bottom: none;
+    /* Remove default dashed line */
+    position: relative;
+    padding-bottom: 5px;
+    /* Create a bit of space */
+}
+
+.domain-container.collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    /* Position it slightly below to overlap and connect */
+    left: 10px;
+    /* Align with container's horizontal padding */
+    right: 10px;
+    /* Align with container's horizontal padding */
+    height: 15px;
+    background-color: rgba(128, 128, 128, 0.12);
+    /* Same as note's torn paper bg */
+    /* This mask creates a torn effect at the TOP of the element.
+       Since we want it at the bottom of the collapsed container, this is correct. */
+    -webkit-mask-image: radial-gradient(circle at 50% 0, transparent 0, transparent 6px, black 7px);
+    mask-image: radial-gradient(circle at 50% 0, transparent 0, transparent 6px, black 7px);
+    -webkit-mask-size: 25px 15px;
+    mask-size: 25px 15px;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+}
+
+.domain-container.collapsed+.domain-container {
+    margin-top: 0;
+    /* Remove margin to bring it closer to the collapsed one */
 }
 
 .domain-container:first-child {
@@ -125,6 +192,7 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
+    padding: 0 20px;
 }
 
 
@@ -134,6 +202,8 @@ h3.ap-sn-site-title {
     font-size: 0.9rem;
     color: #000000dc;
     font-family: var(--titleFont);
+    display: flex;
+    align-items: center;
 }
 
 .favicon {
@@ -143,34 +213,10 @@ h3.ap-sn-site-title {
     vertical-align: middle;
 }
 
-
-/* Visit button styling */
-
-.visit-button {
-    display: inline-block;
-    margin-top: 5px;
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease;
-    /* hidden for now | not needed */
-    display: none;
-}
-
-.visit-button:hover {
-    background-color: #0056b3;
-}
-
 .note-item {
     position: relative;
-    margin-top: 10px;
     padding: 10px;
-    background-color: rgba(128, 128, 128, 0.12);
+    background-color: transparent;
     font-size: var(--noteFontSize);
     color: #333;
     border: 1px solid #cccccc97;
@@ -180,8 +226,52 @@ h3.ap-sn-site-title {
     word-break: break-word;
 }
 
-.note-item:hover {
+.note-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    border-radius: 4px; /* Match parent's border-radius */
+    z-index: -1;
+    transition: background-color 0.3s ease;
+}
+
+.note-item:first-child {
+    margin-top: 10px; /* Give it some space from the header */
+    border-top: none; /* Remove the straight top border */
+    padding-top: 15px; /* Add padding to push content down from the wave */
+}
+
+.note-item:first-child::before {
+    background-color: rgba(128, 128, 128, 0.12);
+    /* Wave/torn paper effect for the first note in each domain */
+    -webkit-mask-image: radial-gradient(circle at 50% 0, transparent 0, transparent 6px, black 7px);
+    mask-image: radial-gradient(circle at 50% 0, transparent 0, transparent 6px, black 7px);
+    -webkit-mask-size: 25px 15px;
+    mask-size: 25px 15px;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+}
+
+.note-item:hover::before {
     background-color: var(--sColor);
+}
+
+.note-item + .note-item {
+    margin-top: -1px;
+}
+
+.note-item:not(:first-child) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.note-item:not(:last-child) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .note-options {
@@ -226,8 +316,12 @@ h3.ap-sn-site-title {
 .note-op-btn {
     padding: 7px;
     cursor: pointer;
-    text-transform: uppercase;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
+    width: 32px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .note-options button:first-child {

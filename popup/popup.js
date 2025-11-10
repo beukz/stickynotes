@@ -137,6 +137,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     const noteOptions = document.createElement("div");
                     noteOptions.className = "note-options";
 
+                    const editButton = document.createElement("button");
+                    editButton.className = "edit-note-button note-op-btn";
+                    editButton.innerHTML = '<i class="fi fi-rr-pencil"></i>';
+                    editButton.title = "Edit Note";
+
+                    const saveButton = document.createElement("button");
+                    saveButton.className = "save-note-button note-op-btn";
+                    saveButton.innerHTML = '<i class="fi fi-rr-check"></i>';
+                    saveButton.title = "Save Note";
+                    saveButton.style.display = "none";
+
                     const copyButton = document.createElement("button");
                     copyButton.className = "copy-note-button note-op-btn";
                     copyButton.innerHTML = '<i class="fi fi-rr-copy"></i>';
@@ -163,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             }, 2000);
                         });
                     });
-                    noteOptions.appendChild(copyButton);
 
                     const visitNoteButton = document.createElement("button");
                     visitNoteButton.className = "visit-note-button note-op-btn";
@@ -175,12 +185,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
                     });
 
-                    // Disable button in dev mode if chrome APIs are not available
                     if (typeof chrome === "undefined" || typeof chrome.tabs === "undefined") {
                         visitNoteButton.disabled = true;
                         visitNoteButton.title = "Navigation is disabled in development mode.";
                     }
-                    noteOptions.appendChild(visitNoteButton);
 
                     const deleteButton = document.createElement("button");
                     deleteButton.className = "p-delete-note-btn note-op-btn";
@@ -190,11 +198,40 @@ document.addEventListener("DOMContentLoaded", () => {
                         deleteNote(url, note);
                     });
 
-                    // Disable button in dev mode if chrome APIs are not available
                     if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
                         deleteButton.disabled = true;
                         deleteButton.title = "Deletion is disabled in development mode.";
                     }
+
+                    editButton.addEventListener("click", () => {
+                        noteContent.contentEditable = true;
+                        noteContent.focus();
+                        noteItem.classList.add('editing');
+                        editButton.style.display = "none";
+                        saveButton.style.display = "flex";
+                        copyButton.style.display = "none";
+                        visitNoteButton.style.display = "none";
+                        deleteButton.style.display = "none";
+                    });
+
+                    saveButton.addEventListener("click", () => {
+                        noteContent.contentEditable = false;
+                        noteItem.classList.remove('editing');
+                        editButton.style.display = "flex";
+                        saveButton.style.display = "none";
+                        copyButton.style.display = "flex";
+                        visitNoteButton.style.display = "flex";
+                        deleteButton.style.display = "flex";
+
+                        const newContent = noteContent.innerHTML;
+                        updateNoteContent(url, note, newContent);
+                        note.content = newContent; // Update closure variable
+                    });
+
+                    noteOptions.appendChild(editButton);
+                    noteOptions.appendChild(saveButton);
+                    noteOptions.appendChild(copyButton);
+                    noteOptions.appendChild(visitNoteButton);
                     noteOptions.appendChild(deleteButton);
 
                     noteItem.appendChild(noteOptions);
@@ -271,6 +308,47 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("chrome.storage.local API not available. Loading mock data for development.");
             renderNotes(mockNotesData, []);
         }
+    }
+
+    /**
+     * Updates the content of a specific note.
+     * @param {string} url - The URL associated with the note.
+     * @param {object} originalNote - The original note object to identify it.
+     * @param {string} newContent - The new HTML content for the note.
+     */
+    function updateNoteContent(url, originalNote, newContent) {
+        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local) {
+            console.warn("Storage API not available. Cannot update note.");
+            return;
+        }
+
+        chrome.storage.local.get(url, (data) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error retrieving notes for update:", chrome.runtime.lastError);
+                return;
+            }
+
+            const notes = data[url] || [];
+            const noteIndex = notes.findIndex(
+                (note) =>
+                note.content === originalNote.content &&
+                note.top === originalNote.top &&
+                note.left === originalNote.left
+            );
+
+            if (noteIndex > -1) {
+                notes[noteIndex].content = newContent;
+
+                chrome.storage.local.set({ [url]: notes }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error saving updated note:", chrome.runtime.lastError);
+                    }
+                });
+            } else {
+                console.warn("Could not find the note to update. It might have been edited in another tab. Reloading notes.", originalNote);
+                loadNotes(); // Fallback to reload all notes if something is out of sync
+            }
+        });
     }
 
     /**

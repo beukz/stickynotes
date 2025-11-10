@@ -247,6 +247,22 @@ h3.ap-sn-site-title {
     word-break: break-word;
 }
 
+.note-item.editing {
+    background-color: #fef9e7;
+    /* A light yellow to indicate editing */
+    border-color: #f1c40f;
+    /* A stronger yellow for the border */
+}
+
+.note-item span[contenteditable="true"] {
+    outline: 1px dashed #f1c40f;
+    padding: 2px;
+    margin: -2px;
+    /* Offset padding */
+    border-radius: 2px;
+    background-color: #fff;
+}
+
 .note-item::before {
     content: '';
     position: absolute;
@@ -255,15 +271,19 @@ h3.ap-sn-site-title {
     right: 0;
     bottom: 0;
     background-color: transparent;
-    border-radius: 4px; /* Match parent's border-radius */
+    border-radius: 4px;
+    /* Match parent's border-radius */
     z-index: -1;
     transition: background-color 0.3s ease;
 }
 
 .note-item:first-child {
-    margin-top: 10px; /* Give it some space from the header */
-    border-top: none; /* Remove the straight top border */
-    padding-top: 20px; /* Add padding to push content down from the wave */
+    margin-top: 10px;
+    /* Give it some space from the header */
+    border-top: none;
+    /* Remove the straight top border */
+    padding-top: 20px;
+    /* Add padding to push content down from the wave */
 }
 
 .note-item:first-child::before {
@@ -281,7 +301,7 @@ h3.ap-sn-site-title {
     background-color: var(--sColor);
 }
 
-.note-item + .note-item {
+.note-item+.note-item {
     margin-top: -1px;
 }
 
@@ -316,6 +336,30 @@ h3.ap-sn-site-title {
 .p-delete-note-btn:hover {
     box-shadow: inset 0 0 20px #f02626;
     transition: all 0.3s ease-out;
+}
+
+.edit-note-button {
+    background-color: #f39c12;
+    /* Orange for edit */
+    color: white;
+    border: none;
+    transition: all 0.3s ease-out;
+}
+
+.edit-note-button:hover {
+    box-shadow: inset 0 0 20px #d35400;
+}
+
+.save-note-button {
+    background-color: #2ecc71;
+    /* Green for save */
+    color: white;
+    border: none;
+    transition: all 0.3s ease-out;
+}
+
+.save-note-button:hover {
+    box-shadow: inset 0 0 20px #27ae60;
 }
 
 

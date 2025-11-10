@@ -46,11 +46,17 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Renders notes in the popup, grouped by their main domain.
      * @param {object} notesData - The notes data from storage or mock data.
+     * @param {string[]} [collapsedDomains=[]] - An array of domains that should be collapsed.
      */
-    function renderNotes(notesData) {
+    function renderNotes(notesData, collapsedDomains = []) {
         notesContainer.innerHTML = "";
 
-        if (Object.keys(notesData).length === 0) {
+        // Filter out any URLs that have empty note arrays to be safe
+        const nonEmptyNotesData = Object.fromEntries(
+            Object.entries(notesData).filter(([, notes]) => Array.isArray(notes) && notes.length > 0)
+        );
+
+        if (Object.keys(nonEmptyNotesData).length === 0) {
             const noNotesMessage = document.createElement("div");
             noNotesMessage.className = "no-notes-message";
             noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
@@ -59,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const groupedNotes = {};
-        for (const [url, notes] of Object.entries(notesData)) {
+        for (const [url, notes] of Object.entries(nonEmptyNotesData)) {
             const mainDomain = getMainDomain(url);
             if (!mainDomain) continue;
             if (!groupedNotes[mainDomain]) groupedNotes[mainDomain] = [];
@@ -75,6 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const domainContainer = document.createElement("div");
             domainContainer.className = "domain-container";
+
+            if (collapsedDomains.includes(domain)) {
+                domainContainer.classList.add("collapsed");
+            }
 
             const domainHeader = document.createElement("div");
             domainHeader.className = "domain-header";
@@ -105,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             domainHeader.addEventListener("click", () => {
                 domainContainer.classList.toggle("collapsed");
+                updateCollapsedState(domain, domainContainer.classList.contains("collapsed"));
             });
 
             domainContainer.appendChild(domainHeader);
@@ -175,6 +186,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Updates the stored list of collapsed domains.
+     * @param {string} domain - The domain to add or remove.
+     * @param {boolean} isCollapsed - Whether the domain is now collapsed.
+     */
+    function updateCollapsedState(domain, isCollapsed) {
+        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local) {
+            console.warn("Storage API not available. Cannot save collapsed state.");
+            return;
+        }
+
+        chrome.storage.local.get({ collapsed_domains: [] }, (data) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error getting collapsed state:", chrome.runtime.lastError);
+                return;
+            }
+
+            const collapsedDomains = data.collapsed_domains;
+            const domainIndex = collapsedDomains.indexOf(domain);
+
+            if (isCollapsed && domainIndex === -1) {
+                // Add to list if it's collapsed and not already there
+                collapsedDomains.push(domain);
+            } else if (!isCollapsed && domainIndex > -1) {
+                // Remove from list if it's expanded and was in the list
+                collapsedDomains.splice(domainIndex, 1);
+            }
+
+            chrome.storage.local.set({ collapsed_domains: collapsedDomains }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error saving collapsed state:", chrome.runtime.lastError);
+                }
+            });
+        });
+    }
+
+    /**
      * Loads notes from storage, or uses mock data if storage is unavailable.
      */
     function loadNotes() {
@@ -182,16 +229,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
             chrome.storage.local.get(null, (data) => {
                 if (chrome.runtime.lastError) {
-                    console.error("Error retrieving notes:", chrome.runtime.lastError);
-                    // Optionally render an error message in the UI
+                    console.error("Error retrieving data:", chrome.runtime.lastError);
                     return;
                 }
-                renderNotes(data);
+                const collapsedDomains = data.collapsed_domains || [];
+                const notesData = { ...data };
+                delete notesData.collapsed_domains; // Separate notes from state
+
+                renderNotes(notesData, collapsedDomains);
             });
         } else {
             // Fallback to mock data for local development/testing
             console.warn("chrome.storage.local API not available. Loading mock data for development.");
-            renderNotes(mockNotesData);
+            renderNotes(mockNotesData, []);
         }
     }
 

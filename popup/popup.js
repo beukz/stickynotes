@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
             top: "300px",
             left: "250px",
         }, ],
-        "https://mlkv.xyz/": [{
-            content: "This is a note on mlkv.xyz. The popup groups notes by the main domain.",
+        "https://partnerflow.co.za/": [{
+            content: "This is a note on partnerflow.co.za. The popup groups notes by the main domain.",
             top: "220px",
             left: "400px",
         }, ],

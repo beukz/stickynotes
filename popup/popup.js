@@ -148,6 +148,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     saveButton.title = "Save Note";
                     saveButton.style.display = "none";
 
+                    const discardButton = document.createElement("button");
+                    discardButton.className = "discard-note-button note-op-btn";
+                    discardButton.innerHTML = '<i class="fi fi-rr-cross-small"></i>';
+                    discardButton.title = "Discard Changes";
+                    discardButton.style.display = "none";
+
                     const copyButton = document.createElement("button");
                     copyButton.className = "copy-note-button note-op-btn";
                     copyButton.innerHTML = '<i class="fi fi-rr-copy"></i>';
@@ -203,12 +209,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         deleteButton.title = "Deletion is disabled in development mode.";
                     }
 
+                    let originalContent = note.content;
+
                     editButton.addEventListener("click", () => {
+                        originalContent = noteContent.innerHTML;
                         noteContent.contentEditable = true;
                         noteContent.focus();
                         noteItem.classList.add('editing');
+                        noteOptions.classList.add('editing');
                         editButton.style.display = "none";
                         saveButton.style.display = "flex";
+                        discardButton.style.display = "flex";
                         copyButton.style.display = "none";
                         visitNoteButton.style.display = "none";
                         deleteButton.style.display = "none";
@@ -217,8 +228,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     saveButton.addEventListener("click", () => {
                         noteContent.contentEditable = false;
                         noteItem.classList.remove('editing');
+                        noteOptions.classList.remove('editing');
                         editButton.style.display = "flex";
                         saveButton.style.display = "none";
+                        discardButton.style.display = "none";
                         copyButton.style.display = "flex";
                         visitNoteButton.style.display = "flex";
                         deleteButton.style.display = "flex";
@@ -228,8 +241,22 @@ document.addEventListener("DOMContentLoaded", () => {
                         note.content = newContent; // Update closure variable
                     });
 
+                    discardButton.addEventListener("click", () => {
+                        noteContent.innerHTML = originalContent;
+                        noteContent.contentEditable = false;
+                        noteItem.classList.remove('editing');
+                        noteOptions.classList.remove('editing');
+                        editButton.style.display = "flex";
+                        saveButton.style.display = "none";
+                        discardButton.style.display = "none";
+                        copyButton.style.display = "flex";
+                        visitNoteButton.style.display = "flex";
+                        deleteButton.style.display = "flex";
+                    });
+
                     noteOptions.appendChild(editButton);
                     noteOptions.appendChild(saveButton);
+                    noteOptions.appendChild(discardButton);
                     noteOptions.appendChild(copyButton);
                     noteOptions.appendChild(visitNoteButton);
                     noteOptions.appendChild(deleteButton);

@@ -277,3 +277,55 @@ body {}
     z-index: 9999;
     display: none;
 }
+
+/* Custom Delete Confirmation Modal */
+.sticky-note-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 10; /* Should be on top of note content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: var(--defaultFont);
+}
+
+.sticky-note-delete-modal p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.modal-buttons button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0 5px;
+    font-family: var(--defaultFont);
+}
+
+.modal-buttons .confirm-delete {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.modal-buttons .confirm-delete:hover {
+    background-color: #ff1a1a;
+}
+
+.modal-buttons .cancel-delete {
+    background-color: #ccc;
+    color: #333;
+}
+
+.modal-buttons .cancel-delete:hover {
+    background-color: #bbb;
+}

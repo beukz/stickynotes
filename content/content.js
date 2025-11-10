@@ -82,7 +82,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             );
 
             const urlKey = getEffectiveUrl();
-            chrome.storage.local.set({
+            chrome.storage.local.set({ 
                 [urlKey]: notes }, () => {
                 if (chrome.runtime.lastError) {
                     console.error(
@@ -125,12 +125,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             deleteButton.title = "Delete note";
             deleteButton.innerHTML = `<img src="https://ucktpuitdnqcqtg2.public.blob.vercel-storage.com/bin-icon-EWmPyvXJ3uLxwOU0l7K42iblggAFb1.svg" alt="Delete" />`;
             deleteButton.addEventListener("click", () => {
-                try {
-                    note.remove();
-                    saveNotes();
-                } catch (error) {
-                    console.error("Error deleting note:", error);
-                }
+                showDeleteConfirmation(note);
             });
 
             stickyCloseMenuBox.appendChild(deleteButton);
@@ -173,6 +168,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         } catch (error) {
             console.error("Error creating sticky note:", error);
         }
+    }
+
+    function showDeleteConfirmation(noteToDelete) {
+        // Create overlay
+        const overlay = document.createElement("div");
+        overlay.className = "sticky-note-delete-overlay";
+
+        // Create modal
+        const modal = document.createElement("div");
+        modal.className = "sticky-note-delete-modal";
+        modal.innerHTML = `
+            <p>Are you sure you want to delete this note?</p>
+            <div class="modal-buttons">
+                <button class="confirm-delete">Delete</button>
+                <button class="cancel-delete">Cancel</button>
+            </div>
+        `;
+
+        // Append modal to overlay, and overlay to the note
+        overlay.appendChild(modal);
+        noteToDelete.appendChild(overlay);
+
+        // Add event listeners for buttons
+        modal.querySelector('.confirm-delete').addEventListener('click', () => {
+            try {
+                noteToDelete.remove();
+                saveNotes();
+            } catch (error) {
+                console.error("Error deleting note:", error);
+            }
+        });
+
+        modal.querySelector('.cancel-delete').addEventListener('click', () => {
+            overlay.remove();
+        });
     }
 
     function dragNote(e, note) {

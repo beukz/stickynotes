@@ -44,6 +44,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Shows a custom confirmation modal over a note item in the popup.
+     * @param {HTMLElement} noteItem - The note item element to cover.
+     * @param {function} onConfirm - The callback function to execute on confirmation.
+     */
+    function showPopupDeleteConfirmation(noteItem, onConfirm) {
+        // Prevent multiple modals on the same item
+        if (noteItem.querySelector('.popup-delete-overlay')) {
+            return;
+        }
+
+        const overlay = document.createElement("div");
+        overlay.className = "popup-delete-overlay";
+
+        const modal = document.createElement("div");
+        modal.className = "popup-delete-modal";
+        modal.innerHTML = `
+            <p>Delete this note?</p>
+            <div class="popup-modal-buttons">
+                <button class="confirm-delete">Delete</button>
+                <button class="cancel-delete">Cancel</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        noteItem.appendChild(overlay);
+
+        modal.querySelector('.confirm-delete').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            onConfirm();
+            overlay.remove();
+        });
+
+        modal.querySelector('.cancel-delete').addEventListener('click', (e) => {
+            e.stopPropagation();
+            overlay.remove();
+        });
+    }
+
+    /**
      * Renders notes in the popup, grouped by their main domain.
      * @param {object} notesData - The notes data from storage or mock data.
      * @param {string[]} [collapsedDomains=[]] - An array of domains that should be collapsed.
@@ -201,7 +240,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     deleteButton.innerHTML = '<i class="fi fi-rr-trash"></i>';
                     deleteButton.title = "Delete Note";
                     deleteButton.addEventListener("click", () => {
-                        deleteNote(url, note);
+                        showPopupDeleteConfirmation(noteItem, () => {
+                            deleteNote(url, note);
+                        });
                     });
 
                     if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {

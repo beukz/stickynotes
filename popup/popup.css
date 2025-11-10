@@ -811,3 +811,54 @@ p.ap-msg-text {
     z-index: 9999;
     display: none;
 }
+
+/* Custom Popup Delete Confirmation Modal */
+.popup-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 4px; /* Match note-item's radius */
+}
+
+.popup-delete-modal p {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.popup-modal-buttons button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin: 0 5px;
+}
+
+.popup-modal-buttons .confirm-delete {
+    background-color: var(--dBtnColor);
+    color: white;
+}
+
+.popup-modal-buttons .confirm-delete:hover {
+    background-color: var(--dBtnColorHover);
+}
+
+.popup-modal-buttons .cancel-delete {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.popup-modal-buttons .cancel-delete:hover {
+    background-color: #7f8c8d;
+}

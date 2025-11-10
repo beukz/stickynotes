@@ -137,6 +137,34 @@ document.addEventListener("DOMContentLoaded", () => {
                     const noteOptions = document.createElement("div");
                     noteOptions.className = "note-options";
 
+                    const copyButton = document.createElement("button");
+                    copyButton.className = "copy-note-button note-op-btn";
+                    copyButton.innerHTML = '<i class="fi fi-rr-copy"></i>';
+                    copyButton.title = "Copy Note";
+                    copyButton.addEventListener("click", () => {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = note.content;
+                        const textToCopy = tempDiv.textContent || tempDiv.innerText || '';
+
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            copyButton.innerHTML = '<i class="fi fi-rr-check"></i>';
+                            copyButton.title = "Copied!";
+                            copyButton.classList.add("copied");
+                            setTimeout(() => {
+                                copyButton.innerHTML = '<i class="fi fi-rr-copy"></i>';
+                                copyButton.title = "Copy Note";
+                                copyButton.classList.remove("copied");
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            copyButton.title = "Failed to copy";
+                            setTimeout(() => {
+                                copyButton.title = "Copy Note";
+                            }, 2000);
+                        });
+                    });
+                    noteOptions.appendChild(copyButton);
+
                     const visitNoteButton = document.createElement("button");
                     visitNoteButton.className = "visit-note-button note-op-btn";
                     visitNoteButton.innerHTML = '<i class="fi fi-rr-arrow-up-right-from-square"></i>';

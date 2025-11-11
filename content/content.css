@@ -184,6 +184,8 @@ body {}
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    background-color: transparent;
 }
 
 .ap-sticky-options:hover {
@@ -248,11 +250,6 @@ body {}
 
 
 /* Delete button styling */
-
-.delete-note-btn {
-    border: none;
-    background-color: transparent;
-}
 
 .delete-note-btn i {
     font-size: 0.9rem;
@@ -329,11 +326,6 @@ body {}
 
 .modal-buttons .cancel-delete:hover {
     background-color: #bbb;
-}
-
-.minimize-note-btn {
-    border: none;
-    background-color: transparent;
 }
 
 .minimize-note-btn i {

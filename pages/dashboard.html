@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Notes Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/pin.png" alt="Logo" class="logo">
+                <h2>Sticky Notes</h2>
+            </div>
+            <nav class="domain-nav" id="domain-nav">
+                <!-- Domain links will be populated by JS -->
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-container">
+                    <i class="fi fi-rr-search"></i>
+                    <input type="text" id="search-input" placeholder="Search all notes...">
+                </div>
+                <div class="header-actions">
+                    <!-- Future actions can go here -->
+                </div>
+            </header>
+            <section class="notes-grid" id="notes-grid">
+                <!-- Notes will be populated by JS -->
+            </section>
+        </main>
+    </div>
+    <script src="dashboard.js"></script>
+</body>
+</html>

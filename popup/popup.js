@@ -176,6 +176,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 notes.forEach((note) => {
                     const noteItem = document.createElement("div");
                     noteItem.className = "note-item";
+                    noteItem.style.borderLeft = `4px solid ${note.color || '#ffd165'}`;
+
+                    const noteTitle = document.createElement("div");
+                    noteTitle.className = "note-item-title";
+                    noteTitle.textContent = note.title || "Note";
+                    noteItem.appendChild(noteTitle);
 
                     const noteContent = document.createElement("span");
                     noteContent.innerHTML = note.content;
@@ -412,7 +418,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = note.content;
                 const noteText = tempDiv.textContent || tempDiv.innerText || '';
-                return noteText.toLowerCase().includes(term);
+                const noteTitle = note.title || '';
+                return noteText.toLowerCase().includes(term) || noteTitle.toLowerCase().includes(term);
             });
 
             // If the domain matches or there are matching notes, add them

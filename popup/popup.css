@@ -284,6 +284,15 @@ h3.ap-sn-site-title {
     line-height: 1.5;
     border-radius: 4px;
     word-break: break-word;
+    padding-left: 14px;
+}
+
+.note-item-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #111;
+    word-break: break-word;
 }
 
 .note-item.editing {

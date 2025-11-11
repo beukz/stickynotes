@@ -85,7 +85,7 @@
 
                 removeAllStickyNotes();
                 notes.forEach((note) =>
-                    createStickyNote(note.content, note.top, note.left, note.collapsed)
+                    createStickyNote(note.content, note.top, note.left, note.collapsed, note.title, note.color)
                 );
             });
         } catch (error) {
@@ -101,6 +101,8 @@
                     top: note.style.top,
                     left: note.style.left,
                     collapsed: note.classList.contains("collapsed"),
+                    title: note.querySelector(".note-title-input").value,
+                    color: note.dataset.color || '#ffd165'
                 })
             );
 
@@ -121,10 +123,11 @@
         }
     }
 
-    function createStickyNote(content = "", top = null, left = null, collapsed = false) {
+    function createStickyNote(content = "", top = null, left = null, collapsed = false, title = "Note", color = "#ffd165") {
         try {
             const note = document.createElement("div");
             note.className = "sticky-note";
+            note.dataset.color = color;
 
             const viewportTop = window.scrollY + window.innerHeight / 2 - 50;
             const viewportLeft = window.scrollX + window.innerWidth / 2 - 75;
@@ -136,12 +139,54 @@
 
             const noteHeader = document.createElement("div");
             noteHeader.className = "note-header";
+            noteHeader.style.backgroundColor = color;
 
-            const emptyDiv = document.createElement("div");
-            emptyDiv.className = "empty-sticky-div";
+            const titleInput = document.createElement("input");
+            titleInput.type = "text";
+            titleInput.className = "note-title-input";
+            titleInput.value = title;
+            titleInput.placeholder = "Title...";
+            titleInput.addEventListener("input", saveNotes);
 
             const stickyCloseMenuBox = document.createElement("div");
             stickyCloseMenuBox.className = "sticky-close-menu-box";
+
+            const NOTE_COLORS = ['#ffd165', '#ff9b71', '#a0d1e8', '#d3a0e8', '#a0e8b1', '#e8a0a0'];
+
+            const colorButton = document.createElement("button");
+            colorButton.className = "color-picker-btn ap-sticky-options";
+            colorButton.title = "Change color";
+            colorButton.innerHTML = `<i class="fi fi-rr-palette"></i>`;
+
+            const colorPalette = document.createElement("div");
+            colorPalette.className = "color-palette";
+
+            NOTE_COLORS.forEach(c => {
+                const swatch = document.createElement("div");
+                swatch.className = "color-swatch";
+                swatch.style.backgroundColor = c;
+                swatch.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    noteHeader.style.backgroundColor = c;
+                    note.dataset.color = c;
+                    saveNotes();
+                    colorPalette.style.display = 'none';
+                });
+                colorPalette.appendChild(swatch);
+            });
+
+            note.appendChild(colorPalette);
+
+            colorButton.addEventListener("click", (e) => {
+                e.stopPropagation();
+                colorPalette.style.display = colorPalette.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!note.contains(e.target)) {
+                    colorPalette.style.display = 'none';
+                }
+            });
 
             const minimizeButton = document.createElement("button");
             minimizeButton.className = "minimize-note-btn ap-sticky-options";
@@ -164,9 +209,10 @@
                 saveNotes();
             });
 
+            stickyCloseMenuBox.appendChild(colorButton);
             stickyCloseMenuBox.appendChild(minimizeButton);
             stickyCloseMenuBox.appendChild(deleteButton);
-            noteHeader.appendChild(emptyDiv);
+            noteHeader.appendChild(titleInput);
             noteHeader.appendChild(stickyCloseMenuBox);
 
             const contentArea = document.createElement("div");
@@ -200,6 +246,9 @@
             document.body.appendChild(note);
 
             noteHeader.addEventListener("mousedown", (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.closest('.ap-sticky-options')) {
+                    return;
+                }
                 dragNote(e, note);
             });
 

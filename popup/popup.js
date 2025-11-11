@@ -457,11 +457,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const notes = data[url] || [];
+            // Find note by position and title. Content can be stale if edited in another tab/page.
             const noteIndex = notes.findIndex(
                 (note) =>
-                note.content === originalNote.content &&
                 note.top === originalNote.top &&
-                note.left === originalNote.left
+                note.left === originalNote.left &&
+                note.title === originalNote.title
             );
 
             if (noteIndex > -1) {
@@ -495,12 +496,22 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const notes = data[url] || [];
-            const updatedNotes = notes.filter(
+            // Find the index of the note to delete using stable properties to avoid ambiguity
+            const noteIndexToDelete = notes.findIndex(
                 (note) =>
-                note.content !== noteToDelete.content ||
-                note.top !== noteToDelete.top ||
-                note.left !== noteToDelete.left
+                note.top === noteToDelete.top &&
+                note.left === noteToDelete.left &&
+                note.title === noteToDelete.title
             );
+
+            if (noteIndexToDelete === -1) {
+                console.warn("Could not find the note to delete. It might have been modified. Reloading notes.", noteToDelete);
+                loadNotes();
+                return; // Stop execution to prevent deleting the wrong note
+            }
+
+            // Create a new array with the note removed.
+            const updatedNotes = notes.filter((_, index) => index !== noteIndexToDelete);
 
             if (updatedNotes.length === 0) {
                 // Remove the URL if no notes are left

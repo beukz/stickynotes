@@ -141,22 +141,42 @@
             noteHeader.className = "note-header";
             noteHeader.style.backgroundColor = color;
 
+            // --- Title Elements ---
+            const titleDisplay = document.createElement("div");
+            titleDisplay.className = "note-title-display";
+            titleDisplay.textContent = title;
+
             const titleInput = document.createElement("input");
             titleInput.type = "text";
             titleInput.className = "note-title-input";
             titleInput.value = title;
             titleInput.placeholder = "Title...";
-            titleInput.addEventListener("input", saveNotes);
+            titleInput.style.display = "none"; // Hidden by default
 
+            // --- Button Container ---
             const stickyCloseMenuBox = document.createElement("div");
             stickyCloseMenuBox.className = "sticky-close-menu-box";
 
+            // --- Title Edit Buttons ---
+            const acceptTitleButton = document.createElement("button");
+            acceptTitleButton.className = "accept-title-btn ap-sticky-options";
+            acceptTitleButton.title = "Save title";
+            acceptTitleButton.innerHTML = `<i class=\"fi fi-rr-check\"></i>`;
+            acceptTitleButton.style.display = "none";
+
+            const discardTitleButton = document.createElement("button");
+            discardTitleButton.className = "discard-title-btn ap-sticky-options";
+            discardTitleButton.title = "Cancel";
+            discardTitleButton.innerHTML = `<i class=\"fi fi-rr-cross-small\"></i>`;
+            discardTitleButton.style.display = "none";
+
+            // --- Regular Note Buttons ---
             const NOTE_COLORS = ['#ffd165', '#ff9b71', '#a0d1e8', '#d3a0e8', '#a0e8b1', '#e8a0a0'];
 
             const colorButton = document.createElement("button");
             colorButton.className = "color-picker-btn ap-sticky-options";
             colorButton.title = "Change color";
-            colorButton.innerHTML = `<i class="fi fi-rr-palette"></i>`;
+            colorButton.innerHTML = `<i class=\"fi fi-rr-palette\"></i>`;
 
             const colorPalette = document.createElement("div");
             colorPalette.className = "color-palette";
@@ -201,6 +221,65 @@
                 showDeleteConfirmation(note);
             });
 
+            // --- Title Edit Logic ---
+            const startTitleEdit = () => {
+                titleDisplay.style.display = "none";
+                titleInput.style.display = "block";
+                titleInput.focus();
+                titleInput.select();
+
+                // Hide regular buttons
+                colorButton.style.display = "none";
+                minimizeButton.style.display = "none";
+                deleteButton.style.display = "none";
+
+                // Show editing buttons
+                acceptTitleButton.style.display = "flex";
+                discardTitleButton.style.display = "flex";
+            };
+
+            const endTitleEdit = () => {
+                titleDisplay.style.display = "block";
+                titleInput.style.display = "none";
+
+                // Show regular buttons
+                colorButton.style.display = "flex";
+                minimizeButton.style.display = "flex";
+                deleteButton.style.display = "flex";
+
+                // Hide editing buttons
+                acceptTitleButton.style.display = "none";
+                discardTitleButton.style.display = "none";
+            };
+
+            titleDisplay.addEventListener("dblclick", startTitleEdit);
+
+            acceptTitleButton.addEventListener("click", () => {
+                const newTitle = titleInput.value.trim();
+                if (newTitle) {
+                    titleDisplay.textContent = newTitle;
+                    saveNotes();
+                } else {
+                    titleInput.value = titleDisplay.textContent;
+                }
+                endTitleEdit();
+            });
+
+            discardTitleButton.addEventListener("click", () => {
+                titleInput.value = titleDisplay.textContent;
+                endTitleEdit();
+            });
+
+            titleInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    acceptTitleButton.click();
+                    e.preventDefault();
+                } else if (e.key === "Escape") {
+                    discardTitleButton.click();
+                }
+            });
+
+            // --- Other Button Logic ---
             minimizeButton.addEventListener("click", () => {
                 note.classList.toggle("collapsed");
                 const isCollapsed = note.classList.contains("collapsed");
@@ -209,12 +288,18 @@
                 saveNotes();
             });
 
+            // --- Assemble Header ---
+            stickyCloseMenuBox.appendChild(acceptTitleButton);
+            stickyCloseMenuBox.appendChild(discardTitleButton);
             stickyCloseMenuBox.appendChild(colorButton);
             stickyCloseMenuBox.appendChild(minimizeButton);
             stickyCloseMenuBox.appendChild(deleteButton);
+            
+            noteHeader.appendChild(titleDisplay);
             noteHeader.appendChild(titleInput);
             noteHeader.appendChild(stickyCloseMenuBox);
 
+            // --- Assemble Note ---
             const contentArea = document.createElement("div");
             contentArea.contentEditable = true;
             contentArea.className = "sticky-content";
@@ -246,7 +331,7 @@
             document.body.appendChild(note);
 
             noteHeader.addEventListener("mousedown", (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.closest('.ap-sticky-options')) {
+                if (e.target.tagName === 'INPUT' || e.target.closest('.ap-sticky-options') || titleInput.style.display === 'block') {
                     return;
                 }
                 dragNote(e, note);

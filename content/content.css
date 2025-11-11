@@ -347,6 +347,23 @@ body {}
 }
 
 /* Sticky Note Header Enhancements */
+.note-title-display {
+    flex-grow: 1;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--titleFont);
+    color: #333;
+    margin-right: 5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 0;
+    cursor: text;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
 .note-title-input {
     flex-grow: 1;
     background: transparent;
@@ -365,6 +382,16 @@ body {}
 
 .note-title-input::placeholder {
     color: rgba(51, 51, 51, 0.7);
+}
+
+.accept-title-btn i, .discard-title-btn i {
+    font-size: 1.2rem;
+    color: #333;
+    line-height: 1;
+}
+
+.discard-title-btn i {
+    font-size: 1.4rem; /* Make the 'x' a bit bigger */
 }
 
 .color-picker-btn i {

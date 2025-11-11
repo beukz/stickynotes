@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     window.onload = function() {
         try {
+            injectExternalCSS();
             injectNewNoteButton();
             loadNotes();
             observeUrlChanges(); // Watch for dynamic URL changes
@@ -17,6 +18,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             console.error("Error during window.onload:", error);
         }
     };
+
+    function injectExternalCSS() {
+        try {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css";
+            document.head.appendChild(link);
+        } catch (error) {
+            console.error("Error injecting external CSS:", error);
+        }
+    }
 
     function injectNewNoteButton() {
         try {
@@ -63,7 +75,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const notes = data[urlKey] || [];
                 removeAllStickyNotes(); // Ensure no leftover notes from the previous URL
                 notes.forEach((note) =>
-                    createStickyNote(note.content, note.top, note.left)
+                    createStickyNote(note.content, note.top, note.left, note.collapsed)
                 );
             });
         } catch (error) {
@@ -78,6 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     content: note.querySelector(".sticky-content").innerHTML,
                     top: note.style.top,
                     left: note.style.left,
+                    collapsed: note.classList.contains("collapsed"),
                 })
             );
 
@@ -96,7 +109,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
     }
 
-    function createStickyNote(content = "", top = null, left = null) {
+    function createStickyNote(content = "", top = null, left = null, collapsed = false) {
         try {
             const note = document.createElement("div");
             note.className = "sticky-note";
@@ -120,6 +133,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const stickyCloseMenuBox = document.createElement("div");
             stickyCloseMenuBox.className = "sticky-close-menu-box";
 
+            const minimizeButton = document.createElement("button");
+            minimizeButton.className = "minimize-note-btn ap-sticky-options";
+            minimizeButton.title = "Minimize note";
+            minimizeButton.innerHTML = `<i class="fi fi-rr-minus-small"></i>`;
+
             const deleteButton = document.createElement("button");
             deleteButton.className = "delete-note-btn ap-sticky-options";
             deleteButton.title = "Delete note";
@@ -128,6 +146,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 showDeleteConfirmation(note);
             });
 
+            minimizeButton.addEventListener("click", () => {
+                note.classList.toggle("collapsed");
+                const isCollapsed = note.classList.contains("collapsed");
+                minimizeButton.title = isCollapsed ? "Expand note" : "Minimize note";
+                minimizeButton.innerHTML = isCollapsed ? `<i class="fi fi-rr-window-maximize"></i>` : `<i class="fi fi-rr-minus-small"></i>`;
+                saveNotes();
+            });
+
+            stickyCloseMenuBox.appendChild(minimizeButton);
             stickyCloseMenuBox.appendChild(deleteButton);
             noteHeader.appendChild(emptyDiv);
             noteHeader.appendChild(stickyCloseMenuBox);
@@ -155,6 +182,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // Append the sections to the note div
             note.appendChild(noteHeader); // Header with delete button
             note.appendChild(contentArea); // Content area for the note
+
+            // Handle initial collapsed state
+            if (collapsed) {
+                note.classList.add("collapsed");
+                minimizeButton.title = "Expand note";
+                minimizeButton.innerHTML = `<i class="fi fi-rr-window-maximize"></i>`;
+            }
 
             // Append sticky note to body
             document.body.appendChild(note);

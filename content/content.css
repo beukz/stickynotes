@@ -329,3 +329,18 @@ body {}
 .modal-buttons .cancel-delete:hover {
     background-color: #bbb;
 }
+
+.minimize-note-btn {
+    border: none;
+    background-color: transparent;
+}
+
+.minimize-note-btn i {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1;
+}
+
+.sticky-note.collapsed .sticky-content {
+    display: none;
+}

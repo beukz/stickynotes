@@ -1,10 +1,12 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "createStickyNote") {
-        createStickyNote();
-    }
-});
-
 (function() {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === "createStickyNote") {
+            createStickyNote();
+            sendResponse({ status: "ok" }); // Acknowledge the message
+        }
+        return true; // Keep message channel open for async responses
+    });
+
     let lastUrl = window.location.href; // Cache the last known URL
     let notesExistInStorage = false; // Flag to track if notes should be on the page
     let noteCheckDebounce = null; // Debounce timer for DOM checks
@@ -144,12 +146,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const minimizeButton = document.createElement("button");
             minimizeButton.className = "minimize-note-btn ap-sticky-options";
             minimizeButton.title = "Minimize note";
-            minimizeButton.innerHTML = `<i class="fi fi-rr-minus-small"></i>`;
+            minimizeButton.innerHTML = `<i class=\"fi fi-rr-minus-small\"></i>`;
 
             const deleteButton = document.createElement("button");
             deleteButton.className = "delete-note-btn ap-sticky-options";
             deleteButton.title = "Delete note";
-            deleteButton.innerHTML = `<img src="https://ucktpuitdnqcqtg2.public.blob.vercel-storage.com/bin-icon-EWmPyvXJ3uLxwOU0l7K42iblggAFb1.svg" alt="Delete" />`;
+            deleteButton.innerHTML = `<img src=\"https://ucktpuitdnqcqtg2.public.blob.vercel-storage.com/bin-icon-EWmPyvXJ3uLxwOU0l7K42iblggAFb1.svg\" alt=\"Delete\" />`;
             deleteButton.addEventListener("click", () => {
                 showDeleteConfirmation(note);
             });
@@ -158,7 +160,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 note.classList.toggle("collapsed");
                 const isCollapsed = note.classList.contains("collapsed");
                 minimizeButton.title = isCollapsed ? "Expand note" : "Minimize note";
-                minimizeButton.innerHTML = isCollapsed ? `<i class="fi fi-rr-window-maximize"></i>` : `<i class="fi fi-rr-minus-small"></i>`;
+                minimizeButton.innerHTML = isCollapsed ? `<i class=\"fi fi-rr-window-maximize\"></i>` : `<i class=\"fi fi-rr-minus-small\"></i>`;
                 saveNotes();
             });
 
@@ -192,7 +194,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (collapsed) {
                 note.classList.add("collapsed");
                 minimizeButton.title = "Expand note";
-                minimizeButton.innerHTML = `<i class="fi fi-rr-window-maximize"></i>`;
+                minimizeButton.innerHTML = `<i class=\"fi fi-rr-window-maximize\"></i>`;
             }
 
             document.body.appendChild(note);
@@ -215,9 +217,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         modal.className = "sticky-note-delete-modal";
         modal.innerHTML = `
             <p>Are you sure you want to delete this note?</p>
-            <div class="modal-buttons">
-                <button class="confirm-delete">Delete</button>
-                <button class="cancel-delete">Cancel</button>
+            <div class=\"modal-buttons\">
+                <button class=\"confirm-delete\">Delete</button>
+                <button class=\"cancel-delete\">Cancel</button>
             </div>
         `;
 

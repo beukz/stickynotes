@@ -3,10 +3,8 @@ console.log('Service Worker is running!');
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.tabs.create({ url: chrome.runtime.getURL("pages/installed.html") });
-});
 
-// Handle context menu creation and clicks
-chrome.runtime.onInstalled.addListener(() => {
+  // Handle context menu creation
   let shortcutLabel = "Ctrl + Q"; // Default for Windows/Linux
 
   if (navigator.userAgentData) {

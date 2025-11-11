@@ -332,12 +332,12 @@ document.addEventListener("DOMContentLoaded", () => {
      * @param {boolean} isCollapsed - Whether the domain is now collapsed.
      */
     function updateCollapsedState(domain, isCollapsed) {
-        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local) {
+        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.sync) {
             console.warn("Storage API not available. Cannot save collapsed state.");
             return;
         }
 
-        chrome.storage.local.get({ collapsed_domains: [] }, (data) => {
+        chrome.storage.sync.get({ collapsed_domains: [] }, (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error getting collapsed state:", chrome.runtime.lastError);
                 return;
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 collapsedDomains.splice(domainIndex, 1);
             }
 
-            chrome.storage.local.set({ collapsed_domains: collapsedDomains }, () => {
+            chrome.storage.sync.set({ collapsed_domains: collapsedDomains }, () => {
                 if (chrome.runtime.lastError) {
                     console.error("Error saving collapsed state:", chrome.runtime.lastError);
                 }
@@ -367,8 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     function loadNotes() {
         // Check if we are in a real extension environment
-        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(null, (data) => {
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+            chrome.storage.sync.get(null, (data) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error retrieving data:", chrome.runtime.lastError);
                     return;
@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } else {
             // Fallback to mock data for local development/testing
-            console.warn("chrome.storage.local API not available. Loading mock data for development.");
+            console.warn("chrome.storage.sync API not available. Loading mock data for development.");
             allNotesData = mockNotesData;
             renderNotes(mockNotesData, []);
         }
@@ -438,12 +438,12 @@ document.addEventListener("DOMContentLoaded", () => {
      * @param {string} newContent - The new HTML content for the note.
      */
     function updateNoteContent(url, originalNote, newContent) {
-        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local) {
+        if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.sync) {
             console.warn("Storage API not available. Cannot update note.");
             return;
         }
 
-        chrome.storage.local.get(url, (data) => {
+        chrome.storage.sync.get(url, (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error retrieving notes for update:", chrome.runtime.lastError);
                 return;
@@ -460,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (noteIndex > -1) {
                 notes[noteIndex].content = newContent;
 
-                chrome.storage.local.set({ [url]: notes }, () => {
+                chrome.storage.sync.set({ [url]: notes }, () => {
                     if (chrome.runtime.lastError) {
                         console.error("Error saving updated note:", chrome.runtime.lastError);
                     }
@@ -478,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
      * @param {object} noteToDelete - The note to delete (identified by content and position).
      */
     function deleteNote(url, noteToDelete) {
-        chrome.storage.local.get(url, (data) => {
+        chrome.storage.sync.get(url, (data) => {
             if (chrome.runtime.lastError) {
                 console.error(
                     "Error retrieving notes for deletion:",
@@ -497,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (updatedNotes.length === 0) {
                 // Remove the URL if no notes are left
-                chrome.storage.local.remove(url, () => {
+                chrome.storage.sync.remove(url, () => {
                     if (chrome.runtime.lastError) {
                         console.error(
                             "Error removing URL from storage:",
@@ -509,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             } else {
                 // Update the remaining notes
-                chrome.storage.local.set({ 
+                chrome.storage.sync.set({ 
                         [url]: updatedNotes,
                     },
                     () => {

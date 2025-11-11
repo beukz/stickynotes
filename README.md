@@ -1,12 +1,12 @@
 # Sticky Notes Chrome Extension
 
-A simple yet powerful Chrome extension that allows you to add sticky notes to any website. Your notes are saved locally and will be waiting for you whenever you return to the page.
+A simple yet powerful Chrome extension that allows you to add sticky notes to any website. Your notes are synced across your devices and will be waiting for you whenever you return to the page.
 
 ## Features
 
 -   **Create Notes Anywhere:** Add sticky notes to any webpage you visit.
 -   **Automatic Saving:** Notes are automatically saved as you type.
--   **Persistent Notes:** Your notes are saved for each specific URL and will reappear when you revisit the page.
+-   **Synced & Persistent Notes:** Your notes are synced across all your Chrome browsers and saved for each specific URL. They'll reappear when you revisit the page.
 -   **Draggable Interface:** Easily move your notes around the page to your preferred position.
 -   **Multiple Ways to Create:**
     -   **Keyboard Shortcut:** Press `Ctrl + Q` (or `⌘ + Q` on macOS) to quickly create a new note.

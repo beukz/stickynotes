@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     function loadNotes() {
         try {
             const urlKey = getEffectiveUrl(); // Get the effective URL key
-            chrome.storage.local.get(urlKey, (data) => {
+            chrome.storage.sync.get(urlKey, (data) => {
                 if (chrome.runtime.lastError) {
                     console.error(
                         "Error loading notes from chrome.storage:",
@@ -82,7 +82,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             );
 
             const urlKey = getEffectiveUrl();
-            chrome.storage.local.set({ 
+            chrome.storage.sync.set({ 
                 [urlKey]: notes }, () => {
                 if (chrome.runtime.lastError) {
                     console.error(

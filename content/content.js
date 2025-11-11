@@ -1,23 +1,36 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "createStickyNote") {
-        // Simulate the button click or keyboard shortcut function
         createStickyNote();
     }
 });
 
 (function() {
     let lastUrl = window.location.href; // Cache the last known URL
+    let notesExistInStorage = false; // Flag to track if notes should be on the page
+    let noteCheckDebounce = null; // Debounce timer for DOM checks
+    let listenersAdded = false; // Flag to ensure event listeners are added only once
 
-    window.onload = function() {
+    /**
+     * Initializes the sticky notes functionality on the page.
+     */
+    function init() {
         try {
             injectExternalCSS();
             injectNewNoteButton();
             loadNotes();
-            observeUrlChanges(); // Watch for dynamic URL changes
+            observePageChanges(); // Watch for URL and DOM changes
         } catch (error) {
-            console.error("Error during window.onload:", error);
+            console.error("Error during Sticky Notes initialization:", error);
         }
-    };
+    }
+
+    // Since content scripts run at `document_idle`, the DOM is generally ready.
+    // A small delay can help ensure that single-page applications have finished their initial render.
+    if (document.readyState === "complete") {
+        setTimeout(init, 100);
+    } else {
+        window.addEventListener("load", () => setTimeout(init, 100));
+    }
 
     function injectExternalCSS() {
         try {
@@ -32,29 +45,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     function injectNewNoteButton() {
         try {
+            if (document.getElementById("appedle-new-note-btn")) {
+                return; // Button already exists
+            }
             const button = document.createElement("button");
             button.id = "appedle-new-note-btn";
             button.textContent = "New Note (Ctrl + Q)";
             document.body.appendChild(button);
 
-            // Add click event listener for "New Note" button
             button.addEventListener("click", () => createStickyNote());
 
-            // Add keyboard shortcut (Ctrl + Q) to create a new note
-            document.addEventListener("keydown", (e) => {
-                // Check for Ctrl + Q (Windows/Linux) or Cmd + Q (macOS)
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "q") {
-                    createStickyNote();
-                    e.preventDefault(); // Prevent default action if needed
-                }
-            });
-
-            // Listen for right-click menu action
-            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                if (request.action === "createStickyNote") {
-                    createStickyNote(); // Reuse the same function
-                }
-            });
+            if (!listenersAdded) {
+                document.addEventListener("keydown", (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "q") {
+                        createStickyNote();
+                        e.preventDefault();
+                    }
+                });
+                listenersAdded = true;
+            }
         } catch (error) {
             console.error("Error injecting 'New Note' button:", error);
         }
@@ -62,18 +71,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     function loadNotes() {
         try {
-            const urlKey = getEffectiveUrl(); // Get the effective URL key
+            const urlKey = getEffectiveUrl();
             chrome.storage.sync.get(urlKey, (data) => {
                 if (chrome.runtime.lastError) {
-                    console.error(
-                        "Error loading notes from chrome.storage:",
-                        chrome.runtime.lastError
-                    );
+                    console.error("Error loading notes from chrome.storage:", chrome.runtime.lastError);
                     return;
                 }
 
                 const notes = data[urlKey] || [];
-                removeAllStickyNotes(); // Ensure no leftover notes from the previous URL
+                notesExistInStorage = notes.length > 0; // Update flag
+
+                removeAllStickyNotes();
                 notes.forEach((note) =>
                     createStickyNote(note.content, note.top, note.left, note.collapsed)
                 );
@@ -93,6 +101,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     collapsed: note.classList.contains("collapsed"),
                 })
             );
+
+            notesExistInStorage = notes.length > 0; // Update flag on save
 
             const urlKey = getEffectiveUrl();
             chrome.storage.sync.set({ 
@@ -114,16 +124,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const note = document.createElement("div");
             note.className = "sticky-note";
 
-            // Determine default position based on scroll position and viewport center
-            const viewportTop = window.scrollY + window.innerHeight / 2 - 50; // Center vertically
-            const viewportLeft = window.scrollX + window.innerWidth / 2 - 75; // Center horizontally
+            const viewportTop = window.scrollY + window.innerHeight / 2 - 50;
+            const viewportLeft = window.scrollX + window.innerWidth / 2 - 75;
 
-            note.style.top = top || `${viewportTop}px`; // Use given top or viewport center
-            note.style.left = left || `${viewportLeft}px`; // Use given left or viewport center
-            note.style.position = "absolute"; // Ensure absolute positioning
-            note.style.zIndex = "9999"; // Ensure it's on top of other elements
+            note.style.top = top || `${viewportTop}px`;
+            note.style.left = left || `${viewportLeft}px`;
+            note.style.position = "absolute";
+            note.style.zIndex = "9999";
 
-            // Create the sticky note header
             const noteHeader = document.createElement("div");
             noteHeader.className = "note-header";
 
@@ -159,7 +167,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             noteHeader.appendChild(emptyDiv);
             noteHeader.appendChild(stickyCloseMenuBox);
 
-            // Sticky note content area
             const contentArea = document.createElement("div");
             contentArea.contentEditable = true;
             contentArea.className = "sticky-content";
@@ -179,21 +186,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             contentArea.addEventListener("input", saveNotes);
 
-            // Append the sections to the note div
-            note.appendChild(noteHeader); // Header with delete button
-            note.appendChild(contentArea); // Content area for the note
+            note.appendChild(noteHeader);
+            note.appendChild(contentArea);
 
-            // Handle initial collapsed state
             if (collapsed) {
                 note.classList.add("collapsed");
                 minimizeButton.title = "Expand note";
                 minimizeButton.innerHTML = `<i class="fi fi-rr-window-maximize"></i>`;
             }
 
-            // Append sticky note to body
             document.body.appendChild(note);
 
-            // Make note draggable across the webpage
             noteHeader.addEventListener("mousedown", (e) => {
                 dragNote(e, note);
             });
@@ -205,11 +208,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     function showDeleteConfirmation(noteToDelete) {
-        // Create overlay
         const overlay = document.createElement("div");
         overlay.className = "sticky-note-delete-overlay";
 
-        // Create modal
         const modal = document.createElement("div");
         modal.className = "sticky-note-delete-modal";
         modal.innerHTML = `
@@ -220,11 +221,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             </div>
         `;
 
-        // Append modal to overlay, and overlay to the note
         overlay.appendChild(modal);
         noteToDelete.appendChild(overlay);
 
-        // Add event listeners for buttons
         modal.querySelector('.confirm-delete').addEventListener('click', () => {
             try {
                 noteToDelete.remove();
@@ -248,13 +247,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
 
-                // Prevent sticky note from overflowing the page horizontally (left or right)
-                newX = Math.max(0, newX); // Prevent moving left
-                newX = Math.min(newX, document.body.offsetWidth - note.offsetWidth); // Prevent moving right
+                newX = Math.max(0, newX);
+                newX = Math.min(newX, document.body.offsetWidth - note.offsetWidth);
 
-                // Prevent sticky note from overflowing vertically (top or bottom)
-                newY = Math.max(0, newY); // Prevent moving up
-                newY = Math.min(newY, document.body.scrollHeight - note.offsetHeight); // Prevent moving down
+                newY = Math.max(0, newY);
+                newY = Math.min(newY, document.body.scrollHeight - note.offsetHeight);
 
                 note.style.top = `${newY}px`;
                 note.style.left = `${newX}px`;
@@ -285,28 +282,54 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     function getEffectiveUrl() {
         try {
-            return window.location.href; // Save the full URL (including protocol and path)
+            return window.location.href;
         } catch (error) {
             console.error("Error getting effective URL:", error);
-            return "unknown-url"; // Fallback key
+            return "unknown-url";
         }
     }
 
-    function observeUrlChanges() {
+    /**
+     * Observes changes to the page URL (for SPAs) and DOM structure.
+     * This ensures notes are reloaded if the URL changes or if a framework
+     * re-renders the page and removes the notes.
+     */
+    function observePageChanges() {
         try {
             const observer = new MutationObserver(() => {
+                // 1. Handle URL changes for single-page applications
                 if (window.location.href !== lastUrl) {
                     lastUrl = window.location.href;
                     loadNotes();
+                    return; // URL changed, notes are reloaded, no need for further checks
+                }
+
+                // 2. Handle DOM wipes by frameworks (e.g., React, Vue)
+                // If we have notes in storage for this URL but none are on the page,
+                // it's likely they were removed by a re-render.
+                if (notesExistInStorage && document.querySelectorAll('.sticky-note').length === 0) {
+                    // Debounce to prevent rapid-fire reloads during complex DOM manipulations
+                    clearTimeout(noteCheckDebounce);
+                    noteCheckDebounce = setTimeout(() => {
+                        // Re-check condition in case notes were added in the meantime
+                        if (notesExistInStorage && document.querySelectorAll('.sticky-note').length === 0) {
+                            console.log("Sticky notes missing from page, attempting to restore.");
+                            loadNotes();
+                        }
+                    }, 500);
                 }
             });
 
-            observer.observe(document, {
-                subtree: true,
-                childList: true,
-            });
+            // Observe the body for child additions/removals. This is a good
+            // indicator of page re-renders without being overly resource-intensive.
+            if (document.body) {
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
         } catch (error) {
-            console.error("Error observing URL changes:", error);
+            console.error("Error observing page changes:", error);
         }
     }
 })();

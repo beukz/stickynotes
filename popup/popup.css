@@ -109,6 +109,10 @@ body {
     font-family: var(--titleFont);
 }
 
+.ap-sn-logo {
+    height: 28px;
+}
+
 /* Search bar styling */
 .search-container {
     position: relative;

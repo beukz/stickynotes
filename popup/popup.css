@@ -109,6 +109,41 @@ body {
     font-family: var(--titleFont);
 }
 
+/* Search bar styling */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-container .fi-rr-search {
+    position: absolute;
+    left: 10px;
+    color: #aaa;
+    font-size: 0.9rem;
+    pointer-events: none; /* So it doesn't block clicks on the input */
+}
+
+#search-input {
+    width: 160px;
+    padding: 6px 10px 6px 30px; /* Left padding for icon */
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    transition: all 0.3s ease-in-out;
+    font-family: var(--defaultFont);
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--mainHoverColor);
+    box-shadow: 0 0 5px var(--sColor);
+}
+
+#search-input::placeholder {
+    color: #bbb;
+}
+
 
 /* Domain section styling */
 

@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const notesContainer = document.getElementById("notes-container");
+    const searchInput = document.getElementById("search-input");
+    let allNotesData = {}; // To cache all notes from storage
+    let collapsedDomainsState = []; // To cache the collapsed state
 
     // Mock data for development when chrome.storage is not available
     const mockNotesData = {
@@ -86,8 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
      * Renders notes in the popup, grouped by their main domain.
      * @param {object} notesData - The notes data from storage or mock data.
      * @param {string[]} [collapsedDomains=[]] - An array of domains that should be collapsed.
+     * @param {boolean} [isSearchResult=false] - Flag to indicate if the data is from a search.
      */
-    function renderNotes(notesData, collapsedDomains = []) {
+    function renderNotes(notesData, collapsedDomains = [], isSearchResult = false) {
         notesContainer.innerHTML = "";
 
         // Filter out any URLs that have empty note arrays to be safe
@@ -98,7 +102,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (Object.keys(nonEmptyNotesData).length === 0) {
             const noNotesMessage = document.createElement("div");
             noNotesMessage.className = "no-notes-message";
-            noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
+            if (isSearchResult) {
+                noNotesMessage.textContent = "No notes found matching your search. 🕵️‍♂️";
+            } else {
+                noNotesMessage.textContent = "Oops! Your sticky note board is squeaky clean 🧼. Start scribbling to add some magic!";
+            }
             notesContainer.appendChild(noNotesMessage);
             return;
         }
@@ -365,18 +373,63 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.error("Error retrieving data:", chrome.runtime.lastError);
                     return;
                 }
-                const collapsedDomains = data.collapsed_domains || [];
+                collapsedDomainsState = data.collapsed_domains || [];
                 const notesData = { ...data };
                 delete notesData.collapsed_domains; // Separate notes from state
 
-                renderNotes(notesData, collapsedDomains);
+                allNotesData = notesData;
+                renderNotes(allNotesData, collapsedDomainsState);
             });
         } else {
             // Fallback to mock data for local development/testing
             console.warn("chrome.storage.local API not available. Loading mock data for development.");
+            allNotesData = mockNotesData;
             renderNotes(mockNotesData, []);
         }
     }
+
+    /**
+     * Filters notes based on a search term and re-renders the list.
+     * @param {string} searchTerm - The term to filter by.
+     */
+    function filterAndRenderNotes(searchTerm) {
+        if (!searchTerm) {
+            renderNotes(allNotesData, collapsedDomainsState);
+            return;
+        }
+
+        const filteredData = {};
+        const term = searchTerm.toLowerCase();
+
+        for (const [url, notes] of Object.entries(allNotesData)) {
+            const domain = getMainDomain(url) || url;
+
+            // Check if the domain itself matches the search term
+            const domainMatches = domain.toLowerCase().includes(term);
+
+            // Filter notes within this URL that match the content
+            const matchingNotes = notes.filter(note => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = note.content;
+                const noteText = tempDiv.textContent || tempDiv.innerText || '';
+                return noteText.toLowerCase().includes(term);
+            });
+
+            // If the domain matches or there are matching notes, add them
+            if (domainMatches || matchingNotes.length > 0) {
+                // If domain matches, add all notes; otherwise, add only matching notes
+                filteredData[url] = domainMatches ? notes : matchingNotes;
+            }
+        }
+
+        // When searching, expand all groups to show results.
+        renderNotes(filteredData, [], true);
+    }
+
+    // Add event listener for the search input
+    searchInput.addEventListener("input", () => {
+        filterAndRenderNotes(searchInput.value);
+    });
 
     /**
      * Updates the content of a specific note.

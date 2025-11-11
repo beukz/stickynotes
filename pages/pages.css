@@ -146,3 +146,33 @@ body {
     font-size: 1.1rem;
     color: var(--color-text-light);
 }
+
+/* Confetti Trigger Button */
+#confetti-trigger {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background-color: var(--color-primary);
+    color: #333;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000;
+}
+
+#confetti-trigger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+#confetti-trigger i {
+    font-size: 1.5rem;
+    line-height: 1; /* Fix for icon alignment */
+}

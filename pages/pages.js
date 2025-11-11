@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Trigger confetti burst after 2 seconds
-  setTimeout(() => {
+  const confettiTrigger = document.getElementById('confetti-trigger');
+
+  function triggerConfetti() {
     // First confetti burst from the center
     confetti({
       particleCount: 200,
@@ -26,5 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
         colors: ['#FFBD33', '#33FFBD', '#9D33FF'] // Another subset for balance
       });
     }, 500);
-  }, 500);
+  }
+
+  // Trigger confetti burst on page load
+  setTimeout(triggerConfetti, 500);
+
+  // Add click listener to the button
+  if (confettiTrigger) {
+    confettiTrigger.addEventListener('click', triggerConfetti);
+  }
 });

@@ -125,6 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${note.content}
                 </div>
                 <div class="note-card-footer">
+                    <button class="note-action-btn edit-btn" title="Edit Note">
+                        <i class="fi fi-rr-pencil"></i>
+                    </button>
                     <button class="note-action-btn visit-btn" title="Go to Note">
                         <i class="fi fi-rr-arrow-up-right-from-square"></i>
                     </button>
@@ -134,15 +137,55 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button class="note-action-btn delete-btn" title="Delete Note">
                         <i class="fi fi-rr-trash"></i>
                     </button>
+                    <button class="note-action-btn save-btn" title="Save Changes">
+                        <i class="fi fi-rr-check"></i>
+                    </button>
+                    <button class="note-action-btn cancel-btn" title="Cancel Edit">
+                        <i class="fi fi-rr-cross-small"></i>
+                    </button>
                 </div>
             `;
 
-            // Add event listeners
-            card.querySelector('.visit-btn').addEventListener('click', () => {
+            // Get references to elements
+            const noteContent = card.querySelector('.note-card-content');
+            const editBtn = card.querySelector('.edit-btn');
+            const visitBtn = card.querySelector('.visit-btn');
+            const copyBtn = card.querySelector('.copy-btn');
+            const deleteBtn = card.querySelector('.delete-btn');
+            const saveBtn = card.querySelector('.save-btn');
+            const cancelBtn = card.querySelector('.cancel-btn');
+            
+            let originalContent = note.content;
+
+            // Edit button logic
+            editBtn.addEventListener('click', () => {
+                noteContent.contentEditable = true;
+                noteContent.focus();
+                card.classList.add('editing');
+            });
+
+            // Save button logic
+            saveBtn.addEventListener('click', () => {
+                const newContent = noteContent.innerHTML;
+                updateNoteContent(note.url, note, newContent);
+                
+                noteContent.contentEditable = false;
+                card.classList.remove('editing');
+                originalContent = newContent; // Update original content for subsequent edits
+            });
+
+            // Cancel button logic
+            cancelBtn.addEventListener('click', () => {
+                noteContent.innerHTML = originalContent;
+                noteContent.contentEditable = false;
+                card.classList.remove('editing');
+            });
+
+            // Add event listeners for other buttons
+            visitBtn.addEventListener('click', () => {
                 chrome.tabs.create({ url: note.url });
             });
 
-            const copyBtn = card.querySelector('.copy-btn');
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(plainTextContent).then(() => {
                     copyBtn.innerHTML = '<i class="fi fi-rr-check"></i>';
@@ -152,13 +195,47 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
 
-            card.querySelector('.delete-btn').addEventListener('click', () => {
+            deleteBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to delete this note?')) {
                     deleteNote(note.url, note);
                 }
             });
 
             notesGrid.appendChild(card);
+        });
+    }
+
+    function updateNoteContent(url, originalNote, newContent) {
+        if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+            console.warn('Storage API not available. Cannot update note.');
+            return;
+        }
+
+        chrome.storage.sync.get(url, (data) => {
+            if (chrome.runtime.lastError) {
+                console.error('Error retrieving notes for update:', chrome.runtime.lastError);
+                return;
+            }
+
+            const notes = data[url] || [];
+            const noteIndex = notes.findIndex(
+                (note) =>
+                    note.top === originalNote.top &&
+                    note.left === originalNote.left &&
+                    note.title === originalNote.title
+            );
+
+            if (noteIndex > -1) {
+                notes[noteIndex].content = newContent;
+                chrome.storage.sync.set({ [url]: notes }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error saving updated note:', chrome.runtime.lastError);
+                    }
+                });
+            } else {
+                console.warn('Could not find the note to update.');
+                loadAllData();
+            }
         });
     }
 
@@ -170,14 +247,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const notes = data[url] || [];
-            const updatedNotes = notes.filter(
-                (note) => !(note.content === noteToDelete.content && note.top === noteToDelete.top && note.left === noteToDelete.left)
+            const noteIndexToDelete = notes.findIndex(
+                (note) =>
+                    note.top === noteToDelete.top &&
+                    note.left === noteToDelete.left &&
+                    note.title === noteToDelete.title
             );
 
+            if (noteIndexToDelete === -1) {
+                console.warn('Could not find the note to delete.');
+                loadAllData();
+                return;
+            }
+
+            const updatedNotes = notes.filter((_, index) => index !== noteIndexToDelete);
+
             if (updatedNotes.length === 0) {
-                chrome.storage.sync.remove(url, () => !chrome.runtime.lastError && loadAllData());
+                chrome.storage.sync.remove(url, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error removing URL from storage:", chrome.runtime.lastError);
+                    }
+                });
             } else {
-                chrome.storage.sync.set({ [url]: updatedNotes }, () => !chrome.runtime.lastError && loadAllData());
+                chrome.storage.sync.set({ [url]: updatedNotes }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error saving updated notes:", chrome.runtime.lastError);
+                    }
+                });
             }
         });
     }

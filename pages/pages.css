@@ -1,89 +1,148 @@
+/* General Reset & Font Setup */
 * {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 @font-face {
-  font-family: "Inter", sans-serif;
-  src: url("../font/Inter.ttc") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Inter", sans-serif;
+    src: url("../font/Inter.ttc") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 :root {
-  --font: "Inter", sans-serif;
+    --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --color-background: #f7f7f7;
+    --color-text: #333;
+    --color-text-light: #666;
+    --color-primary: #ffd165; /* Same as sticky note header */
+    --color-card-bg: #ffffff;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  font-family: Arial, sans-serif;
-  /* text-align: center; */
-  background-color: #f4f4f4;
-  height: 100dvh;
-  display: flex;
-  /* align-items: center; */
-  /* justify-content: center; */
+    font-family: var(--font-primary);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
 }
 
-.body-box {
-  /* border: 1px solid grey; */
-  width: 1200px;
-  max-width: 90%;
-  margin: auto;
-  font-family: var(--font);
+/* Main Container */
+.container {
+    background-color: var(--color-card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    max-width: 800px;
+    width: 100%;
+    padding: 3rem;
+    text-align: center;
 }
 
-.body-box h1 {
-  color: #333;
-  font-size: 2rem;
+/* Header */
+.header {
+    margin-bottom: 2.5rem;
 }
 
-.body-box p {
-  color: #555;
-  /* font-size: 1.1em; */
+.header .logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
 }
 
-.body-text {
-  text-align: center;
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
 }
 
-#pin-instruction {
-  margin-top: 15px;
-  color: #444;
-  font-size: 1rem;
+.header p {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
 }
 
-#pin-instruction i {
+/* Pinning Instruction */
+.pin-instruction {
+    background-color: #fff9e6;
+    border: 1px solid #ffeec2;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.pin-instruction h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.pin-instruction p {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+}
+
+.pin-instruction i {
+    color: var(--color-primary);
+    vertical-align: middle;
+    font-size: 1.2rem;
+}
+
+/* Features Grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.feature-card {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.icon-wrapper {
+    background-color: var(--color-primary);
+    border-radius: 50%;
+    width: 50px;
     height: 50px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.feature {
-  margin-top: 30px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 20px;
+.icon-wrapper i {
+    font-size: 1.5rem;
+    color: #333;
 }
 
-.feature h2 {
-  font-size: 1.3rem;
+.feature-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
 }
 
-.feature-item {
-  margin-bottom: 30px;
-  padding: 15px;
-  background-color: #fff;
-  border-radius: 8px;
-  transition: all 0.3s ease-in-out;
+.feature-card p {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
 }
 
-.feature-item h3 {
-  font-size: 1.1rem;
-  color: #5fa8ca;
-  margin-bottom: 10px;
-}
-
-.feature-item p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #555;
+/* Footer */
+.footer {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
 }

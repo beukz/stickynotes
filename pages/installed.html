@@ -1,76 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- icons -->
+    <title>Welcome to Sticky Notes!</title>
     <link rel="icon" href="../assets/pin.png" type="image/png" />
-
-    <link
-      rel="stylesheet"
-      href="https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css"
-    />
-
-    <!-- stylesheets -->
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
     <link rel="stylesheet" href="pages.css" />
-
-    <!-- confetti -->
-
-    <title>Welcome to PartnerFlow: Sticky Notes!</title>
-    <style></style>
-  </head>
-  <body>
-    <div class="body-box">
-        
-      <div class="body-text">
-        <h1>Thank you for installing PartnerFlow: Sticky Notes! 🎉</h1>
-        <p id="pin-instruction">
-          Click on the <strong>Extensions</strong> icon (<i
-            class="fi fi-ss-puzzle-piece"
-            title="puzzle icon"
-          ></i
-          >) in your browser's toolbar and pin PartnerFlow: Sticky Notes to the toolbar
-          for quick access.
-        </p>
-      </div>
-
-      <section class="feature">
-        <h2>Features:</h2>
-
-        <!-- Feature 1: Keyboard Shortcut -->
-        <div class="feature-item">
-          <h3>Use Keyboard Shortcut</h3>
-          <p>
-            Press <strong>Ctrl + Q</strong> (or <strong>⌘ + Q</strong> on MacOS)
-            to create a new sticky note anywhere on the webpage.
-          </p>
-          <p>This shortcut opens a new sticky note for you to start typing!</p>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/pin.png" alt="Sticky Notes Icon" class="logo">
+            <h1>Welcome to Sticky Notes!</h1>
+            <p>Your extension is installed. Here are a few tips to get started.</p>
         </div>
 
-        <!-- Feature 2: Right Click Menu -->
-        <div class="feature-item">
-          <h3>Create a New Note from the Right-Click Menu</h3>
-          <p>
-            Right-click anywhere on the page, and you'll see the option to
-            <strong>Create Sticky Note</strong> in the context menu.
-          </p>
-          <p>Select it to instantly create a new note on that page.</p>
+        <div class="pin-instruction">
+            <h2>1. Pin the Extension</h2>
+            <p>
+                For easy access, click the puzzle icon <i class="fi fi-rr-puzzle-piece"></i> in your toolbar and pin <strong>Sticky Notes</strong>.
+            </p>
         </div>
 
-        <!-- Additional Features if any -->
-        <div class="feature-item">
-          <h3>Auto Save and View Notes</h3>
-          <p>
-            Sticky notes will be auto saved upon typing and
-            available for you to view at any time and anywhere by clicking on the extension icon on browser's toolbar (you can also go directly to the sticky notes by clicking the GO TO NOTE button).
-          </p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fi fi-rr-keyboard"></i>
+                </div>
+                <h3>Create with a Shortcut</h3>
+                <p>Press <strong>Ctrl + Q</strong> (or <strong>⌘ + Q</strong>) on any page.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fi fi-rr-mouse"></i>
+                </div>
+                <h3>Create with Right-Click</h3>
+                <p>Right-click on a page and select "Create Sticky Note".</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fi fi-rr-apps"></i>
+                </div>
+                <h3>View All Notes</h3>
+                <p>Click the extension icon to see all your notes in one place.</p>
+            </div>
         </div>
-      </section>
+
+        <div class="footer">
+            <p>Happy note-taking! 🎉</p>
+        </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript for confetti -->
     <script src="confetti.js"></script>
     <script src="pages.js"></script>
-  </body>
+</body>
 </html>

@@ -161,6 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="note-card-toolbar"></div>
                 </div>
+                <div class="view-more-container">
+                    <button class="view-more-btn">
+                        <i class="fi fi-rr-angle-small-down"></i>
+                        <span>View More</span>
+                    </button>
+                </div>
                 <div class="note-card-footer">
                     <button class="note-action-btn edit-btn" title="Edit Note">
                         <i class="fi fi-rr-pencil"></i>
@@ -265,6 +271,17 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             notesGrid.appendChild(card);
+
+            // Check for overflow AFTER appending to the DOM
+            if (noteContent.scrollHeight > noteContent.clientHeight) {
+                card.classList.add('is-long');
+                const viewMoreBtn = card.querySelector('.view-more-btn');
+                if (viewMoreBtn) {
+                    viewMoreBtn.addEventListener('click', () => {
+                        card.classList.add('is-expanded');
+                    });
+                }
+            }
         });
     }
 

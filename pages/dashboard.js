@@ -68,6 +68,40 @@ document.addEventListener("DOMContentLoaded", () => {
         renderNotes(allNotesData);
     }
 
+    function showDashboardDeleteConfirmation(noteCard, onConfirm) {
+        // Prevent multiple modals on the same item
+        if (noteCard.querySelector('.dashboard-delete-overlay')) {
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'dashboard-delete-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'dashboard-delete-modal';
+        modal.innerHTML = `
+            <p>Delete this note?</p>
+            <div class="dashboard-modal-buttons">
+                <button class="confirm-delete">Delete</button>
+                <button class="cancel-delete">Cancel</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        noteCard.appendChild(overlay);
+
+        modal.querySelector('.confirm-delete').addEventListener('click', (e) => {
+            e.stopPropagation();
+            onConfirm();
+            overlay.remove();
+        });
+
+        modal.querySelector('.cancel-delete').addEventListener('click', (e) => {
+            e.stopPropagation();
+            overlay.remove();
+        });
+    }
+
     function renderNotes(notesData) {
         notesGrid.innerHTML = '';
         const searchTerm = searchInput.value.toLowerCase();
@@ -121,8 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="note-card-header">
                     <h3 class="note-card-title">${note.title || 'Note'}</h3>
                 </div>
-                <div class="note-card-content">
-                    ${note.content}
+                <div class="note-card-content-wrapper">
+                    <div class="note-card-content">
+                        ${note.content}
+                    </div>
+                    <div class="note-card-toolbar"></div>
                 </div>
                 <div class="note-card-footer">
                     <button class="note-action-btn edit-btn" title="Edit Note">
@@ -148,6 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Get references to elements
             const noteContent = card.querySelector('.note-card-content');
+            const noteToolbar = card.querySelector('.note-card-toolbar');
             const editBtn = card.querySelector('.edit-btn');
             const visitBtn = card.querySelector('.visit-btn');
             const copyBtn = card.querySelector('.copy-btn');
@@ -157,11 +195,34 @@ document.addEventListener("DOMContentLoaded", () => {
             
             let originalContent = note.content;
 
+            // --- Create and append toolbar buttons ---
+            const formattingButtons = [
+                { command: 'bold', icon: '../assets/bold.svg', title: 'Bold' },
+                { command: 'italic', icon: '../assets/italic.svg', title: 'Italic' },
+                { command: 'underline', icon: '../assets/underline.svg', title: 'Underline' },
+                { command: 'strikeThrough', icon: '../assets/strikethrough.svg', title: 'Strikethrough' }
+            ];
+
+            formattingButtons.forEach(btn => {
+                const button = document.createElement("button");
+                button.className = "toolbar-btn";
+                button.title = btn.title;
+                button.innerHTML = `<img src="${btn.icon}" alt="${btn.title}">`;
+                
+                button.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent contenteditable from losing focus
+                    document.execCommand(btn.command, false, null);
+                    noteContent.focus(); // Re-focus the content area
+                });
+                noteToolbar.appendChild(button);
+            });
+
             // Edit button logic
             editBtn.addEventListener('click', () => {
                 noteContent.contentEditable = true;
                 noteContent.focus();
                 card.classList.add('editing');
+                noteToolbar.style.display = 'flex';
             });
 
             // Save button logic
@@ -171,6 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 noteContent.contentEditable = false;
                 card.classList.remove('editing');
+                noteToolbar.style.display = 'none';
                 originalContent = newContent; // Update original content for subsequent edits
             });
 
@@ -179,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 noteContent.innerHTML = originalContent;
                 noteContent.contentEditable = false;
                 card.classList.remove('editing');
+                noteToolbar.style.display = 'none';
             });
 
             // Add event listeners for other buttons
@@ -196,9 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             deleteBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to delete this note?')) {
+                showDashboardDeleteConfirmation(card, () => {
                     deleteNote(note.url, note);
-                }
+                });
             });
 
             notesGrid.appendChild(card);

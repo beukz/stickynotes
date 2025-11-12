@@ -175,6 +175,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative; /* Needed for overlay positioning */
 }
 
 .note-card:hover {
@@ -196,13 +197,20 @@ body {
     margin-right: 0.5rem;
 }
 
+.note-card-content-wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .note-card-content {
     font-size: 0.9rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    flex-grow: 1;
     overflow: hidden;
     word-break: break-word;
+    flex-grow: 1;
 }
 
 .note-card-footer {
@@ -251,6 +259,10 @@ body {
 }
 
 /* --- Editing Styles --- */
+.note-card.editing .note-card-content {
+    padding-bottom: 40px; /* Make space for the toolbar */
+}
+
 .note-card-content[contenteditable="true"] {
     outline: 2px solid var(--accent-color);
     border-radius: 4px;
@@ -260,6 +272,41 @@ body {
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     max-height: 120px;
     overflow-y: auto;
+}
+
+.note-card-toolbar {
+    display: none; /* Hidden by default */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f3f4f6; /* Light gray, fits the theme */
+    border-top: 1px solid var(--border-color);
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 0 0 6px 6px; /* Match card rounding */
+}
+
+.toolbar-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    padding: 4px;
+    margin: 0 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-btn:hover {
+    background-color: #e5e7eb; /* Slightly darker gray on hover */
+    border-color: #d1d5db;
+}
+
+.toolbar-btn img {
+    width: 16px;
+    height: 16px;
 }
 
 .note-action-btn.edit-btn:hover {
@@ -293,4 +340,59 @@ body {
 .note-card.editing .save-btn,
 .note-card.editing .cancel-btn {
     display: inline-flex;
+}
+
+/* --- Custom Delete Confirmation --- */
+.dashboard-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(31, 41, 55, 0.75); /* text-primary with alpha */
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 8px; /* Match note-card's radius */
+}
+
+.dashboard-delete-modal p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.dashboard-modal-buttons button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    margin: 0 0.25rem;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.dashboard-modal-buttons .confirm-delete {
+    background-color: #ef4444; /* red-500 */
+    color: white;
+}
+
+.dashboard-modal-buttons .confirm-delete:hover {
+    background-color: #dc2626; /* red-600 */
+}
+
+.dashboard-modal-buttons .cancel-delete {
+    background-color: #6b7280; /* gray-500 */
+    color: white;
+}
+
+.dashboard-modal-buttons .cancel-delete:hover {
+    background-color: #4b5563; /* gray-600 */
 }

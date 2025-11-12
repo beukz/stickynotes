@@ -117,17 +117,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 continue;
             }
 
-            notes.forEach(note => {
-                // Filter by search term
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = note.content;
-                const noteText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
-                const noteTitle = (note.title || '').toLowerCase();
+            let notesForThisUrl = [];
+            if (searchTerm) {
+                const domainMatches = mainDomain.toLowerCase().includes(searchTerm);
 
-                if (searchTerm && !noteText.includes(searchTerm) && !noteTitle.includes(searchTerm)) {
-                    return;
+                if (domainMatches) {
+                    notesForThisUrl = notes; // Add all notes if domain matches
+                } else {
+                    // Otherwise, filter notes by content and title
+                    notesForThisUrl = notes.filter(note => {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = note.content;
+                        const noteText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+                        const noteTitle = (note.title || '').toLowerCase();
+                        return noteText.includes(searchTerm) || noteTitle.includes(searchTerm);
+                    });
                 }
+            } else {
+                // No search term, so include all notes for this URL
+                notesForThisUrl = notes;
+            }
 
+            // Add the URL property to each note and push to the final list
+            notesForThisUrl.forEach(note => {
                 notesToShow.push({ url, ...note });
             });
         }

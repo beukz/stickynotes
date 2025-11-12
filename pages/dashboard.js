@@ -190,6 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             // Get references to elements
+            const noteTitle = card.querySelector('.note-card-title');
             const noteContent = card.querySelector('.note-card-content');
             const noteToolbar = card.querySelector('.note-card-toolbar');
             const editBtn = card.querySelector('.edit-btn');
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cancelBtn = card.querySelector('.cancel-btn');
             
             let originalContent = note.content;
+            let originalTitle = note.title || 'Note';
 
             // --- Create and append toolbar buttons ---
             const formattingButtons = [
@@ -225,6 +227,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Edit button logic
             editBtn.addEventListener('click', () => {
+                noteTitle.contentEditable = true;
+                noteTitle.classList.add('editing');
                 noteContent.contentEditable = true;
                 noteContent.focus();
                 card.classList.add('editing');
@@ -234,16 +238,23 @@ document.addEventListener("DOMContentLoaded", () => {
             // Save button logic
             saveBtn.addEventListener('click', () => {
                 const newContent = noteContent.innerHTML;
-                updateNoteContent(note.url, note, newContent);
+                const newTitle = noteTitle.textContent.trim() || 'Note';
+                updateNote(note.url, note, newContent, newTitle);
                 
+                noteTitle.contentEditable = false;
+                noteTitle.classList.remove('editing');
                 noteContent.contentEditable = false;
                 card.classList.remove('editing');
                 noteToolbar.style.display = 'none';
-                originalContent = newContent; // Update original content for subsequent edits
+                originalContent = newContent;
+                originalTitle = newTitle;
             });
 
             // Cancel button logic
             cancelBtn.addEventListener('click', () => {
+                noteTitle.textContent = originalTitle;
+                noteTitle.contentEditable = false;
+                noteTitle.classList.remove('editing');
                 noteContent.innerHTML = originalContent;
                 noteContent.contentEditable = false;
                 card.classList.remove('editing');
@@ -285,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function updateNoteContent(url, originalNote, newContent) {
+    function updateNote(url, originalNote, newContent, newTitle) {
         if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
             console.warn('Storage API not available. Cannot update note.');
             return;
@@ -307,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (noteIndex > -1) {
                 notes[noteIndex].content = newContent;
+                notes[noteIndex].title = newTitle;
                 chrome.storage.sync.set({ [url]: notes }, () => {
                     if (chrome.runtime.lastError) {
                         console.error('Error saving updated note:', chrome.runtime.lastError);

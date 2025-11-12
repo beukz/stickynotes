@@ -305,22 +305,55 @@
             contentArea.className = "sticky-content";
             contentArea.innerHTML = content || "Take a note.. ";
 
+            // --- Formatting Toolbar ---
+            const noteToolbar = document.createElement("div");
+            noteToolbar.className = "sticky-note-toolbar";
+
+            const formattingButtons = [
+                { command: 'bold', icon: 'assets/bold.svg', title: 'Bold' },
+                { command: 'italic', icon: 'assets/italic.svg', title: 'Italic' },
+                { command: 'underline', icon: 'assets/underline.svg', title: 'Underline' },
+                { command: 'strikeThrough', icon: 'assets/strikethrough.svg', title: 'Strikethrough' }
+            ];
+
+            formattingButtons.forEach(btn => {
+                const button = document.createElement("button");
+                button.className = "toolbar-btn";
+                button.title = btn.title;
+                button.innerHTML = `<img src="${chrome.runtime.getURL(btn.icon)}" alt="${btn.title}">`;
+                
+                button.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent contenteditable from losing focus
+                    document.execCommand(btn.command, false, null);
+                });
+                noteToolbar.appendChild(button);
+            });
+
             contentArea.addEventListener("focus", () => {
                 if (contentArea.innerHTML === "Take a note.. ") {
                     contentArea.innerHTML = "";
                 }
+                noteToolbar.style.display = "flex";
             });
 
             contentArea.addEventListener("blur", () => {
                 if (contentArea.innerHTML.trim() === "") {
                     contentArea.innerHTML = "Take a note.. ";
                 }
+                setTimeout(() => {
+                    if (!noteToolbar.contains(document.activeElement)) {
+                        noteToolbar.style.display = "none";
+                    }
+                }, 200);
             });
 
             contentArea.addEventListener("input", saveNotes);
 
             note.appendChild(noteHeader);
             note.appendChild(contentArea);
+            note.appendChild(noteToolbar);
+
+            noteToolbar.style.display = "none";
 
             if (collapsed) {
                 note.classList.add("collapsed");

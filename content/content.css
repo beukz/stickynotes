@@ -72,6 +72,7 @@ body {}
     position: absolute;
     /* Absolute positioning for drag */
     color: #000;
+    border-radius: 8px;
 }
 
 
@@ -93,6 +94,7 @@ body {}
     -moz-user-select: none;
     user-select: none;
     padding: 0 5px 0 10px;
+    border-radius: 7px 7px 0 0;
 }
 
 .sticky-note-menu-options {
@@ -216,6 +218,8 @@ body {}
     z-index: 0;
     line-height: 1.5;
     font-family: var(--cFont);
+    border-radius: 0 0 7px 7px;
+    padding-bottom: 40px;
     /* scrollbar-width: thin;
   scrollbar-color: #7d7d7d #f2f2f2;  */
 }
@@ -293,6 +297,7 @@ body {}
     padding: 20px;
     box-sizing: border-box;
     font-family: var(--defaultFont);
+    border-radius: 7px;
 }
 
 .sticky-note-delete-modal p {
@@ -420,4 +425,42 @@ body {}
 
 .color-swatch:hover {
     transform: scale(1.1);
+}
+
+/* Formatting Toolbar */
+.sticky-note-toolbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2e2e2e;
+    border-top: 1px solid #444;
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    z-index: 1;
+    border-radius: 0 0 7px 7px;
+}
+
+.toolbar-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    padding: 4px;
+    margin: 0 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-btn:hover {
+    background-color: #4a4a4a;
+    border-color: #666;
+}
+
+.toolbar-btn img {
+    width: 16px;
+    height: 16px;
+    filter: invert(1);
 }

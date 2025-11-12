@@ -31,7 +31,13 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pages/installed.html"],
+      "resources": [
+        "pages/installed.html",
+        "assets/bold.svg",
+        "assets/italic.svg",
+        "assets/underline.svg",
+        "assets/strikethrough.svg"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

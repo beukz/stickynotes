@@ -1,8 +1,25 @@
+import '/canx-sdk.v1.js';
+
 document.addEventListener('DOMContentLoaded', () => {
+
   const notesContainer = document.getElementById('notes-container');
   const searchInput = document.getElementById('search-input');
   let allNotesData = {}; // To cache all notes from storage
   let collapsedDomainsState = []; // To cache the collapsed state
+
+  const canxContainer = document.getElementById('canx-ad-banner-slot');
+
+  // Initialize the ad network (assuming CANX is globally available after import)
+  // You'll need to replace 'YOUR_API_KEY' with your actual CANX API key.
+  const adNetwork = new CANX({ apiKey: '5c9a339e12824cace3a3b3fb3b1a4e5f', debug: true });
+
+  // Render the ad
+  if (canxContainer) {
+    adNetwork.renderAd(canxContainer, {
+      format: 'BANNER',
+      placement: 'popup_main' // optional analytics tag
+    });
+  }
 
   // Mock data for development when chrome.storage is not available
   const mockNotesData = {
@@ -23,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       {
         content:
-          'Another note on Google. You can have multiple notes per page. <b>HTML content</b> like bold text is also supported.',
+          'Another note on Google. You can have multiple notes per page. <b style="font-weight: bold;">HTML content</b> like bold text is also supported.',
         top: '300px',
         left: '250px',
       },
@@ -260,8 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const visitNoteButton = document.createElement('button');
           visitNoteButton.className = 'visit-note-button note-op-btn';
-          visitNoteButton.innerHTML =
-            '<i class="fi fi-rr-arrow-up-right-from-square"></i>';
+          visitNoteButton.innerHTML = '<i class="fi fi-rr-arrow-up-right-from-square"></i>';
           visitNoteButton.title = 'Go to Note';
           visitNoteButton.addEventListener('click', () => {
             chrome.tabs.create({
@@ -274,8 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typeof chrome.tabs === 'undefined'
           ) {
             visitNoteButton.disabled = true;
-            visitNoteButton.title =
-              'Navigation is disabled in development mode.';
+            visitNoteButton.title = 'Navigation is disabled in development mode.';
           }
 
           const deleteButton = document.createElement('button');
@@ -433,7 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
         allNotesData = notesData;
         renderNotes(allNotesData, collapsedDomainsState);
       });
-    } else {
+    }
+    else {
       // Fallback to mock data for local development/testing
       console.warn(
         'chrome.storage.sync API not available. Loading mock data for development.'
@@ -470,7 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const noteTitle = note.title || '';
         return (
           noteText.toLowerCase().includes(term) ||
-          noteTitle.toLowerCase().includes(term)
+          noteTitle.toLowerCase().includes(term) ||
+          domainMatches // Include notes if the domain itself matches
         );
       });
 
@@ -607,8 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Error saving updated notes:',
                 chrome.runtime.lastError
               );
-            } else {
-              loadNotes(); // Refresh the display
             }
           }
         );

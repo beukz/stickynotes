@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sticky Notes",
   "description": "Add sticky notes to any website, save them, and view them anytime!",
-  "version": "0.7",
+  "version": "0.8",
   "icons": {
     "128": "assets/pin.png"
   },
@@ -10,7 +10,8 @@
     "storage",
     "activeTab",
     "scripting",
-    "contextMenus"
+    "contextMenus",
+    "identity"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -33,10 +34,14 @@
     {
       "resources": [
         "pages/installed.html",
+        "pages/migrate.html",
+        "pages/account.html",
+        "pages/auth-callback.html",
         "assets/bold.svg",
         "assets/italic.svg",
         "assets/underline.svg",
-        "assets/strikethrough.svg"
+        "assets/strikethrough.svg",
+        "canx-sdk.v1.js"
       ],
       "matches": ["<all_urls>"]
     }

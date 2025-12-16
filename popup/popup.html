@@ -2,141 +2,124 @@
 <html>
 
 <head>
-    <meta charset="UTF-8" />
-    <title>PartnerFlow: Sticky Notes</title>
-    <link rel="stylesheet" href="popup.css" />
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+  <meta charset="UTF-8" />
+  <title>PartnerFlow: Sticky Notes</title>
+  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet"
+    href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
 </head>
 
 <body>
-    <div class="sticky-box">
-        <div class="ap-sn-title-box">
-            <img src="../assets/pin.png" alt="Sticky Notes Logo" class="ap-sn-logo" />
-            <div class="header-right-controls">
-                <div class="search-container">
-                    <i class="fi fi-rr-search"></i>
-                    <input type="text" id="search-input" placeholder="Search notes..." />
-                </div>
-                <a href="../pages/dashboard.html" target="_blank" class="dashboard-link" title="Open Dashboard">
-                    <i class="fi fi-rr-dashboard"></i>
-                </a>
-            </div>
+  <div class="sticky-box">
+    <div class="ap-sn-title-box">
+      <img src="../assets/pin.png" alt="Sticky Notes Logo" class="ap-sn-logo" />
+      <div class="header-right-controls">
+        <div class="search-container">
+          <i class="fi fi-rr-search"></i>
+          <input type="text" id="search-input" placeholder="Search notes..." />
         </div>
+        <a href="../pages/dashboard.html" target="_blank" class="dashboard-link" title="Open Dashboard">
+          <i class="fi fi-rr-dashboard"></i>
+        </a>
+      </div>
+    </div>
 
-        <div id="notes-container">
-            <!-- Content will be dynamically loaded by popup.js -->
-        </div>
+    <div id="notes-container">
+      <!-- Content will be dynamically loaded by popup.js -->
+    </div>
 
-        <!-- ap sn footer -->
-        <div class="ap-sn-footer-box">
-            <div class="ap-sn-version-product">
-                <p class="app-version">v0.6</p>
-                <span class="ap-sn-divider"></span>
-                <p class="app-from">
-                    A product from
-                    <a href="https://partnerflow.co.za" target="_blank">PartnerFlow</a
-            >
+    <!-- ap sn footer -->
+    <div class="ap-sn-footer-box">
+
+      <!-- banner ad slot -->
+      <div id="canx-ad-banner-slot" style="width: 320px; height: 50px;"></div>
+
+      <div class="footer-bottom-row">
+        <div class="ap-sn-version-product">
+          <p class="app-version">v0.8</p>
+          <span class="ap-sn-divider"></span>
+          <p class="app-from">
+            A product from
+            <a href="https://partnerflow.co.za" target="_blank">PartnerFlow</a>
           </p>
         </div>
 
-        <div class="div"></div>
-
         <div class="ap-sn-noti-box">
           <button class="ap-sn-noti-btn">
-            <i class="fi fi-rr-bell-notification-social-media"></i>
-          </button>
+              <i class="fi fi-rr-bell-notification-social-media"></i>
+            </button>
         </div>
       </div>
+    </div>
+    <!-- sticky note ends -->
+  </div>
 
-      <!-- sticky note starts -->
-      <!-- <div class="sticky-note">
+  <!-- test button -->
+  <div class="ap-note-btn">
+    <button id="appedle-new-note-btn">New Note (Ctrl + Q)</button>
+  </div>
 
-        <div class="note-header">
-          <div class="empty-sticky-div"></div>
-
-          <div class="sticky-close-menu-box">
-            <button
-              class="delete-note-btn ap-sticky-options"
-              title="Delete note"
-            >
-            <img src="https://ucktpuitdnqcqtg2.public.blob.vercel-storage.com/bin-icon-EWmPyvXJ3uLxwOU0l7K42iblggAFb1.svg" alt="">
-            </button>
-          </div>
-        </div>
-
-        <div class="sticky-content" contenteditable="true">
-          What Changed:
-Head tags preserved: The cleanPastedContent function now keeps the <h1>, <h2>, <h3>, etc. tags intact. This will allow headings to be preserved when pasting text.
-Inline styles removed: The code still removes any inline styles such as font-size or color to maintain a consistent look for the sticky note.
-All other formatting intact: Lists, bold, italics, links, and other basic HTML structures are also retained.
-Key Features:
-Retained head tags: <h1>, <h2>, etc., will now appear in the sticky notes as you pasted them.
-Layout consistency: Lists, links, bold text, and other structures maintain their layout when pasted into the sticky note.
-Draggable sticky notes: The sticky notes remain draggable and correctly save their position when moved around.
-Let me know if this works as expected or if further adjustments are needed!
-        </div>
-
-      </div> -->
-      <!-- sticky note ends -->
+  <!-- message box | from HQ -->
+  <div class="msg-box">
+    <!-- error report box -->
+    <div class="ap-sn-error-report-box">
+      <p>Did you encounter an error? <a href="#">report it here</a></p>
     </div>
 
-    <!-- test button -->
-    <div class="ap-note-btn">
-      <button id="appedle-new-note-btn">New Note (Ctrl + Q)</button>
-    </div>
+    <div class="ap-sn-title-box">
+      <h1 class="ap-sn-title">Notifications from HQ</h1>
 
-    <!-- message box | from HQ -->
-    <div class="msg-box">
-      <!-- error report box -->
-      <div class="ap-sn-error-report-box">
-        <p>Did you encounter an error? <a href="#">report it here</a></p>
-            </div>
-
-            <div class="ap-sn-title-box">
-                <h1 class="ap-sn-title">Notifications from HQ</h1>
-
-                <button class="ap-sn-msg-closeBtn">
+      <button class="ap-sn-msg-closeBtn">
           <i class="fi fi-rr-cross-small"></i>
         </button>
-            </div>
+    </div>
 
-            <!-- msg start -->
-            <div class="ap-sn-msg">
-                <div class="ap-msg">
-                    <h3 class="ap-msg-title">
-                        New Update for the Sticky Notes Extension
-                    </h3>
-                    <p class="ap-msg-text">
-                        The latest update introduces dynamic URL support, ensuring sticky notes update automatically on single-page applications. Dragging functionality has been improved to keep notes within the viewport, and auto-save has been optimized for reliable content
-                        editing. Update now to enjoy these enhancements.
-                    </p>
-                </div>
+    <!-- msg start -->
+    <div class="ap-sn-msg">
+      <div class="ap-msg">
+        <h3 class="ap-msg-title">
+          New Update for the Sticky Notes Extension
+        </h3>
+        <p class="ap-msg-text">
+          The latest update introduces dynamic URL support, ensuring sticky notes update automatically on single-page
+          applications. Dragging functionality has been improved to keep notes within the viewport, and auto-save has
+          been optimized for reliable content
+          editing. Update now to enjoy these enhancements.
+        </p>
+      </div>
 
-                <div class="ap-msg">
-                    <h3 class="ap-msg-title">Sticky Notes Extension Patch Released</h3>
-                    <p class="ap-msg-text">
-                        An issue causing notes to occasionally not save properly has been resolved. This update ensures stable performance and reliable note-saving. Please update to avoid errors.
-                    </p>
-                </div>
+      <div class="ap-msg">
+        <h3 class="ap-msg-title">Sticky Notes Extension Patch Released</h3>
+        <p class="ap-msg-text">
+          An issue causing notes to occasionally not save properly has been resolved. This update ensures stable
+          performance and reliable note-saving. Please update to avoid errors.
+        </p>
+      </div>
 
-                <div class="ap-msg">
-                    <h3 class="ap-msg-title">Sticky Notes Extension Updated</h3>
-                    <p class="ap-msg-text">
-                        This update improves performance and stability, introduces smoother drag-and-drop functionality, and enhances note-saving reliability. Upgrade to experience these improvements.
-                    </p>
-                </div>
+      <div class="ap-msg">
+        <h3 class="ap-msg-title">Sticky Notes Extension Updated</h3>
+        <p class="ap-msg-text">
+          This update improves performance and stability, introduces smoother drag-and-drop functionality, and enhances
+          note-saving reliability. Upgrade to experience these improvements.
+        </p>
+      </div>
 
-                <div class="ap-msg">
-                    <h3 class="ap-msg-title">New Features Added to Sticky Notes 🙌</h3>
-                    <p class="ap-msg-text">
-                        The latest update includes improved note management, faster loading times, and better compatibility with dynamic websites. Make sure to update to the newest version.
-                    </p>
-                </div>
-            </div>
-            <!-- msg ends -->
-        </div>
+      <div class="ap-msg">
+        <h3 class="ap-msg-title">New Features Added to Sticky Notes 🙌</h3>
+        <p class="ap-msg-text">
+          The latest update includes improved note management, faster loading times, and better compatibility with
+          dynamic websites. Make sure to update to the newest version.
+        </p>
+      </div>
+    </div>
+    <!-- msg ends -->
+  </div>
 
-        <script src="popup.js"></script>
+  <!-- Load popup logic as a module -->
+  <script type="module" src="popup.js"></script>
+
+  <!-- Ad script stays global (non-module) -->
+  <!-- <script src="/canx-sdk.v1.js" defer></script> -->
 </body>
 
 </html>

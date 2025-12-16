@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signing you in…</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f7f7f7; margin: 0; padding: 24px; color: #111; }
+    .card { max-width: 720px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    h1 { font-size: 16px; margin: 0 0 8px; }
+    p { margin: 8px 0; color: #374151; line-height: 1.5; }
+    .status { margin-top: 14px; padding: 12px; border-radius: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; white-space: pre-wrap; }
+    .ok { background: #ecfdf5; border-color: #a7f3d0; }
+    .err { background: #fef2f2; border-color: #fecaca; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Completing sign-in…</h1>
+    <p>You can close this tab once sign-in completes.</p>
+    <div id="status" class="status">Waiting for OAuth response…</div>
+  </div>
+
+  <script type="module" src="auth-callback.js"></script>
+</body>
+</html>

@@ -15,11 +15,13 @@
     --bg-color: #f9fafb;
     --sidebar-bg: #ffffff;
     --card-bg: #ffffff;
-    --text-primary: #1f2937;
+    --text-primary: #111827;
     --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
-    --accent-color: #ffd165;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --border-color: #f0f0f0;
+    --accent-color: #007aff;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 body {
@@ -27,6 +29,8 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .dashboard-container {
@@ -41,23 +45,24 @@ body {
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
 }
 
 .sidebar-header {
     display: flex;
     align-items: center;
     margin-bottom: 2rem;
+    padding: 0 0.5rem;
 }
 
 .sidebar-header .logo {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     margin-right: 0.75rem;
 }
 
 .sidebar-header h2 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
 }
 
@@ -71,19 +76,19 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 0 0.5rem;
-    margin-bottom: 0.5rem;
+    padding: 0 0.75rem;
+    margin: 1.5rem 0 0.5rem 0;
 }
 
 .domain-link {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
-    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--text-primary);
     margin-bottom: 0.25rem;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
     cursor: pointer;
 }
 
@@ -92,15 +97,15 @@ body {
 }
 
 .domain-link.active {
-    background-color: var(--accent-color);
-    color: var(--text-primary);
+    background-color: #f0f0f0;
     font-weight: 500;
 }
 
-.domain-link .favicon {
+.domain-link .favicon, .domain-link i {
     width: 16px;
     height: 16px;
-    margin-right: 0.75rem;
+    margin-right: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .domain-link span {
@@ -122,8 +127,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
-    background-color: var(--sidebar-bg);
+    padding: 1.25rem 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -132,21 +139,21 @@ body {
 
 .search-container {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .search-container .fi-rr-search {
     position: absolute;
     left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--text-secondary);
     font-size: 1rem;
 }
 
 #search-input {
     width: 320px;
-    padding: 0.6rem 1rem 0.6rem 2.5rem;
-    border: 1px solid var(--border-color);
+    padding: 0.6rem 1rem 0.6rem 2.75rem;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     font-size: 0.9rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -155,38 +162,37 @@ body {
 #search-input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(255, 209, 101, 0.4);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
 }
 
 .notes-grid {
     padding: 2rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
     align-content: flex-start;
 }
 
 .note-card {
     background-color: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    border-left: 5px solid var(--accent-color);
-    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative; /* Needed for overlay positioning */
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    border-top: 4px solid;
 }
 
 .note-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: #e0e0e0;
 }
 
 .note-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     margin-bottom: 0.75rem;
 }
 
@@ -194,14 +200,6 @@ body {
     font-size: 1rem;
     font-weight: 600;
     word-break: break-word;
-    margin-right: 0.5rem;
-}
-
-.note-card-content-wrapper {
-    position: relative;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
 }
 
 .note-card-content {
@@ -232,7 +230,9 @@ body {
     color: var(--text-secondary);
     padding: 0.25rem;
     margin-left: 0.5rem;
-    border-radius: 4px;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -319,46 +319,49 @@ body {
 }
 
 /* --- Editing Styles --- */
+.note-card.editing {
+    box-shadow: var(--shadow-lg), 0 0 0 4px rgba(0, 122, 255, 0.2);
+    transform: translateY(-4px);
+}
+
 .note-card.editing .note-card-content {
-    padding-bottom: 40px; /* Make space for the toolbar */
-    max-height: 1000px; /* Override max-height when editing */
+    padding-bottom: 40px;
+    max-height: 1000px;
 }
 
 .note-card.editing .note-card-title.editing {
     outline: 2px solid var(--accent-color);
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
-    margin: -0.25rem -0.5rem; /* Offset padding to maintain layout */
+    margin: -0.25rem -0.5rem;
     background-color: #fff;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .note-card.editing .note-card-content::after,
 .note-card.editing .view-more-container {
-    display: none; /* Hide view more elements when editing */
+    display: none;
 }
 
 .note-card-content[contenteditable="true"] {
     outline: 2px solid var(--accent-color);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 0.5rem;
-    margin: -0.5rem; /* Offset padding */
+    margin: -0.5rem;
     background-color: #fff;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     overflow-y: auto;
 }
 
 .note-card-toolbar {
-    display: none; /* Hidden by default */
+    display: none;
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #f3f4f6; /* Light gray, fits the theme */
+    background-color: #f3f4f6;
     border-top: 1px solid var(--border-color);
     align-items: center;
     padding: 4px 8px;
-    border-radius: 0 0 6px 6px; /* Match card rounding */
+    border-radius: 0 0 11px 11px;
 }
 
 .toolbar-btn {
@@ -374,8 +377,7 @@ body {
 }
 
 .toolbar-btn:hover {
-    background-color: #e5e7eb; /* Slightly darker gray on hover */
-    border-color: #d1d5db;
+    background-color: #e5e7eb;
 }
 
 .toolbar-btn img {
@@ -383,25 +385,8 @@ body {
     height: 16px;
 }
 
-.note-action-btn.edit-btn:hover {
-    background-color: #e0f2fe; /* light blue */
-    color: #0284c7;
-}
-
-.note-action-btn.save-btn {
+.note-action-btn.save-btn, .note-action-btn.cancel-btn {
     display: none;
-}
-.note-action-btn.save-btn:hover {
-    background-color: #dcfce7; /* light green */
-    color: #16a34a;
-}
-
-.note-action-btn.cancel-btn {
-    display: none;
-}
-.note-action-btn.cancel-btn:hover {
-    background-color: #fee2e2; /* light red */
-    color: #dc2626;
 }
 
 .note-card.editing .visit-btn,
@@ -423,7 +408,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(31, 41, 55, 0.75); /* text-primary with alpha */
+    background-color: rgba(31, 41, 55, 0.75);
     z-index: 20;
     display: flex;
     flex-direction: column;
@@ -432,8 +417,7 @@ body {
     color: white;
     text-align: center;
     padding: 1rem;
-    box-sizing: border-box;
-    border-radius: 8px; /* Match note-card's radius */
+    border-radius: 11px;
 }
 
 .dashboard-delete-modal p {
@@ -454,19 +438,19 @@ body {
 }
 
 .dashboard-modal-buttons .confirm-delete {
-    background-color: #ef4444; /* red-500 */
+    background-color: #ef4444;
     color: white;
 }
 
 .dashboard-modal-buttons .confirm-delete:hover {
-    background-color: #dc2626; /* red-600 */
+    background-color: #dc2626;
 }
 
 .dashboard-modal-buttons .cancel-delete {
-    background-color: #6b7280; /* gray-500 */
+    background-color: #6b7280;
     color: white;
 }
 
 .dashboard-modal-buttons .cancel-delete:hover {
-    background-color: #4b5563; /* gray-600 */
+    background-color: #4b5563;
 }

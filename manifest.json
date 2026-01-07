@@ -23,6 +23,15 @@
     "default_popup": "popup/popup.html",
     "default_icon": "assets/pin.png"
   },
+  "commands": {
+    "open-notes-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+D",
+        "mac": "Alt+Shift+D"
+      },
+      "description": "Open the My Notes page"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -37,6 +46,7 @@
         "pages/migrate.html",
         "pages/account.html",
         "pages/auth-callback.html",
+        "pages/notes.html",
         "assets/bold.svg",
         "assets/italic.svg",
         "assets/underline.svg",

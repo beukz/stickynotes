@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notes</title>
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+</head>
+<body>
+    <div class="notes-container">
+        <aside class="notes-sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/pin.png" alt="Logo" class="logo">
+                <h2>My Notes</h2>
+                <button id="new-note-btn" title="New Note"><i class="fi fi-rr-plus"></i></button>
+            </div>
+            <div class="notes-list" id="notes-list">
+                <!-- List of notes will be populated here -->
+            </div>
+            <div class="sidebar-footer">
+                <a href="dashboard.html" class="dashboard-link"><i class="fi fi-rr-apps"></i> <span>Dashboard</span></a>
+            </div>
+        </aside>
+        <main class="main-editor">
+            <div id="editor-placeholder">
+                <h2>Select a note or create a new one</h2>
+                <p>Your personal space for thoughts, ideas, and plans.</p>
+            </div>
+            <div id="editor-content" class="hidden">
+                <input type="text" id="note-title-input" placeholder="Untitled">
+                <div id="note-editor" contenteditable="true" data-placeholder="Start writing..."></div>
+            </div>
+            <div id="slash-command-menu" class="hidden"></div>
+            <div id="floating-toolbar" class="hidden">
+                <button data-command="bold" title="Bold"><i class="fi fi-rr-bold"></i></button>
+                <button data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
+                <button data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
+                <button data-command="strikeThrough" title="Strikethrough"><i class="fi fi-rr-strikethrough"></i></button>
+            </div>
+        </main>
+    </div>
+    <script src="notes.js"></script>
+</body>
+</html>

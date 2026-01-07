@@ -41,6 +41,13 @@ document.addEventListener("DOMContentLoaded", () => {
         allNotesLink.addEventListener('click', () => setActiveDomain('all'));
         domainNav.appendChild(allNotesLink);
 
+        // "My Notes" link
+        const myNotesLink = document.createElement("a");
+        myNotesLink.className = "domain-link";
+        myNotesLink.href = "notes.html";
+        myNotesLink.innerHTML = `<i class="fi fi-rr-document"></i> <span>My Notes</span>`;
+        domainNav.appendChild(myNotesLink);
+
         const domainsHeader = document.createElement('h3');
         domainsHeader.textContent = 'Websites';
         domainNav.appendChild(domainsHeader);
@@ -157,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         notesToShow.forEach(note => {
             const card = document.createElement("div");
             card.className = "note-card";
-            card.style.borderColor = note.color || '#ffd165';
+            card.style.borderTopColor = note.color || '#ffd165';
 
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = note.content;

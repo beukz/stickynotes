@@ -30,3 +30,20 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.sendMessage(tab.id, { action: "createStickyNote" });
   }
 });
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "open-notes-page") {
+    const notesPageUrl = chrome.runtime.getURL("pages/notes.html");
+    // Check if a tab with this URL is already open
+    chrome.tabs.query({ url: notesPageUrl }, (tabs) => {
+      if (tabs.length > 0) {
+        // If it's open, focus it
+        chrome.tabs.update(tabs[0].id, { active: true });
+        chrome.windows.update(tabs[0].windowId, { focused: true });
+      } else {
+        // If not, create a new tab
+        chrome.tabs.create({ url: notesPageUrl });
+      }
+    });
+  }
+});

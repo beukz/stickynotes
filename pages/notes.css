@@ -1,0 +1,327 @@
+/* General Reset & Font Setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: "Inter", sans-serif;
+    src: url("../font/Inter.ttc") format("truetype");
+}
+
+:root {
+    --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg-color: #ffffff;
+    --sidebar-bg: #fafafa;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --border-color: #f0f0f0;
+    --accent-color: #007aff;
+    --hover-bg: #f0f0f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.notes-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* --- Sidebar --- */
+.notes-sidebar {
+    width: 280px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+.sidebar-header .logo {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+}
+
+.sidebar-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-right: auto;
+}
+
+#new-note-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0.25rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#new-note-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.notes-list {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.note-item {
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.note-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.note-item.active {
+    background-color: #e5e5e5;
+}
+
+.note-item .delete-note-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: none;
+    font-size: 0.9rem;
+}
+
+.note-item:hover .delete-note-btn {
+    display: block;
+}
+
+.note-item .delete-note-btn:hover {
+    background-color: #d1d5db;
+    color: var(--text-primary);
+}
+
+.no-notes {
+    padding: 0.5rem 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.dashboard-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.dashboard-link:hover {
+    background-color: var(--hover-bg);
+}
+
+.dashboard-link i {
+    margin-right: 0.75rem;
+    font-size: 1rem;
+}
+
+/* --- Main Editor --- */
+.main-editor {
+    flex: 1;
+    padding: 2rem 4rem;
+    overflow-y: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#editor-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+#editor-placeholder h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#editor-content.hidden, #editor-placeholder.hidden {
+    display: none;
+}
+
+#note-title-input {
+    width: 100%;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 700;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    outline: none;
+    color: var(--text-primary);
+}
+
+#note-title-input::placeholder {
+    color: #d1d5db;
+}
+
+#note-editor {
+    outline: none;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+#note-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #d1d5db;
+    cursor: text;
+    pointer-events: none;
+}
+
+/* --- Slash Command Menu --- */
+#slash-command-menu {
+    position: absolute;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    transition: opacity 0.1s ease;
+}
+
+#slash-command-menu.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.command-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.command-item:hover, .command-item.active {
+    background-color: var(--hover-bg);
+}
+
+.command-item-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.command-item-text h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.command-item-text p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* --- Floating Formatting Toolbar --- */
+#floating-toolbar {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 101;
+    padding: 6px;
+    display: flex;
+    gap: 4px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#floating-toolbar.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+}
+
+#floating-toolbar button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+#floating-toolbar button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#floating-toolbar button.active {
+    background-color: var(--accent-color);
+    color: white;
+}

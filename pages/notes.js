@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
             action: () => document.execCommand('formatBlock', false, '<h2>')
         },
         {
+            id: 'h3',
+            label: 'Heading 3',
+            description: 'Small section heading.',
+            icon: '<i class="fi fi-rr-h3"></i>',
+            action: () => document.execCommand('formatBlock', false, '<h3>')
+        },
+        {
             id: 'bulletList',
             label: 'Bulleted list',
             description: 'Create a simple bulleted list.',
@@ -332,6 +339,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Markdown Shortcuts ---
+    function handleMarkdownShortcuts(e) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const node = selection.anchorNode;
+        if (!node || node.nodeType !== Node.TEXT_NODE) return;
+
+        const block = getParentBlock(node);
+        if (!block) return;
+
+        const text = block.textContent;
+
+        const applyShortcut = (command, value, length) => {
+            // Select and delete the markdown text
+            const range = document.createRange();
+            range.setStart(block.firstChild, 0);
+            range.setEnd(block.firstChild, length);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('delete', false, null);
+
+            // Apply the command
+            document.execCommand(command, false, value);
+            updateNote();
+        };
+
+        // Space-triggered shortcuts
+        if (e.key === ' ') {
+            if (selection.anchorOffset !== text.length) return;
+
+            if (text.startsWith('# ')) {
+                applyShortcut('formatBlock', '<h1>', 2);
+            } else if (text.startsWith('## ')) {
+                applyShortcut('formatBlock', '<h2>', 3);
+            } else if (text.startsWith('### ')) {
+                applyShortcut('formatBlock', '<h3>', 4);
+            } else if (text.startsWith('> ')) {
+                applyShortcut('formatBlock', '<blockquote>', 2);
+            } else if (text.startsWith('* ') || text.startsWith('- ')) {
+                applyShortcut('insertUnorderedList', null, 2);
+            } else if (/^1\. $/.test(text)) {
+                applyShortcut('insertOrderedList', null, 3);
+            }
+        }
+
+        // Enter-triggered shortcuts
+        if (e.key === 'Enter') {
+            if (text === '---' || text === '***') {
+                e.preventDefault();
+
+                const hr = document.createElement('hr');
+                const newBlock = document.createElement('div');
+                newBlock.appendChild(document.createElement('br'));
+
+                const parent = block.parentNode;
+                parent.replaceChild(hr, block);
+                
+                if (hr.nextSibling) {
+                    parent.insertBefore(newBlock, hr.nextSibling);
+                } else {
+                    parent.appendChild(newBlock);
+                }
+
+                const range = document.createRange();
+                range.setStart(newBlock, 0);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                updateNote();
+            }
+        }
+    }
+
     // --- Floating Toolbar Functions ---
     function updateToolbarPosition() {
         const selection = window.getSelection();
@@ -385,8 +467,17 @@ document.addEventListener('DOMContentLoaded', () => {
     noteEditor.addEventListener('input', updateNote);
 
     noteEditor.addEventListener('keyup', (e) => {
-        if (['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
+        // Let keydown handler for slash menu do its thing if menu is active
+        if (slashMenuActive && ['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) {
+            return;
+        }
 
+        // Markdown shortcuts
+        if (e.key === ' ' || e.key === 'Enter') {
+            handleMarkdownShortcuts(e);
+        }
+
+        // Slash command activation
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
         

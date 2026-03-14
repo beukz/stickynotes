@@ -1,7 +1,7 @@
 (function() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "createStickyNote") {
-            createStickyNote();
+            createStickyNote("", null, null, false, "Note", "#ffd165", true);
             sendResponse({ status: "ok" }); // Acknowledge the message
         }
         return true; // Keep message channel open for async responses
@@ -11,6 +11,7 @@
     let notesExistInStorage = false; // Flag to track if notes should be on the page
     let noteCheckDebounce = null; // Debounce timer for DOM checks
     let listenersAdded = false; // Flag to ensure event listeners are added only once
+    let saveTimeout = null; // Timer for debouncing save operations
 
     /**
      * Initializes the sticky notes functionality on the page.
@@ -42,12 +43,12 @@
             button.textContent = "New Note (Ctrl + Q)";
             document.body.appendChild(button);
 
-            button.addEventListener("click", () => createStickyNote());
+            button.addEventListener("click", () => createStickyNote("", null, null, false, "Note", "#ffd165", true));
 
             if (!listenersAdded) {
                 document.addEventListener("keydown", (e) => {
                     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "q") {
-                        createStickyNote();
+                        createStickyNote("", null, null, false, "Note", "#ffd165", true);
                         e.preventDefault();
                     }
                 });
@@ -101,7 +102,7 @@
                 if (chrome.runtime.lastError) {
                     console.error(
                         "Error saving to chrome.storage:",
-                        chrome.runtime.lastError
+                        chrome.runtime.lastError.message
                     );
                 }
             });
@@ -110,7 +111,17 @@
         }
     }
 
-    function createStickyNote(content = "", top = null, left = null, collapsed = false, title = "Note", color = "#ffd165") {
+    /**
+     * Debounced version of saveNotes to prevent hitting storage quotas.
+     */
+    function debouncedSaveNotes() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveNotes();
+        }, 1000); // Wait 1 second after last change before saving
+    }
+
+    function createStickyNote(content = "", top = null, left = null, collapsed = false, title = "Note", color = "#ffd165", shouldSave = false) {
         try {
             const note = document.createElement("div");
             note.className = "sticky-note";
@@ -176,7 +187,7 @@
                     e.stopPropagation();
                     noteHeader.style.backgroundColor = c;
                     note.dataset.color = c;
-                    saveNotes();
+                    debouncedSaveNotes();
                     colorPalette.style.display = 'none';
                 });
                 colorPalette.appendChild(swatch);
@@ -245,7 +256,7 @@
                 const newTitle = titleInput.value.trim();
                 if (newTitle) {
                     titleDisplay.textContent = newTitle;
-                    saveNotes();
+                    debouncedSaveNotes();
                 } else {
                     titleInput.value = titleDisplay.textContent;
                 }
@@ -359,9 +370,11 @@
                 dragNote(e, note);
             });
 
-            saveNotes();
+            if (shouldSave) {
+                saveNotes();
+            }
         } catch (error) {
-            console.error("Error creating sticky note:", error);
+            console.error("Error creating sticky note:", error.message);
         }
     }
 
@@ -446,6 +459,22 @@
             return "unknown-url";
         }
     }
+
+    /**
+     * Listen for changes in storage to keep notes in sync across tabs and windows.
+     */
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace === 'sync') {
+            // Check if we are currently editing any note
+            const isEditing = document.querySelector('.note-title-input[style*="display: block"]') || 
+                             document.querySelector('.sticky-content:focus');
+            
+            if (!isEditing) {
+                console.log('Storage changed, reloading notes in content script.');
+                loadNotes();
+            }
+        }
+    });
 
     /**
      * Observes changes to the page URL (for SPAs) and DOM structure.

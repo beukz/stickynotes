@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('search-input');
   let allNotesData = {}; // To cache all notes from storage
   let collapsedDomainsState = []; // To cache the collapsed state
+  let saveTimeout = null; // Timer for debouncing save operations
 
   const canxContainer = document.getElementById('canx-ad-banner-slot');
 
@@ -583,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (chrome.runtime.lastError) {
             console.error(
               'Error saving updated note:',
-              chrome.runtime.lastError
+              chrome.runtime.lastError.message
             );
           }
         });
@@ -657,7 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (chrome.runtime.lastError) {
               console.error(
                 'Error saving updated notes:',
-                chrome.runtime.lastError
+                chrome.runtime.lastError.message
               );
             }
           }
@@ -665,6 +666,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  /**
+   * Debounced helper for storage operations. 
+   * Note: For simple edits, we might still want immediate saves,
+   * but this helps if user is clicking around rapidly.
+   */
+  function debouncedLoadNotes() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        loadNotes();
+    }, 1000);
+  }
+
+  // Listen for changes in storage to keep the popup in sync
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'sync') {
+      console.log('Storage changed, reloading popup data.');
+      loadNotes();
+    }
+  });
 
   // Load notes when the popup is opened
   loadNotes();

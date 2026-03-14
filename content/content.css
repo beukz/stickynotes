@@ -276,3 +276,52 @@
 .modal-buttons .cancel-delete:hover {
     background-color: #6b7280;
 }
+
+/* Header-only Delete Overlay (for collapsed notes) */
+.sticky-header-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background: rgba(239, 68, 68, 0.4); /* Red tint */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px 0 12px;
+    border-radius: 12px 12px 0 0;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.header-delete-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.header-del-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.header-del-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.header-del-btn img {
+    width: 14px;
+    height: 14px;
+    filter: brightness(0) invert(1); /* Make icons white */
+}

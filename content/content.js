@@ -560,23 +560,42 @@
     }
 
     function showDeleteConfirmation(noteToDelete) {
+        const isCollapsed = noteToDelete.classList.contains("collapsed");
         const overlay = document.createElement("div");
-        overlay.className = "sticky-note-delete-overlay";
 
-        const modal = document.createElement("div");
-        modal.className = "sticky-note-delete-modal";
-        modal.innerHTML = `
-            <p>Are you sure you want to delete this note?</p>
-            <div class=\"modal-buttons\">
-                <button class=\"confirm-delete\">Delete</button>
-                <button class=\"cancel-delete\">Cancel</button>
-            </div>
-        `;
+        if (isCollapsed) {
+            overlay.className = "sticky-header-delete-overlay";
+            overlay.innerHTML = `
+                <span>Delete note?</span>
+                <div class="header-delete-btns">
+                    <button class="header-del-btn confirm-del" title="Confirm Delete">
+                        <img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Confirm">
+                    </button>
+                    <button class="header-del-btn cancel-del" title="Cancel">
+                        <img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">
+                    </button>
+                </div>
+            `;
+        } else {
+            overlay.className = "sticky-note-delete-overlay";
+            const modal = document.createElement("div");
+            modal.className = "sticky-note-delete-modal";
+            modal.innerHTML = `
+                <p>Are you sure you want to delete this note?</p>
+                <div class="modal-buttons">
+                    <button class="confirm-delete">Delete</button>
+                    <button class="cancel-delete">Cancel</button>
+                </div>
+            `;
+            overlay.appendChild(modal);
+        }
 
-        overlay.appendChild(modal);
         noteToDelete.appendChild(overlay);
 
-        modal.querySelector('.confirm-delete').addEventListener('click', () => {
+        const confirmBtn = isCollapsed ? overlay.querySelector('.confirm-del') : overlay.querySelector('.confirm-delete');
+        const cancelBtn = isCollapsed ? overlay.querySelector('.cancel-del') : overlay.querySelector('.cancel-delete');
+
+        confirmBtn.addEventListener('click', () => {
             try {
                 const noteId = noteToDelete.dataset.id;
                 noteToDelete.remove();
@@ -589,7 +608,7 @@
             }
         });
 
-        modal.querySelector('.cancel-delete').addEventListener('click', () => {
+        cancelBtn.addEventListener('click', () => {
             overlay.remove();
         });
     }

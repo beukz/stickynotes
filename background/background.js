@@ -59,6 +59,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .catch(error => sendResponse({ success: false, error: error.message }));
         return true; // Keep channel open
     }
+
+    if (request.action === "getSession") {
+        getSession().then(session => sendResponse({ success: true, session }));
+        return true;
+    }
 });
 
 async function handleSupabaseAction(method, table, query, body) {

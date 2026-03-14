@@ -13,10 +13,38 @@
     let listenersAdded = false; // Flag to ensure event listeners are added only once
     let saveTimeout = null; // Timer for debouncing save operations
     let currentUser = null;
+    let contextInvalidated = false;
+
+    /**
+     * Checks if the extension context is still valid.
+     * If not, it sets a flag and returns false.
+     */
+    function isExtensionValid() {
+        if (contextInvalidated) return false;
+        try {
+            // Accessing chrome.runtime.id is a stable way to check if the background context is still there
+            if (!chrome?.runtime?.id) {
+                if (!contextInvalidated) {
+                    console.log("[Sticky Notes] Extension updated or reloaded. Please refresh the page to keep using sticky notes.");
+                }
+                contextInvalidated = true;
+                return false;
+            }
+            return true;
+        } catch (e) {
+            contextInvalidated = true;
+            return false;
+        }
+    }
 
     async function checkAuth() {
+        if (!isExtensionValid()) return null;
         return new Promise((resolve) => {
             chrome.storage.local.get("supabase_session", (data) => {
+                if (!isExtensionValid()) {
+                    resolve(null);
+                    return;
+                }
                 currentUser = data.supabase_session?.user || null;
                 resolve(currentUser);
             });
@@ -70,8 +98,10 @@
     }
 
     async function loadNotes() {
+        if (!isExtensionValid()) return;
         try {
             const user = await checkAuth();
+            if (contextInvalidated) return;
             const urlKey = getEffectiveUrl();
 
             if (user) {
@@ -82,6 +112,7 @@
                     table: "sticky_notes",
                     query: `url=eq.${encodeURIComponent(urlKey)}`
                 }, (response) => {
+                    if (!isExtensionValid()) return;
                     if (response?.success) {
                         const notes = response.data || [];
                         notesExistInStorage = notes.length > 0;
@@ -99,12 +130,16 @@
                 loadLocalNotes(urlKey);
             }
         } catch (error) {
-            console.error("Error in loadNotes:", error);
+            if (isExtensionValid()) {
+                console.error("Error in loadNotes:", error);
+            }
         }
     }
 
     function loadLocalNotes(urlKey) {
+        if (!isExtensionValid()) return;
         chrome.storage.sync.get(urlKey, (data) => {
+            if (!isExtensionValid()) return;
             if (chrome.runtime.lastError) {
                 console.error("Error loading notes from chrome.storage:", chrome.runtime.lastError);
                 return;
@@ -121,6 +156,7 @@
     }
 
     async function saveNotes() {
+        if (!isExtensionValid()) return;
         try {
             const urlKey = getEffectiveUrl();
             const notes = Array.from(document.querySelectorAll(".sticky-note")).map(
@@ -144,6 +180,7 @@
                 // For simplicity, we'll implement a 'syncNotes' action in background or handle here.)
                 // Actually, let's just save to Supabase via the proxy.
                 for (const noteData of notes) {
+                    if (!isExtensionValid()) break;
                     const method = noteData.id ? "PATCH" : "POST";
                     const query = noteData.id ? `id=eq.${noteData.id}` : "";
                     
@@ -154,6 +191,7 @@
                         query,
                         body: noteData
                     }, (response) => {
+                        if (!isExtensionValid()) return;
                         if (response?.success && method === "POST") {
                             // Update the note element with the new ID
                             const newId = response.data?.[0]?.id;
@@ -172,13 +210,16 @@
                         return rest;
                     })
                 }, () => {
+                    if (!isExtensionValid()) return;
                     if (chrome.runtime.lastError) {
                         console.error("Error saving to chrome.storage:", chrome.runtime.lastError.message);
                     }
                 });
             }
         } catch (error) {
-            console.error("Error in saveNotes:", error);
+            if (isExtensionValid()) {
+                console.error("Error in saveNotes:", error);
+            }
         }
     }
 
@@ -186,9 +227,12 @@
      * Debounced version of saveNotes to prevent hitting storage quotas.
      */
     function debouncedSaveNotes() {
+        if (!isExtensionValid()) return;
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(() => {
-            saveNotes();
+            if (isExtensionValid()) {
+                saveNotes();
+            }
         }, 1000); // Wait 1 second after last change before saving
     }
 
@@ -231,13 +275,17 @@
             const acceptTitleButton = document.createElement("button");
             acceptTitleButton.className = "accept-title-btn ap-sticky-options";
             acceptTitleButton.title = "Save title";
-            acceptTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Save">`;
+            if (isExtensionValid()) {
+                acceptTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Save">`;
+            }
             acceptTitleButton.style.display = "none";
 
             const discardTitleButton = document.createElement("button");
             discardTitleButton.className = "discard-title-btn ap-sticky-options";
             discardTitleButton.title = "Cancel";
-            discardTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">`;
+            if (isExtensionValid()) {
+                discardTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">`;
+            }
             discardTitleButton.style.display = "none";
 
             // --- Regular Note Buttons ---
@@ -246,7 +294,9 @@
             const colorButton = document.createElement("button");
             colorButton.className = "color-picker-btn ap-sticky-options";
             colorButton.title = "Change color";
-            colorButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/palette.svg')}" alt="Color">`;
+            if (isExtensionValid()) {
+                colorButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/palette.svg')}" alt="Color">`;
+            }
 
             const colorPalette = document.createElement("div");
             colorPalette.className = "color-palette";
@@ -281,12 +331,16 @@
             const minimizeButton = document.createElement("button");
             minimizeButton.className = "minimize-note-btn ap-sticky-options";
             minimizeButton.title = "Minimize note";
-            minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
+            if (isExtensionValid()) {
+                minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
+            }
 
             const deleteButton = document.createElement("button");
             deleteButton.className = "delete-note-btn ap-sticky-options";
             deleteButton.title = "Delete note";
-            deleteButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/bin-icon.svg')}" alt="Delete">`;
+            if (isExtensionValid()) {
+                deleteButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/bin-icon.svg')}" alt="Delete">`;
+            }
             deleteButton.addEventListener("click", () => {
                 showDeleteConfirmation(note);
             });
@@ -469,7 +523,11 @@
 
         modal.querySelector('.confirm-delete').addEventListener('click', () => {
             try {
+                const noteId = noteToDelete.dataset.id;
                 noteToDelete.remove();
+                if (noteId && currentUser) {
+                    deleteSupabaseNote(noteId);
+                }
                 saveNotes();
             } catch (error) {
                 console.error("Error deleting note:", error);
@@ -523,6 +581,20 @@
         }
     }
 
+    async function deleteSupabaseNote(noteId) {
+        if (!isExtensionValid()) return;
+        try {
+            await chrome.runtime.sendMessage({
+                action: "supabaseAction",
+                method: "DELETE",
+                table: "sticky_notes",
+                query: `id=eq.${noteId}`
+            });
+        } catch (e) {
+            console.error("Failed to delete note from Supabase:", e);
+        }
+    }
+
     function getEffectiveUrl() {
         try {
             return window.location.href;
@@ -536,6 +608,7 @@
      * Listen for changes in storage to keep notes in sync across tabs and windows.
      */
     chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (!isExtensionValid()) return;
         if (namespace === 'sync') {
             // Check if we are currently editing any note
             const isEditing = document.querySelector('.note-title-input[style*="display: block"]') || 
@@ -549,6 +622,7 @@
     });
 
     chrome.runtime.onMessage.addListener((request) => {
+        if (!isExtensionValid()) return;
         if (request.action === "supabaseChange") {
             const payload = request.payload;
             const urlKey = getEffectiveUrl();

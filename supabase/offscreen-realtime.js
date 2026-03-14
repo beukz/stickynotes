@@ -5,7 +5,8 @@ import { getSession } from "./auth.js";
 const REALTIME_SDK_URL = "https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.10.2/dist/main/index.js";
 
 async function initRealtime() {
-    const session = await getSession();
+    const response = await chrome.runtime.sendMessage({ action: "getSession" });
+    const session = response?.session;
     if (!session?.access_token) return;
 
     // Supabase Realtime via REST/WS

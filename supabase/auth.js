@@ -33,6 +33,10 @@ function getRedirectUrl() {
 }
 
 async function setLocal(obj) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    console.warn("chrome.storage.local not available in this context.");
+    return;
+  }
   return new Promise((resolve, reject) => {
     chrome.storage.local.set(obj, () => {
       if (chrome.runtime?.lastError) reject(chrome.runtime.lastError);
@@ -42,6 +46,10 @@ async function setLocal(obj) {
 }
 
 async function getLocal(keys) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    console.warn("chrome.storage.local not available in this context.");
+    return {};
+  }
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(keys, (data) => {
       if (chrome.runtime?.lastError) reject(chrome.runtime.lastError);
@@ -51,6 +59,10 @@ async function getLocal(keys) {
 }
 
 async function removeLocal(keys) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    console.warn("chrome.storage.local not available in this context.");
+    return;
+  }
   return new Promise((resolve, reject) => {
     chrome.storage.local.remove(keys, () => {
       if (chrome.runtime?.lastError) reject(chrome.runtime.lastError);

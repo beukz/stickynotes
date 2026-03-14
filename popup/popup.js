@@ -489,6 +489,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadSupabaseNotes(accessToken) {
     try {
       const rows = await selectRows('sticky_notes', '', accessToken);
+
+      // Fetch collapsed state from storage
+      const storageData = await new Promise((resolve) => {
+          chrome.storage.sync.get('collapsed_domains', (data) => resolve(data));
+      });
+      collapsedDomainsState = storageData.collapsed_domains || [];
+
       // Group by URL to match the expected format
       const notesData = {};
       rows.forEach(row => {
@@ -507,7 +514,6 @@ document.addEventListener('DOMContentLoaded', () => {
       renderNotes(allNotesData, collapsedDomainsState);
     } catch (e) {
       console.error('Failed to load Supabase notes:', e);
-      // Fallback or show error
     }
   }
 

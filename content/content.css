@@ -230,9 +230,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background: rgba(239, 68, 68, 0.4); /* Red tint */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
     z-index: 10;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: white;
@@ -242,39 +245,46 @@
     font-family: var(--font-primary);
 }
 
+.sticky-note-delete-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .sticky-note-delete-modal p {
-    margin-bottom: 15px;
-    font-size: 1rem;
-    font-weight: 500;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.modal-buttons button {
-    padding: 8px 15px;
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-buttons .confirm-delete, .modal-buttons .cancel-delete {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     border: none;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
     cursor: pointer;
-    font-weight: 500;
-    margin: 0 5px;
-    font-family: var(--font-primary);
-    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.modal-buttons .confirm-delete {
-    background-color: #ef4444;
-    color: white;
+.modal-buttons .confirm-delete:hover, .modal-buttons .cancel-delete:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
 }
 
-.modal-buttons .confirm-delete:hover {
-    background-color: #dc2626;
-}
-
-.modal-buttons .cancel-delete {
-    background-color: #9ca3af;
-    color: white;
-}
-
-.modal-buttons .cancel-delete:hover {
-    background-color: #6b7280;
+.modal-buttons img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
 }
 
 /* Header-only Delete Overlay (for collapsed notes) */

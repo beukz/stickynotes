@@ -581,10 +581,14 @@
             const modal = document.createElement("div");
             modal.className = "sticky-note-delete-modal";
             modal.innerHTML = `
-                <p>Are you sure you want to delete this note?</p>
+                <p>Delete this note?</p>
                 <div class="modal-buttons">
-                    <button class="confirm-delete">Delete</button>
-                    <button class="cancel-delete">Cancel</button>
+                    <button class="confirm-delete" title="Delete">
+                        <img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Delete">
+                    </button>
+                    <button class="cancel-delete" title="Cancel">
+                        <img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">
+                    </button>
                 </div>
             `;
             overlay.appendChild(modal);

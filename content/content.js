@@ -82,15 +82,19 @@
         
         shadowHost = document.createElement("div");
         shadowHost.id = "ap-sticky-notes-container";
-        // Ensure the host doesn't block interactions with the page
-        shadowHost.style.position = "fixed";
-        shadowHost.style.inset = "0";
-        shadowHost.style.zIndex = "2147483647"; // Max z-index
+        // Use absolute positioning relative to document body/root
+        // so notes stay with the content, not the viewport.
+        shadowHost.style.position = "absolute";
+        shadowHost.style.top = "0";
+        shadowHost.style.left = "0";
+        shadowHost.style.width = "100%";
+        shadowHost.style.height = "0";
         shadowHost.style.overflow = "visible";
+        shadowHost.style.zIndex = "2147483647";
         shadowHost.style.pointerEvents = "none";
+        document.body.appendChild(shadowHost);
         
         shadowRoot = shadowHost.attachShadow({ mode: "open" });
-        document.documentElement.appendChild(shadowHost);
 
         // Inject the styles
         try {
@@ -619,12 +623,13 @@
 
     function dragNote(e, note) {
         try {
-            let offsetX = e.clientX - note.offsetLeft;
-            let offsetY = e.clientY - note.offsetTop;
+            // Use pageX/pageY for document-relative positioning
+            let offsetX = e.pageX - note.offsetLeft;
+            let offsetY = e.pageY - note.offsetTop;
 
             function moveNote(e) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
+                let newX = e.pageX - offsetX;
+                let newY = e.pageY - offsetY;
 
                 newX = Math.max(0, newX);
                 newX = Math.min(newX, document.body.offsetWidth - note.offsetWidth);

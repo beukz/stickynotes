@@ -15,9 +15,14 @@
     /**
      * Initializes the sticky notes functionality on the page.
      */
+    if (document.readyState === "complete") {
+        setTimeout(init, 100);
+    } else {
+        window.addEventListener("load", () => setTimeout(init, 100));
+    }
+
     function init() {
         try {
-            injectExternalCSS();
             injectNewNoteButton();
             loadNotes();
             observePageChanges(); // Watch for URL and DOM changes
@@ -26,24 +31,6 @@
         }
     }
 
-    // Since content scripts run at `document_idle`, the DOM is generally ready.
-    // A small delay can help ensure that single-page applications have finished their initial render.
-    if (document.readyState === "complete") {
-        setTimeout(init, 100);
-    } else {
-        window.addEventListener("load", () => setTimeout(init, 100));
-    }
-
-    function injectExternalCSS() {
-        try {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css";
-            document.head.appendChild(link);
-        } catch (error) {
-            console.error("Error injecting external CSS:", error);
-        }
-    }
 
     function injectNewNoteButton() {
         try {
@@ -161,13 +148,13 @@
             const acceptTitleButton = document.createElement("button");
             acceptTitleButton.className = "accept-title-btn ap-sticky-options";
             acceptTitleButton.title = "Save title";
-            acceptTitleButton.innerHTML = `<i class=\"fi fi-rr-check\"></i>`;
+            acceptTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Save">`;
             acceptTitleButton.style.display = "none";
 
             const discardTitleButton = document.createElement("button");
             discardTitleButton.className = "discard-title-btn ap-sticky-options";
             discardTitleButton.title = "Cancel";
-            discardTitleButton.innerHTML = `<i class=\"fi fi-rr-cross-small\"></i>`;
+            discardTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">`;
             discardTitleButton.style.display = "none";
 
             // --- Regular Note Buttons ---
@@ -176,7 +163,7 @@
             const colorButton = document.createElement("button");
             colorButton.className = "color-picker-btn ap-sticky-options";
             colorButton.title = "Change color";
-            colorButton.innerHTML = `<i class=\"fi fi-rr-palette\"></i>`;
+            colorButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/palette.svg')}" alt="Color">`;
 
             const colorPalette = document.createElement("div");
             colorPalette.className = "color-palette";
@@ -211,12 +198,12 @@
             const minimizeButton = document.createElement("button");
             minimizeButton.className = "minimize-note-btn ap-sticky-options";
             minimizeButton.title = "Minimize note";
-            minimizeButton.innerHTML = `<i class=\"fi fi-rr-minus-small\"></i>`;
+            minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
 
             const deleteButton = document.createElement("button");
             deleteButton.className = "delete-note-btn ap-sticky-options";
             deleteButton.title = "Delete note";
-            deleteButton.innerHTML = `<img src=\"https://ucktpuitdnqcqtg2.public.blob.vercel-storage.com/bin-icon-EWmPyvXJ3uLxwOU0l7K42iblggAFb1.svg\" alt=\"Delete\" />`;
+            deleteButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/bin-icon.svg')}" alt="Delete">`;
             deleteButton.addEventListener("click", () => {
                 showDeleteConfirmation(note);
             });
@@ -284,7 +271,9 @@
                 note.classList.toggle("collapsed");
                 const isCollapsed = note.classList.contains("collapsed");
                 minimizeButton.title = isCollapsed ? "Expand note" : "Minimize note";
-                minimizeButton.innerHTML = isCollapsed ? `<i class=\"fi fi-rr-window-maximize\"></i>` : `<i class=\"fi fi-rr-minus-small\"></i>`;
+                minimizeButton.innerHTML = isCollapsed ? 
+                    `<img src="${chrome.runtime.getURL('assets/maximize.svg')}" alt="Expand">` : 
+                    `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
                 saveNotes();
             });
 
@@ -358,7 +347,7 @@
             if (collapsed) {
                 note.classList.add("collapsed");
                 minimizeButton.title = "Expand note";
-                minimizeButton.innerHTML = `<i class=\"fi fi-rr-window-maximize\"></i>`;
+                minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/maximize.svg')}" alt="Expand">`;
             }
 
             document.body.appendChild(note);

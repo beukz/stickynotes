@@ -27,7 +27,6 @@
 
 .sticky-note:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
 }
 
 .sticky-note .note-header {
@@ -57,7 +56,9 @@
     margin-top: 36px;
     outline: none;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     color: var(--text-primary);
     line-height: 1.6;
     padding-bottom: 40px;
@@ -206,6 +207,11 @@
 .toolbar-btn img {
     width: 16px;
     height: 16px;
+}
+
+.sticky-note.collapsed {
+    height: 36px;
+    min-height: 36px;
 }
 
 .sticky-note.collapsed .sticky-content, .sticky-note.collapsed .sticky-note-toolbar {

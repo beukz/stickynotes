@@ -51,6 +51,12 @@
         "assets/italic.svg",
         "assets/underline.svg",
         "assets/strikethrough.svg",
+        "assets/check.svg",
+        "assets/cross.svg",
+        "assets/palette.svg",
+        "assets/minus.svg",
+        "assets/maximize.svg",
+        "assets/bin-icon.svg",
         "canx-sdk.v1.js"
       ],
       "matches": ["<all_urls>"]

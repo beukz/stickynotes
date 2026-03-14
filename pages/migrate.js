@@ -1,5 +1,6 @@
 // pages/migrate.js
 import { insertRows } from "../supabase/client.js";
+import { getSession } from "../supabase/auth.js";
 
 const scanBtn = document.getElementById("scan-btn");
 const migrateBtn = document.getElementById("migrate-btn");
@@ -20,11 +21,8 @@ function isNotesKey(key) {
   return true;
 }
 
-function normalizeNote(url, note) {
+function normalizeNote(url, note, userId = null) {
   return {
-    // NOTE: This schema assumes you will create a Supabase table.
-    // Suggested table: notes
-    // Columns: id (uuid default), url (text), domain (text), title (text), content (text), color (text), top (text), left (text), created_at (timestamptz default now())
     url,
     domain: (() => {
       try {
@@ -39,7 +37,7 @@ function normalizeNote(url, note) {
     color: note.color || "#ffd165",
     top: note.top || null,
     left: note.left || null,
-    // For now we do anonymous migration. Later we can add user_id.
+    user_id: userId,
     migrated_from: "chrome.storage.sync",
     migrated_at: new Date().toISOString()
   };
@@ -102,6 +100,16 @@ async function migrate() {
     return;
   }
 
+  const session = await getSession();
+  if (!session?.user) {
+    setStatus("Please sign in with Google first to migrate your notes to the cloud.", "warn");
+    return;
+  }
+
+  const userId = session.user.id;
+  // Re-normalize with userId
+  scanned.rows = scanned.rows.map(row => ({ ...row, user_id: userId }));
+
   migrateBtn.disabled = true;
   scanBtn.disabled = true;
 
@@ -117,7 +125,7 @@ async function migrate() {
 
     for (let i = 0; i < batches.length; i++) {
       setStatus(`Uploading batch ${i + 1}/${batches.length}...`);
-      await insertRows("notes", batches[i]);
+      await insertRows("sticky_notes", batches[i], session.access_token);
     }
 
     // Save migration log locally

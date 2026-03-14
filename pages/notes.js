@@ -12,6 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let notes = [];
     let activeNoteId = null;
     let saveTimeout;
+    let currentUser = null;
+
+    async function checkAuth() {
+        return new Promise((resolve) => {
+            chrome.storage.local.get("supabase_session", (data) => {
+                currentUser = data.supabase_session?.user || null;
+                resolve(currentUser);
+            });
+        });
+    }
 
     let slashMenuActive = false;
     let activeCommandIndex = 0;
@@ -73,14 +83,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Functions ---
     async function loadNotes() {
-        const data = await chrome.storage.sync.get(STORAGE_KEY);
-        notes = data[STORAGE_KEY] || [];
-        notes.sort((a, b) => b.lastModified - a.lastModified);
-        renderNotesList();
+        const user = await checkAuth();
+        if (user) {
+            chrome.runtime.sendMessage({
+                action: "supabaseAction",
+                method: "GET",
+                table: "sticky_notes",
+                query: "select=*"
+            }, (response) => {
+                if (response?.success) {
+                    const supabaseNotes = (response.data || []).map(n => ({
+                        ...n,
+                        id: n.id, // Supabase UUID
+                        id_local: n.id_local || n.id, // Fallback for local UI logic
+                        lastModified: new Date(n.updated_at || n.created_at).getTime()
+                    }));
+                    notes = supabaseNotes;
+                    notes.sort((a, b) => b.lastModified - a.lastModified);
+                    renderNotesList();
+                }
+            });
+        } else {
+            const data = await chrome.storage.sync.get(STORAGE_KEY);
+            notes = data[STORAGE_KEY] || [];
+            notes.sort((a, b) => b.lastModified - a.lastModified);
+            renderNotesList();
+        }
     }
 
-    async function saveNotes() {
-        await chrome.storage.sync.set({ [STORAGE_KEY]: notes });
+    async function saveNotes(note) {
+        if (currentUser) {
+            const isNew = !note.id.includes('-'); // Rough check for local timestamp vs UUID
+            const method = isNew ? "POST" : "PATCH";
+            const query = isNew ? "" : `id=eq.${note.id}`;
+            
+            const body = {
+                title: note.title,
+                content: note.content,
+                color: note.color || "#ffd165",
+                url: note.url || "dashboard",
+                id_local: note.id_local || note.id
+            };
+
+            chrome.runtime.sendMessage({
+                action: "supabaseAction",
+                method,
+                table: "sticky_notes",
+                query,
+                body
+            }, (response) => {
+                if (response?.success && isNew) {
+                    const newId = response.data?.[0]?.id;
+                    if (newId) note.id = newId;
+                }
+            });
+        } else {
+            await chrome.storage.sync.set({ [STORAGE_KEY]: notes });
+        }
     }
 
     // --- UI Functions ---
@@ -180,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
             notes.sort((a, b) => b.lastModified - a.lastModified);
-            await saveNotes();
+            await saveNotes(note);
             renderNotesList(); // Re-render to reflect title changes and order
             console.log('Note saved');
         }, 500);
@@ -190,8 +249,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Are you sure you want to delete this note?')) {
             return;
         }
+
+        if (currentUser && id.includes('-')) { // UUID check
+             chrome.runtime.sendMessage({
+                action: "supabaseAction",
+                method: "DELETE",
+                table: "sticky_notes",
+                query: `id=eq.${id}`
+            });
+        }
+
         notes = notes.filter(n => n.id !== id);
-        await saveNotes();
+        if (!currentUser) await saveNotes();
         
         if (activeNoteId === id) {
             if (notes.length > 0) {

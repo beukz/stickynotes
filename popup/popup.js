@@ -1,4 +1,6 @@
 import '/canx-sdk.v1.js';
+import { getSession, startGoogleSignIn, signOut } from '../supabase/auth.js';
+import { selectRows } from '../supabase/client.js';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -7,6 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let allNotesData = {}; // To cache all notes from storage
   let collapsedDomainsState = []; // To cache the collapsed state
   let saveTimeout = null; // Timer for debouncing save operations
+  let currentUser = null;
+
+  const authContainer = document.getElementById('auth-container');
+  const googleBtn = document.getElementById('google-btn');
+  const accountSection = document.getElementById('account-section');
+  const migrationPrompt = document.getElementById('migration-prompt');
+  const settingsPanel = document.getElementById('settings-panel');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsCloseBtn = document.getElementById('settings-close-btn');
+
+  // --- Settings Panel Toggle ---
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.add('active');
+  });
+
+  settingsCloseBtn.addEventListener('click', () => {
+    settingsPanel.classList.remove('active');
+  });
 
   const canxContainer = document.getElementById('canx-ad-banner-slot');
 
@@ -463,9 +483,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
+   * Fetches notes from Supabase for the current user.
+   * @param {string} accessToken
+   */
+  async function loadSupabaseNotes(accessToken) {
+    try {
+      const rows = await selectRows('sticky_notes', '', accessToken);
+      // Group by URL to match the expected format
+      const notesData = {};
+      rows.forEach(row => {
+        if (!notesData[row.url]) notesData[row.url] = [];
+        notesData[row.url].push({
+          id: row.id,
+          title: row.title,
+          content: row.content,
+          color: row.color,
+          top: row.top,
+          left: row.left,
+          collapsed: row.collapsed
+        });
+      });
+      allNotesData = notesData;
+      renderNotes(allNotesData, collapsedDomainsState);
+    } catch (e) {
+      console.error('Failed to load Supabase notes:', e);
+      // Fallback or show error
+    }
+  }
+
+  /**
    * Loads notes from storage, or uses mock data if storage is unavailable.
    */
-  function loadNotes() {
+  async function loadNotes() {
+    const session = await getSession();
+    currentUser = session?.user || null;
+
+    if (currentUser && session?.access_token) {
+      authContainer.style.display = 'flex';
+      accountSection.style.display = 'flex';
+      googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign out';
+      
+      // Also check sync storage for migration status while logged in
+      chrome.storage.sync.get("migration_log", (data) => {
+        if (data.migration_log) {
+          if (migrationPrompt) migrationPrompt.style.display = 'none';
+          if (accountSection) accountSection.style.display = 'none';
+        }
+      });
+
+      await loadSupabaseNotes(session.access_token);
+      return;
+    }
+
+    // Show login button if not signed in
+    authContainer.style.display = 'flex';
+    accountSection.style.display = 'none';
+    
+    googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign in';
+
     // Check if we are in a real extension environment
     if (
       typeof chrome !== 'undefined' &&
@@ -479,7 +554,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         collapsedDomainsState = data.collapsed_domains || [];
         const notesData = { ...data };
-        delete notesData.collapsed_domains; // Separate notes from state
+        delete notesData.collapsed_domains;
+        delete notesData.migration_log; // Hide internal logs from UI rendering
+
+        // Handle migration prompt visibility
+        if (data.migration_log) {
+            if (migrationPrompt) migrationPrompt.style.display = 'none';
+            if (accountSection) accountSection.style.display = 'none';
+        } else {
+            if (migrationPrompt) migrationPrompt.style.display = 'flex';
+            if (accountSection) accountSection.style.display = 'flex';
+        }
 
         allNotesData = notesData;
         renderNotes(allNotesData, collapsedDomainsState);
@@ -549,7 +634,22 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {object} originalNote - The original note object to identify it.
    * @param {string} newContent - The new HTML content for the note.
    */
-  function updateNoteContent(url, originalNote, newContent) {
+  async function updateNoteContent(url, originalNote, newContent) {
+    if (currentUser) {
+      try {
+        await chrome.runtime.sendMessage({
+          action: "supabaseAction",
+          method: "PATCH",
+          table: "sticky_notes",
+          query: `id=eq.${originalNote.id}`,
+          body: { content: newContent }
+        });
+        return;
+      } catch (e) {
+        console.error('Supabase update failed:', e);
+      }
+    }
+
     if (
       typeof chrome === 'undefined' ||
       !chrome.storage ||
@@ -603,7 +703,22 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} url - The URL associated with the note.
    * @param {object} noteToDelete - The note to delete (identified by content and position).
    */
-  function deleteNote(url, noteToDelete) {
+  async function deleteNote(url, noteToDelete) {
+    if (currentUser && noteToDelete.id) {
+      try {
+        await chrome.runtime.sendMessage({
+          action: "supabaseAction",
+          method: "DELETE",
+          table: "sticky_notes",
+          query: `id=eq.${noteToDelete.id}`
+        });
+        loadNotes();
+        return;
+      } catch (e) {
+        console.error('Supabase delete failed:', e);
+      }
+    }
+
     chrome.storage.sync.get(url, (data) => {
       if (chrome.runtime.lastError) {
         console.error(
@@ -684,6 +799,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (namespace === 'sync') {
       console.log('Storage changed, reloading popup data.');
       loadNotes();
+    }
+  });
+
+  chrome.runtime.onMessage.addListener((request) => {
+    if (request.action === "supabaseChange") {
+        console.log('Supabase Realtime change detected, reloading popup.');
+        loadNotes();
+    }
+  });
+
+  googleBtn.addEventListener('click', async () => {
+    if (currentUser) {
+      if (confirm('Are you sure you want to sign out?')) {
+        await signOut();
+        currentUser = null;
+        loadNotes();
+      }
+    } else {
+      await startGoogleSignIn();
     }
   });
 

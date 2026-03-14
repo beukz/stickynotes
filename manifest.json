@@ -11,13 +11,15 @@
     "activeTab",
     "scripting",
     "contextMenus",
-    "identity"
+    "identity",
+    "offscreen"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background/background.js"
+    "service_worker": "background/background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup/popup.html",

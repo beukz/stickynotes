@@ -60,7 +60,8 @@
         "assets/minus.svg",
         "assets/maximize.svg",
         "assets/bin-icon.svg",
-        "canx-sdk.v1.js"
+        "canx-sdk.v1.js",
+        "content/content.css"
       ],
       "matches": ["<all_urls>"]
     }

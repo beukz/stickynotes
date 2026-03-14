@@ -14,6 +14,11 @@
     let saveTimeout = null; // Timer for debouncing save operations
     let currentUser = null;
     let contextInvalidated = false;
+    let shadowRoot = null;
+    let shadowHost = null;
+
+    /**
+     * Checks if the extension context is still valid.
 
     /**
      * Checks if the extension context is still valid.
@@ -62,11 +67,49 @@
 
     function init() {
         try {
-            injectNewNoteButton();
-            loadNotes();
-            observePageChanges(); // Watch for URL and DOM changes
+            setupShadowDOM().then(() => {
+                injectNewNoteButton();
+                loadNotes();
+                observePageChanges(); // Watch for URL and DOM changes
+            });
         } catch (error) {
             console.error("Error during Sticky Notes initialization:", error);
+        }
+    }
+
+    async function setupShadowDOM() {
+        if (shadowRoot) return;
+        
+        shadowHost = document.createElement("div");
+        shadowHost.id = "ap-sticky-notes-container";
+        // Ensure the host doesn't block interactions with the page
+        shadowHost.style.position = "fixed";
+        shadowHost.style.inset = "0";
+        shadowHost.style.zIndex = "2147483647"; // Max z-index
+        shadowHost.style.overflow = "visible";
+        shadowHost.style.pointerEvents = "none";
+        
+        shadowRoot = shadowHost.attachShadow({ mode: "open" });
+        document.documentElement.appendChild(shadowHost);
+
+        // Inject the styles
+        try {
+            const cssUrl = chrome.runtime.getURL("content/content.css");
+            const response = await fetch(cssUrl);
+            const cssText = await response.text();
+            
+            const style = document.createElement("style");
+            // Adjust CSS for Shadow DOM if necessary
+            // For example, variables in :root might need to be in :host
+            style.textContent = cssText.replace(/:root/g, ":host");
+            shadowRoot.appendChild(style);
+
+            // Re-enable pointer events for sticky notes themselves
+            const interactionStyle = document.createElement("style");
+            interactionStyle.textContent = ".sticky-note { pointer-events: auto; }";
+            shadowRoot.appendChild(interactionStyle);
+        } catch (e) {
+            console.error("Failed to load sticky notes styles:", e);
         }
     }
 
@@ -156,10 +199,10 @@
     }
 
     async function saveNotes() {
-        if (!isExtensionValid()) return;
+        if (!isExtensionValid() || !shadowRoot) return;
         try {
             const urlKey = getEffectiveUrl();
-            const notes = Array.from(document.querySelectorAll(".sticky-note")).map(
+            const notes = Array.from(shadowRoot.querySelectorAll(".sticky-note")).map(
                 (note) => ({
                     id: note.dataset.id || undefined, // UUID from Supabase
                     url: urlKey,
@@ -175,12 +218,21 @@
             notesExistInStorage = notes.length > 0;
 
             if (currentUser) {
-                // Upsert to Supabase (rest v1 doesn't have native upsert in simple headers, 
-                // so we insert with on_conflict or handle individually. 
-                // For simplicity, we'll implement a 'syncNotes' action in background or handle here.)
-                // Actually, let's just save to Supabase via the proxy.
-                for (const noteData of notes) {
+                const noteElements = Array.from(shadowRoot.querySelectorAll(".sticky-note"));
+                for (const noteEl of noteElements) {
                     if (!isExtensionValid()) break;
+                    
+                    const noteData = {
+                        id: noteEl.dataset.id || undefined,
+                        url: urlKey,
+                        content: noteEl.querySelector(".sticky-content").innerHTML,
+                        top: noteEl.style.top,
+                        left: noteEl.style.left,
+                        collapsed: noteEl.classList.contains("collapsed"),
+                        title: noteEl.querySelector(".note-title-input").value,
+                        color: noteEl.dataset.color || '#ffd165'
+                    };
+
                     const method = noteData.id ? "PATCH" : "POST";
                     const query = noteData.id ? `id=eq.${noteData.id}` : "";
                     
@@ -195,10 +247,8 @@
                         if (response?.success && method === "POST") {
                             // Update the note element with the new ID
                             const newId = response.data?.[0]?.id;
-                            if (newId) {
-                                // Find the element and update it
-                                // (This is a bit tricky, but we can match by content/pos)
-                                // We'll improve this with a proper sync loop later.
+                            if (newId && noteEl) {
+                                noteEl.dataset.id = newId;
                             }
                         }
                     });
@@ -487,7 +537,12 @@
                 minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/maximize.svg')}" alt="Expand">`;
             }
 
-            document.body.appendChild(note);
+            if (shadowRoot) {
+                shadowRoot.appendChild(note);
+            } else {
+                // Fallback (should not happen after init)
+                document.body.appendChild(note);
+            }
 
             noteHeader.addEventListener("mousedown", (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.closest('.ap-sticky-options') || titleInput.style.display === 'block') {
@@ -572,8 +627,9 @@
     }
 
     function removeAllStickyNotes() {
+        if (!shadowRoot) return;
         try {
-            document
+            shadowRoot
                 .querySelectorAll(".sticky-note")
                 .forEach((note) => note.remove());
         } catch (error) {
@@ -611,8 +667,8 @@
         if (!isExtensionValid()) return;
         if (namespace === 'sync') {
             // Check if we are currently editing any note
-            const isEditing = document.querySelector('.note-title-input[style*="display: block"]') || 
-                             document.querySelector('.sticky-content:focus');
+            const isEditing = shadowRoot?.querySelector('.note-title-input[style*="display: block"]') || 
+                             shadowRoot?.querySelector('.sticky-content:focus');
             
             if (!isEditing) {
                 console.log('Storage changed, reloading notes in content script.');
@@ -651,12 +707,14 @@
                 // 2. Handle DOM wipes by frameworks (e.g., React, Vue)
                 // If we have notes in storage for this URL but none are on the page,
                 // it's likely they were removed by a re-render.
-                if (notesExistInStorage && document.querySelectorAll('.sticky-note').length === 0) {
+                const noteCount = shadowRoot ? shadowRoot.querySelectorAll('.sticky-note').length : 0;
+                if (notesExistInStorage && noteCount === 0) {
                     // Debounce to prevent rapid-fire reloads during complex DOM manipulations
                     clearTimeout(noteCheckDebounce);
                     noteCheckDebounce = setTimeout(() => {
                         // Re-check condition in case notes were added in the meantime
-                        if (notesExistInStorage && document.querySelectorAll('.sticky-note').length === 0) {
+                        const currentCount = shadowRoot ? shadowRoot.querySelectorAll('.sticky-note').length : 0;
+                        if (notesExistInStorage && currentCount === 0) {
                             console.log("Sticky notes missing from page, attempting to restore.");
                             loadNotes();
                         }

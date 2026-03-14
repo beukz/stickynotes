@@ -1,6 +1,7 @@
-@font-face {
-    font-family: "Inter", sans-serif;
-    src: url("font/Inter.ttc") format("truetype");
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 :root {
@@ -23,6 +24,7 @@
     transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     font-family: var(--font-primary);
     color: var(--text-primary);
+    line-height: normal; /* Reset line-height */
 }
 
 .sticky-note:hover {
@@ -86,6 +88,7 @@
 .sticky-close-menu-box {
     display: flex;
     align-items: center;
+    flex-shrink: 0; /* Prevent icons from squishing */
 }
 
 .ap-sticky-options {
@@ -100,6 +103,7 @@
     border-radius: 6px;
     color: var(--text-secondary);
     transition: background-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .ap-sticky-options:hover {
@@ -127,6 +131,7 @@
     white-space: nowrap;
     overflow: hidden;
     cursor: text;
+    min-width: 0; /* Allow shrinking */
 }
 
 .note-title-input {
@@ -139,6 +144,7 @@
     font-family: var(--font-primary);
     color: var(--text-primary);
     margin-right: 5px;
+    min-width: 0;
 }
 
 .color-palette {

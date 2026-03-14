@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Sticky Notes</title>
+    <link rel="stylesheet" href="pages.css">
+    <style>
+        .changelog-section {
+            text-align: left;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+        .version-badge {
+            display: inline-block;
+            background: var(--color-primary);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .change-type {
+            font-weight: 700;
+            color: var(--color-text);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        .change-type::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .change-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .change-item {
+            margin-bottom: 0.8rem;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+            color: var(--color-text-light);
+        }
+        .change-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        .change-item strong {
+            color: var(--color-text);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--color-text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--color-text);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="../assets/pin.png" alt="Sticky Notes Logo" class="logo">
+            <h1>Release Notes</h1>
+            <p>What's new in Sticky Notes</p>
+        </header>
+
+        <section class="changelog-section">
+            <div class="version-badge">Version 0.9</div>
+            <p style="color: var(--color-text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">Released on March 14, 2026</p>
+
+            <div class="change-type">Added</div>
+            <ul class="change-list">
+                <li class="change-item"><strong>Glassmorphism Improvements</strong>: Enhanced the visual depth with backdrop blur on note content areas.</li>
+                <li class="change-item"><strong>Local Assets</strong>: All UI icons are now bundled locally to ensure stability across all websites.</li>
+                <li class="change-item"><strong>Dedicated Changelog</strong>: This page! Stay updated with the latest improvements.</li>
+            </ul>
+
+            <div class="change-type">Fixed</div>
+            <ul class="change-list">
+                <li class="change-item"><strong>Collapsed Note Visibility</strong>: Fixed the bug where the note header would disappear when minimized.</li>
+                <li class="change-item"><strong>CSP Compliance</strong>: Resolved font loading issues on strict sites like GitHub.</li>
+                <li class="change-item"><strong>Smoother Interaction</strong>: Removed the hover bounce for a more stable and professional feel.</li>
+            </ul>
+        </section>
+
+        <footer>
+            <a href="notes.html" class="back-link">← Back to My Notes</a>
+        </footer>
+    </div>
+</body>
+</html>

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sticky Notes",
   "description": "Add sticky notes to any website, save them, and view them anytime!",
-  "version": "0.8",
+  "version": "0.9",
   "icons": {
     "128": "assets/pin.png"
   },
@@ -47,6 +47,7 @@
         "pages/account.html",
         "pages/auth-callback.html",
         "pages/notes.html",
+        "pages/changelog.html",
         "assets/bold.svg",
         "assets/italic.svg",
         "assets/underline.svg",

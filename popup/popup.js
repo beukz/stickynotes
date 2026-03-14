@@ -221,9 +221,38 @@ document.addEventListener('DOMContentLoaded', () => {
           noteTitle.textContent = note.title || 'Note';
           noteItem.appendChild(noteTitle);
 
+          const contentContainer = document.createElement('div');
+          contentContainer.className = 'note-content-container';
+
           const noteContent = document.createElement('span');
           noteContent.innerHTML = note.content;
-          noteItem.appendChild(noteContent);
+          contentContainer.appendChild(noteContent);
+          noteItem.appendChild(contentContainer);
+
+          // Add a "Show more" button if the content overflows
+          // Check after appending to noteItem so we have dimensions
+          requestAnimationFrame(() => {
+              if (contentContainer.scrollHeight > 120) {
+                  contentContainer.classList.add('is-truncated');
+
+                  const showMoreWrapper = document.createElement('div');
+                  showMoreWrapper.className = 'show-more-container';
+
+                  const showMoreBtn = document.createElement('button');
+                  showMoreBtn.className = 'show-more-btn';
+                  showMoreBtn.textContent = 'Show more';
+                  
+                  showMoreBtn.addEventListener('click', (e) => {
+                      e.stopPropagation();
+                      const isExpanded = contentContainer.classList.toggle('expanded');
+                      showMoreBtn.classList.toggle('active');
+                      showMoreBtn.textContent = isExpanded ? 'Show less' : 'Show more';
+                  });
+                  
+                  showMoreWrapper.appendChild(showMoreBtn);
+                  noteItem.insertBefore(showMoreWrapper, noteOptions);
+              }
+          });
 
           const noteOptions = document.createElement('div');
           noteOptions.className = 'note-options';
@@ -318,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
             noteContent.contentEditable = true;
             noteContent.focus();
             noteItem.classList.add('editing');
+            contentContainer.classList.add('expanded'); // Always expand while editing
             noteOptions.classList.add('editing');
             editButton.style.display = 'none';
             saveButton.style.display = 'flex';
@@ -347,6 +377,11 @@ document.addEventListener('DOMContentLoaded', () => {
             noteContent.innerHTML = originalContent;
             noteContent.contentEditable = false;
             noteItem.classList.remove('editing');
+            // If there's a show more button, and it wasn't expanded, collapse it back
+            const showBtn = noteItem.querySelector('.show-more-btn');
+            if (showBtn && !showBtn.classList.contains('active')) {
+                contentContainer.classList.remove('expanded');
+            }
             noteOptions.classList.remove('editing');
             editButton.style.display = 'flex';
             saveButton.style.display = 'none';

@@ -4,10 +4,12 @@ import { getSession } from "../supabase/auth.js";
 document.addEventListener("DOMContentLoaded", () => {
     const domainNav = document.getElementById("domain-nav");
     const notesGrid = document.getElementById("notes-grid");
+    const homeContent = document.getElementById("home-content");
     const searchInput = document.getElementById("search-input");
+    const mainHeader = document.querySelector(".main-header");
 
     let allNotesData = {};
-    let activeDomain = "all";
+    let activeDomain = "home";
 
     function getMainDomain(url) {
         try {
@@ -35,6 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             groupedNotes[mainDomain] += notes.length;
         }
+
+        // "Home" link
+        const homeLink = document.createElement("a");
+        homeLink.className = `domain-link ${activeDomain === 'home' ? 'active' : ''}`;
+        homeLink.dataset.domain = "home";
+        homeLink.innerHTML = `<i class="fi fi-rr-home"></i> <span>Home</span>`;
+        homeLink.addEventListener('click', () => setActiveDomain('home'));
+        domainNav.appendChild(homeLink);
 
         // "All Notes" link
         const allNotesLink = document.createElement("a");
@@ -93,7 +103,167 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('.domain-link').forEach(link => {
             link.classList.toggle('active', link.dataset.domain === domain);
         });
-        renderNotes(allNotesData);
+
+        if (domain === 'home') {
+            homeContent.style.display = 'block';
+            notesGrid.style.display = 'none';
+            mainHeader.style.display = 'none';
+            renderHomeContent();
+        } else {
+            homeContent.style.display = 'none';
+            notesGrid.style.display = 'grid';
+            mainHeader.style.display = 'flex';
+            renderNotes(allNotesData);
+        }
+    }
+
+    function renderHomeContent() {
+        homeContent.innerHTML = `
+            <div class="home-container">
+                <h1 class="home-title">Good afternoon</h1>
+                
+                <section class="home-section">
+                    <div class="home-section-header">
+                        <i class="fi fi-rr-time-past"></i>
+                        <span>Recently visited</span>
+                    </div>
+                    <div class="home-cards-row">
+                        <div class="home-card recent-card">
+                            <div class="card-icon-box" style="background-color: #f7f6f3;">
+                                <span class="emoji-icon">👋</span>
+                            </div>
+                            <div class="card-info">
+                                <span class="card-title">Getting Started</span>
+                                <div class="card-meta">
+                                    <span class="meta-initial">B</span>
+                                    <span>1w ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="home-card recent-card new-page-card">
+                            <div class="card-icon-box border-dashed">
+                                <i class="fi fi-rr-plus"></i>
+                            </div>
+                            <div class="card-info">
+                                <span class="card-title secondary">New page</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="home-section">
+                    <div class="home-section-header">
+                        <i class="fi fi-rr-book-open-reader"></i>
+                        <span>Learn</span>
+                    </div>
+                    <div class="home-grid">
+                        <div class="home-card learn-card">
+                            <div class="card-image-box">
+                                <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=400" alt="Code">
+                            </div>
+                            <div class="card-body">
+                                <div class="card-title-row">
+                                    <span class="card-title">Customize & style your content</span>
+                                    <i class="fi fi-rr-badge-check status-icon"></i>
+                                </div>
+                                <div class="card-footer-meta">
+                                    <i class="fi fi-rr-book-open-reader"></i>
+                                    <span>9m read</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="home-card learn-card">
+                            <div class="card-image-box">
+                                <img src="https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&q=80&w=400" alt="Blocks">
+                            </div>
+                            <div class="card-body">
+                                <span class="card-title">Types of content blocks</span>
+                                <div class="card-footer-meta">
+                                    <i class="fi fi-rr-play-alt"></i>
+                                    <span>10m watch</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="home-card learn-card">
+                            <div class="card-image-box">
+                                <img src="https://images.unsplash.com/photo-1551288049-bbbda5466b7a?auto=format&fit=crop&q=80&w=400" alt="Sharing">
+                            </div>
+                            <div class="card-body">
+                                <span class="card-title">Understanding Notion's sharing settings</span>
+                                <div class="card-footer-meta">
+                                    <i class="fi fi-rr-book-open-reader"></i>
+                                    <span>6m read</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="home-card learn-card">
+                            <div class="card-image-box">
+                                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=400" alt="AI">
+                            </div>
+                            <div class="card-body">
+                                <span class="card-title">Using Notion AI to boost your impact</span>
+                                <div class="card-footer-meta">
+                                    <i class="fi fi-rr-book-open-reader"></i>
+                                    <span>3m read</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="home-section">
+                    <div class="home-section-header">
+                        <i class="fi fi-rr-calendar-lines"></i>
+                        <span>Upcoming events</span>
+                    </div>
+                    <div class="events-card">
+                        <div class="events-promo">
+                            <div class="promo-icon">
+                                <i class="fi fi-rr-calendar"></i>
+                                <span class="promo-badge">16</span>
+                            </div>
+                            <h4 class="promo-title">Connect AI Meeting Notes with your Calendar events</h4>
+                            <p class="promo-desc">Join calls, transcribe audio, and summarize meetings all in Notion.</p>
+                            <a href="#" class="promo-link">Connect Notion Calendar</a>
+                        </div>
+                        <div class="events-list">
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="day">Today</span>
+                                    <span class="date">Mar 16</span>
+                                </div>
+                                <div class="event-details">
+                                    <div class="event-header">
+                                        <h5 class="event-title">Team standup</h5>
+                                        <span class="event-time">9 AM · Office</span>
+                                    </div>
+                                    <button class="event-action">
+                                        <i class="fi fi-rr-video-camera"></i>
+                                        <span>Join and take notes</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="day">Tue</span>
+                                    <span class="date">Mar 17</span>
+                                </div>
+                                <div class="event-details border-none">
+                                    <div class="event-header">
+                                        <h5 class="event-title">Project check-in</h5>
+                                        <span class="event-time">10 AM · Office</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <button class="float-help-btn" title="Help & Feedback">
+                <i class="fi fi-rr-question"></i>
+            </button>
+        `;
     }
 
     function showDashboardDeleteConfirmation(noteCard, onConfirm) {
@@ -131,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderNotes(notesData) {
+        if (activeDomain === 'home') return;
         notesGrid.innerHTML = '';
         const searchTerm = searchInput.value.toLowerCase();
 
@@ -482,7 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         allNotesData = mergedData;
         renderDomains(allNotesData);
-        renderNotes(allNotesData);
+        setActiveDomain(activeDomain);
     }
 
     searchInput.addEventListener('input', () => renderNotes(allNotesData));

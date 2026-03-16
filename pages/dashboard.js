@@ -422,4 +422,19 @@ document.addEventListener("DOMContentLoaded", () => {
             loadAllData();
         }
     });
+
+    // --- Settings Panel Toggle ---
+    const settingsPanel = document.getElementById('settings-panel');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+
+    if (settingsBtn && settingsPanel && settingsCloseBtn) {
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('active');
+        });
+
+        settingsCloseBtn.addEventListener('click', () => {
+            settingsPanel.classList.remove('active');
+        });
+    }
 });

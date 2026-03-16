@@ -25,12 +25,35 @@
                     <input type="text" id="search-input" placeholder="Search all notes...">
                 </div>
                 <div class="header-actions">
+                    <button id="settings-btn" class="header-control-btn" title="Settings">
+                        <i class="fi fi-rr-settings"></i>
+                    </button>
                     <!-- Future actions can go here -->
                 </div>
             </header>
             <section class="notes-grid" id="notes-grid">
                 <!-- Notes will be populated by JS -->
             </section>
+            
+            <div id="settings-panel" class="settings-panel shadow-lg">
+                <div class="settings-header">
+                    <h3>Settings</h3>
+                    <button id="settings-close-btn" class="close-panel-btn">
+                        <i class="fi fi-rr-cross-small"></i>
+                    </button>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Cloud Migration</h4>
+                            <p>Transfer your local browser notes to your Supabase account.</p>
+                        </div>
+                        <a href="../pages/migrate.html" target="_blank" class="settings-action-btn">
+                            <i class="fi fi-rr-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     <script src="dashboard.js"></script>

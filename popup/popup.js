@@ -15,18 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const googleBtn = document.getElementById('google-btn');
   const accountSection = document.getElementById('account-section');
   const migrationPrompt = document.getElementById('migration-prompt');
-  const settingsPanel = document.getElementById('settings-panel');
-  const settingsBtn = document.getElementById('settings-btn');
-  const settingsCloseBtn = document.getElementById('settings-close-btn');
 
-  // --- Settings Panel Toggle ---
-  settingsBtn.addEventListener('click', () => {
-    settingsPanel.classList.add('active');
-  });
-
-  settingsCloseBtn.addEventListener('click', () => {
-    settingsPanel.classList.remove('active');
-  });
 
   const canxContainer = document.getElementById('canx-ad-banner-slot');
 

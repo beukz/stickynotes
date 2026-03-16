@@ -386,7 +386,10 @@
             if (e.key === "Enter") titleInput.blur();
         });
 
-        if (isNew) debouncedSave();
+        if (isNew) {
+            contentArea.focus();
+            debouncedSave();
+        }
     }
 
     function dragNote(e, note) {

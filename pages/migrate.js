@@ -4,7 +4,6 @@ import { getSession } from "../supabase/auth.js";
 
 const scanBtn = document.getElementById("scan-btn");
 const migrateBtn = document.getElementById("migrate-btn");
-const openSupabaseBtn = document.getElementById("open-supabase-btn");
 const statusEl = document.getElementById("status");
 
 let scanned = null;
@@ -102,7 +101,7 @@ async function migrate() {
 
   const session = await getSession();
   if (!session?.user) {
-    setStatus("Please sign in with Google first to migrate your notes to the cloud.", "warn");
+    setStatus("Please sign in with Google first to sync your notes to the database.", "warn");
     return;
   }
 
@@ -118,7 +117,7 @@ async function migrate() {
   const migrationId = `mig_${Date.now()}`;
 
   try {
-    setStatus("Uploading to Supabase...\n\nThis may take a few seconds.");
+    setStatus("Syncing with Cloud...\n\nJust a moment.");
 
     // Batch inserts to avoid request size limits.
     const batches = chunk(scanned.rows, 200);
@@ -167,9 +166,6 @@ migrateBtn.addEventListener("click", () => {
   migrate().catch((e) => setStatus(`Migration failed:\n${String(e?.message || e)}`, "err"));
 });
 
-openSupabaseBtn.addEventListener("click", () => {
-  window.open("https://supabase.com/dashboard/project/qrnnthitqgpiowixmlpd", "_blank");
-});
 
 // Auto-scan on load for convenience
 scan().catch((e) => setStatus(`Scan failed:\n${String(e?.message || e)}`, "err"));

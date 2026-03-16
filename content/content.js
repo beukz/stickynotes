@@ -518,6 +518,11 @@
 
     chrome.runtime.onMessage.addListener((request) => {
         if (!isExtensionValid()) return;
+
+        if (request.action === "createStickyNote") {
+            createStickyNote("New Note", null, null, false, "Note", "#ffd165", true);
+        }
+
         if (request.action === "supabaseChange") {
             const payload = request.payload;
             const urlKey = getEffectiveUrl();

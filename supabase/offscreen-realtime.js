@@ -11,16 +11,22 @@ async function initRealtime() {
 
     // Supabase Realtime via REST/WS
     const wsUrl = `${SUPABASE_URL.replace("http", "ws")}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}&Authorization=Bearer ${session.access_token}`;
-    
+
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
         console.log("Realtime socket open");
-        // Subscribe to sticky_notes table
+        // Subscribe to sticky_notes table with postgres_changes config
         const subscribeMsg = {
             topic: "realtime:public:sticky_notes",
             event: "phx_join",
-            payload: {},
+            payload: {
+                config: {
+                    postgres_changes: [
+                        { event: "*", schema: "public", table: "sticky_notes" }
+                    ]
+                }
+            },
             ref: "1"
         };
         socket.send(JSON.stringify(subscribeMsg));
@@ -37,10 +43,10 @@ async function initRealtime() {
                 payload: payload
             });
         }
-        
+
         // Pharos/Phoenix heartbeat
         if (data.event === "phx_reply" && data.topic === "realtime:public:sticky_notes") {
-             // subscribed!
+            // subscribed!
         }
     };
 

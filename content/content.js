@@ -1,15 +1,7 @@
-(function() {
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        if (request.action === "createStickyNote") {
-            createStickyNote("", null, null, false, "Note", "#ffd165", true);
-            sendResponse({ status: "ok" }); // Acknowledge the message
-        }
-        return true; // Keep message channel open for async responses
-    });
-
-    let lastUrl = window.location.href; // Cache the last known URL
-    let notesExistInStorage = false; // Flag to track if notes should be on the page
-    let noteCheckDebounce = null; // Debounce timer for DOM checks
+(function () {
+    let lastUrl = location.href;
+    let noteCheckDebounce = null;
+    let notesExistInStorage = false;
     let listenersAdded = false; // Flag to ensure event listeners are added only once
     let saveTimeout = null; // Timer for debouncing save operations
     let currentUser = null;
@@ -19,15 +11,11 @@
 
     /**
      * Checks if the extension context is still valid.
-
-    /**
-     * Checks if the extension context is still valid.
      * If not, it sets a flag and returns false.
      */
     function isExtensionValid() {
         if (contextInvalidated) return false;
         try {
-            // Accessing chrome.runtime.id is a stable way to check if the background context is still there
             if (!chrome?.runtime?.id) {
                 if (!contextInvalidated) {
                     console.log("[Sticky Notes] Extension updated or reloaded. Please refresh the page to keep using sticky notes.");
@@ -56,19 +44,10 @@
         });
     }
 
-    /**
-     * Initializes the sticky notes functionality on the page.
-     */
-    if (document.readyState === "complete") {
-        setTimeout(init, 100);
-    } else {
-        window.addEventListener("load", () => setTimeout(init, 100));
-    }
-
     function init() {
         try {
             setupShadowDOM().then(() => {
-                injectNewNoteButton();
+                setupKeyboardShortcuts();
                 loadNotes();
                 observePageChanges(); // Watch for URL and DOM changes
             });
@@ -78,12 +57,10 @@
     }
 
     async function setupShadowDOM() {
-        if (shadowRoot) return;
-        
+        if (shadowRoot || !isExtensionValid()) return;
+
         shadowHost = document.createElement("div");
         shadowHost.id = "ap-sticky-notes-container";
-        // Use absolute positioning relative to document body/root
-        // so notes stay with the content, not the viewport.
         shadowHost.style.position = "absolute";
         shadowHost.style.top = "0";
         shadowHost.style.left = "0";
@@ -93,7 +70,7 @@
         shadowHost.style.zIndex = "2147483647";
         shadowHost.style.pointerEvents = "none";
         document.body.appendChild(shadowHost);
-        
+
         shadowRoot = shadowHost.attachShadow({ mode: "open" });
 
         // Inject the styles
@@ -101,14 +78,11 @@
             const cssUrl = chrome.runtime.getURL("content/content.css");
             const response = await fetch(cssUrl);
             const cssText = await response.text();
-            
+
             const style = document.createElement("style");
-            // Adjust CSS for Shadow DOM if necessary
-            // For example, variables in :root might need to be in :host
             style.textContent = cssText.replace(/:root/g, ":host");
             shadowRoot.appendChild(style);
 
-            // Re-enable pointer events for sticky notes themselves
             const interactionStyle = document.createElement("style");
             interactionStyle.textContent = ".sticky-note { pointer-events: auto; }";
             shadowRoot.appendChild(interactionStyle);
@@ -117,21 +91,12 @@
         }
     }
 
-
-    function injectNewNoteButton() {
+    function setupKeyboardShortcuts() {
+        if (!isExtensionValid()) return;
         try {
-            if (document.getElementById("appedle-new-note-btn")) {
-                return; // Button already exists
-            }
-            const button = document.createElement("button");
-            button.id = "appedle-new-note-btn";
-            button.textContent = "New Note (Ctrl + Q)";
-            document.body.appendChild(button);
-
-            button.addEventListener("click", () => createStickyNote("", null, null, false, "Note", "#ffd165", true));
-
             if (!listenersAdded) {
                 document.addEventListener("keydown", (e) => {
+                    if (!isExtensionValid()) return;
                     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "q") {
                         createStickyNote("", null, null, false, "Note", "#ffd165", true);
                         e.preventDefault();
@@ -140,19 +105,25 @@
                 listenersAdded = true;
             }
         } catch (error) {
-            console.error("Error injecting 'New Note' button:", error);
+            if (isExtensionValid()) {
+                console.error("Error setting up keyboard shortcuts:", error);
+            }
         }
+    }
+
+    function getEffectiveUrl() {
+        const url = new URL(window.location.href);
+        return url.origin + url.pathname;
     }
 
     async function loadNotes() {
         if (!isExtensionValid()) return;
         try {
-            const user = await checkAuth();
-            if (contextInvalidated) return;
             const urlKey = getEffectiveUrl();
-
+            const user = await checkAuth();
+            
             if (user) {
-                // Load from Supabase
+                if (!isExtensionValid()) return;
                 chrome.runtime.sendMessage({
                     action: "supabaseAction",
                     method: "GET",
@@ -169,7 +140,6 @@
                         );
                     } else {
                         console.error("Supabase load failed:", response?.error);
-                        // Fallback to local?
                         loadLocalNotes(urlKey);
                     }
                 });
@@ -184,45 +154,41 @@
     }
 
     function loadLocalNotes(urlKey) {
-        if (!isExtensionValid()) return;
-        chrome.storage.sync.get(urlKey, (data) => {
-            if (!isExtensionValid()) return;
-            if (chrome.runtime.lastError) {
-                console.error("Error loading notes from chrome.storage:", chrome.runtime.lastError);
-                return;
-            }
+        if (!isExtensionValid() || !chrome?.storage?.sync) return;
+        try {
+            chrome.storage.sync.get(urlKey, (data) => {
+                if (!isExtensionValid()) return;
+                if (chrome.runtime.lastError) {
+                    console.error("Error loading notes from chrome.storage:", chrome.runtime.lastError);
+                    return;
+                }
 
-            const notes = data[urlKey] || [];
-            notesExistInStorage = notes.length > 0;
+                const notes = data[urlKey] || [];
+                notesExistInStorage = notes.length > 0;
 
-            removeAllStickyNotes();
-            notes.forEach((note) =>
-                createStickyNote(note.content, note.top, note.left, note.collapsed, note.title, note.color)
-            );
-        });
+                removeAllStickyNotes();
+                notes.forEach((note) =>
+                    createStickyNote(note.content, note.top, note.left, note.collapsed, note.title, note.color)
+                );
+            });
+        } catch (e) {
+            console.error("Critical error accessing chrome.storage.sync:", e);
+        }
+    }
+
+    function removeAllStickyNotes() {
+        if (!shadowRoot) return;
+        const existingNotes = shadowRoot.querySelectorAll(".sticky-note");
+        existingNotes.forEach((note) => note.remove());
     }
 
     async function saveNotes() {
         if (!isExtensionValid() || !shadowRoot) return;
         try {
             const urlKey = getEffectiveUrl();
-            const notes = Array.from(shadowRoot.querySelectorAll(".sticky-note")).map(
-                (note) => ({
-                    id: note.dataset.id || undefined, // UUID from Supabase
-                    url: urlKey,
-                    content: note.querySelector(".sticky-content").innerHTML,
-                    top: note.style.top,
-                    left: note.style.left,
-                    collapsed: note.classList.contains("collapsed"),
-                    title: note.querySelector(".note-title-input").value,
-                    color: note.dataset.color || '#ffd165'
-                })
-            );
-
-            notesExistInStorage = notes.length > 0;
-
+            const noteElements = Array.from(shadowRoot.querySelectorAll(".sticky-note"));
+            
             if (currentUser) {
-                const noteElements = Array.from(shadowRoot.querySelectorAll(".sticky-note"));
                 for (const noteEl of noteElements) {
                     if (!isExtensionValid()) break;
                     
@@ -239,7 +205,7 @@
 
                     const method = noteData.id ? "PATCH" : "POST";
                     const query = noteData.id ? `id=eq.${noteData.id}` : "";
-                    
+
                     chrome.runtime.sendMessage({
                         action: "supabaseAction",
                         method,
@@ -249,7 +215,6 @@
                     }, (response) => {
                         if (!isExtensionValid()) return;
                         if (response?.success && method === "POST") {
-                            // Update the note element with the new ID
                             const newId = response.data?.[0]?.id;
                             if (newId && noteEl) {
                                 noteEl.dataset.id = newId;
@@ -258,12 +223,17 @@
                     });
                 }
             } else {
-                chrome.storage.sync.set({ 
-                    [urlKey]: notes.map(n => {
-                        const { id, url, ...rest } = n;
-                        return rest;
-                    })
-                }, () => {
+                if (!chrome?.storage?.sync) return;
+                const localData = noteElements.map(note => ({
+                    content: note.querySelector(".sticky-content").innerHTML,
+                    top: note.style.top,
+                    left: note.style.left,
+                    collapsed: note.classList.contains("collapsed"),
+                    title: note.querySelector(".note-title-input").value,
+                    color: note.dataset.color || '#ffd165'
+                }));
+
+                chrome.storage.sync.set({ [urlKey]: localData }, () => {
                     if (!isExtensionValid()) return;
                     if (chrome.runtime.lastError) {
                         console.error("Error saving to chrome.storage:", chrome.runtime.lastError.message);
@@ -277,290 +247,180 @@
         }
     }
 
-    /**
-     * Debounced version of saveNotes to prevent hitting storage quotas.
-     */
-    function debouncedSaveNotes() {
-        if (!isExtensionValid()) return;
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-            if (isExtensionValid()) {
-                saveNotes();
-            }
-        }, 1000); // Wait 1 second after last change before saving
+    function createStickyNote(content, top, left, collapsed = false, title = "Note", color = "#ffd165", isNew = false, id = null) {
+        if (!shadowRoot) return;
+
+        const note = document.createElement("div");
+        note.className = "sticky-note" + (collapsed ? " collapsed" : "");
+        if (id) note.dataset.id = id;
+        note.dataset.color = color;
+
+        // Default position if null (for new notes)
+        if (isNew && !top && !left) {
+            const scrollX = window.scrollX || window.pageXOffset;
+            const scrollY = window.scrollY || window.pageYOffset;
+            top = (scrollY + 50) + "px";
+            left = (scrollX + 50) + "px";
+        }
+
+        note.style.top = top || "50px";
+        note.style.left = left || "50px";
+
+        note.innerHTML = `
+            <div class="note-header" style="background-color: ${color}">
+                <div class="note-title-display">${title}</div>
+                <input type="text" class="note-title-input" value="${title}" style="display: none;">
+                <div class="sticky-close-menu-box">
+                    <button class="ap-sticky-options palette-btn" title="Change Color">
+                        <img src="${chrome.runtime.getURL('assets/palette.svg')}" alt="Color">
+                    </button>
+                    <button class="ap-sticky-options collapse-btn" title="${collapsed ? 'Expand' : 'Collapse'}">
+                        <img src="${chrome.runtime.getURL(collapsed ? 'assets/maximize.svg' : 'assets/minus.svg')}" alt="Toggle">
+                    </button>
+                    <button class="ap-sticky-options delete-btn" title="Delete Note">
+                        <img src="${chrome.runtime.getURL('assets/bin-icon.svg')}" alt="Delete">
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-content" contenteditable="true">${content}</div>
+            <div class="sticky-note-toolbar">
+                <button class="toolbar-btn bold-btn" title="Bold">
+                    <img src="${chrome.runtime.getURL('assets/bold.svg')}" alt="B">
+                </button>
+                <button class="toolbar-btn italic-btn" title="Italic">
+                    <img src="${chrome.runtime.getURL('assets/italic.svg')}" alt="I">
+                </button>
+                <button class="toolbar-btn underline-btn" title="Underline">
+                    <img src="${chrome.runtime.getURL('assets/underline.svg')}" alt="U">
+                </button>
+                <button class="toolbar-btn strike-btn" title="Strikethrough">
+                    <img src="${chrome.runtime.getURL('assets/strikethrough.svg')}" alt="S">
+                </button>
+            </div>
+            <div class="color-palette">
+                <div class="color-swatch" style="background-color: #ffd165" data-color="#ffd165"></div>
+                <div class="color-swatch" style="background-color: #ff9b9b" data-color="#ff9b9b"></div>
+                <div class="color-swatch" style="background-color: #9bf4ff" data-color="#9bf4ff"></div>
+                <div class="color-swatch" style="background-color: #b4ff9b" data-color="#b4ff9b"></div>
+                <div class="color-swatch" style="background-color: #d19bff" data-color="#d19bff"></div>
+            </div>
+        `;
+
+        shadowRoot.appendChild(note);
+
+        const header = note.querySelector(".note-header");
+        const contentArea = note.querySelector(".sticky-content");
+        const deleteBtn = note.querySelector(".delete-btn");
+        const collapseBtn = note.querySelector(".collapse-btn");
+        const paletteBtn = note.querySelector(".palette-btn");
+        const colorPalette = note.querySelector(".color-palette");
+        const titleDisplay = note.querySelector(".note-title-display");
+        const titleInput = note.querySelector(".note-title-input");
+
+        // Dragging
+        header.addEventListener("mousedown", (e) => {
+            if (e.target.closest('.ap-sticky-options')) return;
+            dragNote(e, note);
+        });
+
+        // Prevent keyboard events from bubbling up to the host website
+        note.addEventListener("keydown", (e) => e.stopPropagation());
+        note.addEventListener("keyup", (e) => e.stopPropagation());
+        note.addEventListener("keypress", (e) => e.stopPropagation());
+
+        // Formatting
+        note.querySelectorAll(".toolbar-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const command = btn.classList.contains("bold-btn") ? "bold" :
+                               btn.classList.contains("italic-btn") ? "italic" :
+                               btn.classList.contains("underline-btn") ? "underline" : "strikeThrough";
+                document.execCommand(command, false, null);
+                contentArea.focus();
+            });
+        });
+
+        // Content changes
+        contentArea.addEventListener("input", debouncedSave);
+
+        // Delete
+        deleteBtn.addEventListener("click", () => showDeleteConfirmation(note));
+
+        // Collapse
+        collapseBtn.addEventListener("click", () => {
+            note.classList.toggle("collapsed");
+            const isCollapsed = note.classList.contains("collapsed");
+            collapseBtn.querySelector("img").src = chrome.runtime.getURL(isCollapsed ? 'assets/maximize.svg' : 'assets/minus.svg');
+            debouncedSave();
+        });
+
+        // Color Palette
+        paletteBtn.addEventListener("click", () => {
+            colorPalette.style.display = colorPalette.style.display === "flex" ? "none" : "flex";
+        });
+
+        note.querySelectorAll(".color-swatch").forEach(swatch => {
+            swatch.addEventListener("click", () => {
+                const newColor = swatch.dataset.color;
+                note.dataset.color = newColor;
+                header.style.backgroundColor = newColor;
+                colorPalette.style.display = "none";
+                debouncedSave();
+            });
+        });
+
+        // Title Editing
+        titleDisplay.addEventListener("click", () => {
+            titleDisplay.style.display = "none";
+            titleInput.style.display = "block";
+            titleInput.focus();
+        });
+
+        titleInput.addEventListener("blur", () => {
+            titleDisplay.textContent = titleInput.value || "Note";
+            titleDisplay.style.display = "block";
+            titleInput.style.display = "none";
+            debouncedSave();
+        });
+
+        titleInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") titleInput.blur();
+        });
+
+        if (isNew) debouncedSave();
     }
 
-    function createStickyNote(content = "", top = null, left = null, collapsed = false, title = "Note", color = "#ffd165", shouldSave = false, id = null) {
+    function dragNote(e, note) {
         try {
-            const note = document.createElement("div");
-            note.className = "sticky-note";
-            note.dataset.color = color;
-            if (id) note.dataset.id = id;
+            let offsetX = e.pageX - note.offsetLeft;
+            let offsetY = e.pageY - note.offsetTop;
 
-            const viewportTop = window.scrollY + window.innerHeight / 2 - 50;
-            const viewportLeft = window.scrollX + window.innerWidth / 2 - 75;
+            function moveNote(e) {
+                let newX = e.pageX - offsetX;
+                let newY = e.pageY - offsetY;
 
-            note.style.top = top || `${viewportTop}px`;
-            note.style.left = left || `${viewportLeft}px`;
-            note.style.position = "absolute";
-            note.style.zIndex = "9999";
+                newX = Math.max(0, newX);
+                newX = Math.min(newX, document.body.offsetWidth - note.offsetWidth);
 
-            const noteHeader = document.createElement("div");
-            noteHeader.className = "note-header";
-            noteHeader.style.backgroundColor = color;
-
-            // --- Title Elements ---
-            const titleDisplay = document.createElement("div");
-            titleDisplay.className = "note-title-display";
-            titleDisplay.textContent = title;
-
-            const titleInput = document.createElement("input");
-            titleInput.type = "text";
-            titleInput.className = "note-title-input";
-            titleInput.value = title;
-            titleInput.placeholder = "Title...";
-            titleInput.style.display = "none"; // Hidden by default
-
-            // --- Button Container ---
-            const stickyCloseMenuBox = document.createElement("div");
-            stickyCloseMenuBox.className = "sticky-close-menu-box";
-
-            // --- Title Edit Buttons ---
-            const acceptTitleButton = document.createElement("button");
-            acceptTitleButton.className = "accept-title-btn ap-sticky-options";
-            acceptTitleButton.title = "Save title";
-            if (isExtensionValid()) {
-                acceptTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/check.svg')}" alt="Save">`;
-            }
-            acceptTitleButton.style.display = "none";
-
-            const discardTitleButton = document.createElement("button");
-            discardTitleButton.className = "discard-title-btn ap-sticky-options";
-            discardTitleButton.title = "Cancel";
-            if (isExtensionValid()) {
-                discardTitleButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/cross.svg')}" alt="Cancel">`;
-            }
-            discardTitleButton.style.display = "none";
-
-            // --- Regular Note Buttons ---
-            const NOTE_COLORS = ['#ffd165', '#ff9b71', '#a0d1e8', '#d3a0e8', '#a0e8b1', '#e8a0a0'];
-
-            const colorButton = document.createElement("button");
-            colorButton.className = "color-picker-btn ap-sticky-options";
-            colorButton.title = "Change color";
-            if (isExtensionValid()) {
-                colorButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/palette.svg')}" alt="Color">`;
+                note.style.left = newX + "px";
+                note.style.top = newY + "px";
             }
 
-            const colorPalette = document.createElement("div");
-            colorPalette.className = "color-palette";
-
-            NOTE_COLORS.forEach(c => {
-                const swatch = document.createElement("div");
-                swatch.className = "color-swatch";
-                swatch.style.backgroundColor = c;
-                swatch.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    noteHeader.style.backgroundColor = c;
-                    note.dataset.color = c;
-                    debouncedSaveNotes();
-                    colorPalette.style.display = 'none';
-                });
-                colorPalette.appendChild(swatch);
-            });
-
-            note.appendChild(colorPalette);
-
-            colorButton.addEventListener("click", (e) => {
-                e.stopPropagation();
-                colorPalette.style.display = colorPalette.style.display === 'flex' ? 'none' : 'flex';
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!note.contains(e.target)) {
-                    colorPalette.style.display = 'none';
-                }
-            });
-
-            const minimizeButton = document.createElement("button");
-            minimizeButton.className = "minimize-note-btn ap-sticky-options";
-            minimizeButton.title = "Minimize note";
-            if (isExtensionValid()) {
-                minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
+            function stopDrag() {
+                document.removeEventListener("mousemove", moveNote);
+                document.removeEventListener("mouseup", stopDrag);
+                debouncedSave();
             }
 
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "delete-note-btn ap-sticky-options";
-            deleteButton.title = "Delete note";
-            if (isExtensionValid()) {
-                deleteButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/bin-icon.svg')}" alt="Delete">`;
-            }
-            deleteButton.addEventListener("click", () => {
-                showDeleteConfirmation(note);
-            });
-
-            // --- Title Edit Logic ---
-            const startTitleEdit = () => {
-                titleDisplay.style.display = "none";
-                titleInput.style.display = "block";
-                titleInput.focus();
-                titleInput.select();
-
-                // Hide regular buttons
-                colorButton.style.display = "none";
-                minimizeButton.style.display = "none";
-                deleteButton.style.display = "none";
-
-                // Show editing buttons
-                acceptTitleButton.style.display = "flex";
-                discardTitleButton.style.display = "flex";
-            };
-
-            const endTitleEdit = () => {
-                titleDisplay.style.display = "block";
-                titleInput.style.display = "none";
-
-                // Show regular buttons
-                colorButton.style.display = "flex";
-                minimizeButton.style.display = "flex";
-                deleteButton.style.display = "flex";
-
-                // Hide editing buttons
-                acceptTitleButton.style.display = "none";
-                discardTitleButton.style.display = "none";
-            };
-
-            titleDisplay.addEventListener("dblclick", startTitleEdit);
-
-            acceptTitleButton.addEventListener("click", () => {
-                const newTitle = titleInput.value.trim();
-                if (newTitle) {
-                    titleDisplay.textContent = newTitle;
-                    debouncedSaveNotes();
-                } else {
-                    titleInput.value = titleDisplay.textContent;
-                }
-                endTitleEdit();
-            });
-
-            discardTitleButton.addEventListener("click", () => {
-                titleInput.value = titleDisplay.textContent;
-                endTitleEdit();
-            });
-
-            titleInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    acceptTitleButton.click();
-                    e.preventDefault();
-                } else if (e.key === "Escape") {
-                    discardTitleButton.click();
-                }
-            });
-
-            // --- Other Button Logic ---
-            minimizeButton.addEventListener("click", () => {
-                note.classList.toggle("collapsed");
-                const isCollapsed = note.classList.contains("collapsed");
-                minimizeButton.title = isCollapsed ? "Expand note" : "Minimize note";
-                minimizeButton.innerHTML = isCollapsed ? 
-                    `<img src="${chrome.runtime.getURL('assets/maximize.svg')}" alt="Expand">` : 
-                    `<img src="${chrome.runtime.getURL('assets/minus.svg')}" alt="Minimize">`;
-                saveNotes();
-            });
-
-            // --- Assemble Header ---
-            stickyCloseMenuBox.appendChild(acceptTitleButton);
-            stickyCloseMenuBox.appendChild(discardTitleButton);
-            stickyCloseMenuBox.appendChild(colorButton);
-            stickyCloseMenuBox.appendChild(minimizeButton);
-            stickyCloseMenuBox.appendChild(deleteButton);
-            
-            noteHeader.appendChild(titleDisplay);
-            noteHeader.appendChild(titleInput);
-            noteHeader.appendChild(stickyCloseMenuBox);
-
-            // --- Assemble Note ---
-            const contentArea = document.createElement("div");
-            contentArea.contentEditable = true;
-            contentArea.className = "sticky-content";
-            contentArea.innerHTML = content || "Take a note.. ";
-
-            // --- Formatting Toolbar ---
-            const noteToolbar = document.createElement("div");
-            noteToolbar.className = "sticky-note-toolbar";
-
-            const formattingButtons = [
-                { command: 'bold', icon: 'assets/bold.svg', title: 'Bold' },
-                { command: 'italic', icon: 'assets/italic.svg', title: 'Italic' },
-                { command: 'underline', icon: 'assets/underline.svg', title: 'Underline' },
-                { command: 'strikeThrough', icon: 'assets/strikethrough.svg', title: 'Strikethrough' }
-            ];
-
-            formattingButtons.forEach(btn => {
-                const button = document.createElement("button");
-                button.className = "toolbar-btn";
-                button.title = btn.title;
-                button.innerHTML = `<img src="${chrome.runtime.getURL(btn.icon)}" alt="${btn.title}">`;
-                
-                button.addEventListener('mousedown', (e) => {
-                    e.preventDefault(); // Prevent contenteditable from losing focus
-                    document.execCommand(btn.command, false, null);
-                });
-                noteToolbar.appendChild(button);
-            });
-
-            contentArea.addEventListener("focus", () => {
-                if (contentArea.innerHTML === "Take a note.. ") {
-                    contentArea.innerHTML = "";
-                }
-                noteToolbar.style.display = "flex";
-            });
-
-            contentArea.addEventListener("blur", () => {
-                if (contentArea.innerHTML.trim() === "") {
-                    contentArea.innerHTML = "Take a note.. ";
-                }
-                setTimeout(() => {
-                    if (!noteToolbar.contains(document.activeElement)) {
-                        noteToolbar.style.display = "none";
-                    }
-                }, 200);
-            });
-
-            contentArea.addEventListener("input", saveNotes);
-
-            note.appendChild(noteHeader);
-            note.appendChild(contentArea);
-            note.appendChild(noteToolbar);
-
-            noteToolbar.style.display = "none";
-
-            if (collapsed) {
-                note.classList.add("collapsed");
-                minimizeButton.title = "Expand note";
-                minimizeButton.innerHTML = `<img src="${chrome.runtime.getURL('assets/maximize.svg')}" alt="Expand">`;
-            }
-
-            if (shadowRoot) {
-                shadowRoot.appendChild(note);
-            } else {
-                // Fallback (should not happen after init)
-                document.body.appendChild(note);
-            }
-
-            noteHeader.addEventListener("mousedown", (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.closest('.ap-sticky-options') || titleInput.style.display === 'block') {
-                    return;
-                }
-                dragNote(e, note);
-            });
-
-            if (shouldSave) {
-                saveNotes();
-            }
+            document.addEventListener("mousemove", moveNote);
+            document.addEventListener("mouseup", stopDrag);
         } catch (error) {
-            console.error("Error creating sticky note:", error.message);
+            console.error("Error dragging note:", error);
         }
+    }
+
+    function debouncedSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveNotes, 1000);
     }
 
     function showDeleteConfirmation(noteToDelete) {
@@ -621,50 +481,6 @@
         });
     }
 
-    function dragNote(e, note) {
-        try {
-            // Use pageX/pageY for document-relative positioning
-            let offsetX = e.pageX - note.offsetLeft;
-            let offsetY = e.pageY - note.offsetTop;
-
-            function moveNote(e) {
-                let newX = e.pageX - offsetX;
-                let newY = e.pageY - offsetY;
-
-                newX = Math.max(0, newX);
-                newX = Math.min(newX, document.body.offsetWidth - note.offsetWidth);
-
-                newY = Math.max(0, newY);
-                newY = Math.min(newY, document.body.scrollHeight - note.offsetHeight);
-
-                note.style.top = `${newY}px`;
-                note.style.left = `${newX}px`;
-            }
-
-            function stopDrag() {
-                document.removeEventListener("mousemove", moveNote);
-                document.removeEventListener("mouseup", stopDrag);
-                saveNotes();
-            }
-
-            document.addEventListener("mousemove", moveNote);
-            document.addEventListener("mouseup", stopDrag);
-        } catch (error) {
-            console.error("Error dragging note:", error);
-        }
-    }
-
-    function removeAllStickyNotes() {
-        if (!shadowRoot) return;
-        try {
-            shadowRoot
-                .querySelectorAll(".sticky-note")
-                .forEach((note) => note.remove());
-        } catch (error) {
-            console.error("Error removing all sticky notes:", error);
-        }
-    }
-
     async function deleteSupabaseNote(noteId) {
         if (!isExtensionValid()) return;
         try {
@@ -679,87 +495,69 @@
         }
     }
 
-    function getEffectiveUrl() {
-        try {
-            return window.location.href;
-        } catch (error) {
-            console.error("Error getting effective URL:", error);
-            return "unknown-url";
-        }
-    }
-
-    /**
-     * Listen for changes in storage to keep notes in sync across tabs and windows.
-     */
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (!isExtensionValid()) return;
-        if (namespace === 'sync') {
-            // Check if we are currently editing any note
-            const isEditing = shadowRoot?.querySelector('.note-title-input[style*="display: block"]') || 
-                             shadowRoot?.querySelector('.sticky-content:focus');
-            
-            if (!isEditing) {
-                console.log('Storage changed, reloading notes in content script.');
-                loadNotes();
-            }
-        }
-    });
-
     chrome.runtime.onMessage.addListener((request) => {
         if (!isExtensionValid()) return;
         if (request.action === "supabaseChange") {
             const payload = request.payload;
             const urlKey = getEffectiveUrl();
-            if (payload.record?.url === urlKey || payload.old_record?.url === urlKey) {
-                console.log("Supabase Realtime change for this page! Reloading...");
-                loadNotes();
+            const record = payload.record || payload.new || payload.old_record || payload.old;
+            const oldRecord = payload.old_record || payload.old;
+            const eventType = payload.eventType;
+
+            if (record?.url !== urlKey && oldRecord?.url !== urlKey) return;
+
+            if (eventType === 'DELETE') {
+                const idToDelete = oldRecord?.id || record?.id;
+                const noteEl = shadowRoot?.querySelector(`.sticky-note[data-id="${idToDelete}"]`);
+                if (noteEl) noteEl.remove();
+            } else {
+                const existingNote = shadowRoot?.querySelector(`.sticky-note[data-id="${record.id}"]`);
+                const isEditing = existingNote && (
+                    existingNote.querySelector('.sticky-content:focus') || 
+                    existingNote.querySelector('.note-title-input[style*="display: block"]')
+                );
+
+                if (isEditing) return;
+
+                if (existingNote) {
+                    existingNote.querySelector(".sticky-content").innerHTML = record.content;
+                    existingNote.querySelector(".note-title-display").textContent = record.title;
+                    existingNote.querySelector(".note-title-input").value = record.title;
+                    existingNote.style.top = record.top;
+                    existingNote.style.left = record.left;
+                    existingNote.dataset.color = record.color;
+                    existingNote.querySelector(".note-header").style.backgroundColor = record.color;
+                    if (record.collapsed) existingNote.classList.add("collapsed");
+                    else existingNote.classList.remove("collapsed");
+                } else {
+                    createStickyNote(record.content, record.top, record.left, record.collapsed, record.title, record.color, false, record.id);
+                }
             }
         }
     });
 
-    /**
-     * Observes changes to the page URL (for SPAs) and DOM structure.
-     * This ensures notes are reloaded if the URL changes or if a framework
-     * re-renders the page and removes the notes.
-     */
     function observePageChanges() {
         try {
             const observer = new MutationObserver(() => {
-                // 1. Handle URL changes for single-page applications
                 if (window.location.href !== lastUrl) {
                     lastUrl = window.location.href;
                     loadNotes();
-                    return; // URL changed, notes are reloaded, no need for further checks
+                    return;
                 }
-
-                // 2. Handle DOM wipes by frameworks (e.g., React, Vue)
-                // If we have notes in storage for this URL but none are on the page,
-                // it's likely they were removed by a re-render.
-                const noteCount = shadowRoot ? shadowRoot.querySelectorAll('.sticky-note').length : 0;
-                if (notesExistInStorage && noteCount === 0) {
-                    // Debounce to prevent rapid-fire reloads during complex DOM manipulations
+                if (notesExistInStorage && shadowRoot?.querySelectorAll('.sticky-note').length === 0) {
                     clearTimeout(noteCheckDebounce);
                     noteCheckDebounce = setTimeout(() => {
-                        // Re-check condition in case notes were added in the meantime
-                        const currentCount = shadowRoot ? shadowRoot.querySelectorAll('.sticky-note').length : 0;
-                        if (notesExistInStorage && currentCount === 0) {
-                            console.log("Sticky notes missing from page, attempting to restore.");
+                        if (notesExistInStorage && shadowRoot?.querySelectorAll('.sticky-note').length === 0) {
                             loadNotes();
                         }
-                    }, 500);
+                    }, 2000);
                 }
             });
-
-            // Observe the body for child additions/removals. This is a good
-            // indicator of page re-renders without being overly resource-intensive.
-            if (document.body) {
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true,
-                });
-            }
+            observer.observe(document.body, { childList: true, subtree: true });
         } catch (error) {
             console.error("Error observing page changes:", error);
         }
     }
+
+    init();
 })();

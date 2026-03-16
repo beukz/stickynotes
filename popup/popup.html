@@ -153,6 +153,21 @@
     <!-- msg ends -->
   </div>
 
+  <!-- Logout Confirmation Modal -->
+  <div id="logout-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="fi fi-rr-exit"></i>
+        <h3>Confirm Logout</h3>
+      </div>
+      <p>Are you sure you want to sign out of your account?</p>
+      <div class="modal-actions">
+        <button id="confirm-logout-btn" class="modal-btn confirm">Sign Out</button>
+        <button id="cancel-logout-btn" class="modal-btn cancel">Not Now</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Load popup logic as a module -->
   <script type="module" src="popup.js"></script>
 

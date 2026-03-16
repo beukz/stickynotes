@@ -815,13 +815,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const logoutModal = document.getElementById('logout-modal');
+  const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
+  const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
+
+  function showLogoutModal() {
+    logoutModal.style.display = 'flex';
+    setTimeout(() => logoutModal.classList.add('active'), 10);
+  }
+
+  function hideLogoutModal() {
+    logoutModal.classList.remove('active');
+    setTimeout(() => logoutModal.style.display = 'none', 300);
+  }
+
+  confirmLogoutBtn.addEventListener('click', async () => {
+    hideLogoutModal();
+    await signOut();
+    currentUser = null;
+    loadNotes();
+  });
+
+  cancelLogoutBtn.addEventListener('click', () => {
+    hideLogoutModal();
+  });
+
   googleBtn.addEventListener('click', async () => {
     if (currentUser) {
-      if (confirm('Are you sure you want to sign out?')) {
-        await signOut();
-        currentUser = null;
-        loadNotes();
-      }
+      showLogoutModal();
     } else {
       await startGoogleSignIn();
     }

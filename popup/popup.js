@@ -515,69 +515,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const session = await getSession();
     currentUser = session?.user || null;
 
+    // Unified Migration Prompt Visibility Logic
+    const storageKeys = { sync: ['migration_log'], local: ['migration_dismissed'] };
+    const [syncData, localData, allSyncData] = await Promise.all([
+        new Promise(resolve => chrome.storage.sync.get(storageKeys.sync, resolve)),
+        new Promise(resolve => chrome.storage.local.get(storageKeys.local, resolve)),
+        new Promise(resolve => chrome.storage.sync.get(null, resolve))
+    ]);
+
+    const isMigrated = !!syncData.migration_log;
+    const isDismissed = !!localData.migration_dismissed;
+    const hasLocalNotes = Object.keys(allSyncData).some(key => 
+        !['collapsed_domains', 'migration_log'].includes(key) && 
+        Array.isArray(allSyncData[key]) && allSyncData[key].length > 0
+    );
+
+    const shouldShowPrompt = !isMigrated && !isDismissed && hasLocalNotes;
+
+    if (shouldShowPrompt) {
+        if (migrationPrompt) migrationPrompt.style.display = 'flex';
+        if (accountSection) accountSection.style.display = 'flex';
+    } else {
+        if (migrationPrompt) migrationPrompt.style.display = 'none';
+        // Only hide accountSection if it doesn't contain other future tools/info
+        if (accountSection) accountSection.style.display = 'none';
+    }
+
     if (currentUser && session?.access_token) {
       authContainer.style.display = 'flex';
-      accountSection.style.display = 'flex';
+      // Account section visibility is handled by shouldShowPrompt above
       googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign out';
       
-      // Also check sync storage for migration status while logged in
-      chrome.storage.sync.get("migration_log", (data) => {
-        if (data.migration_log) {
-          if (migrationPrompt) migrationPrompt.style.display = 'none';
-          if (accountSection) accountSection.style.display = 'none';
-        }
-      });
-
       await loadSupabaseNotes(session.access_token);
       return;
     }
 
     // Show login button if not signed in
     authContainer.style.display = 'flex';
-    accountSection.style.display = 'none';
-    
     googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign in';
-
+    
     // Check if we are in a real extension environment
-    if (
-      typeof chrome !== 'undefined' &&
-      chrome.storage &&
-      chrome.storage.sync
-    ) {
-      chrome.storage.sync.get(null, (data) => {
-        if (chrome.runtime.lastError) {
-          console.error('Error retrieving data:', chrome.runtime.lastError);
-          return;
-        }
-        const notesData = { ...data };
-        const collapsedDomainsState = data.collapsed_domains || [];
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+        const notesData = { ...allSyncData };
+        const collapsedDomainsState = allSyncData.collapsed_domains || [];
         delete notesData.collapsed_domains;
         delete notesData.migration_log;
 
-        // Check if there are any actual notes in local sync storage
-        const hasLocalNotes = Object.keys(notesData).some(key => Array.isArray(notesData[key]) && notesData[key].length > 0);
-
-        // Check if user has already dismissed the prompt in local storage
-        chrome.storage.local.get("migration_dismissed", (localData) => {
-            const isDismissed = localData.migration_dismissed;
-            
-            if (data.migration_log || isDismissed || !hasLocalNotes) {
-                if (migrationPrompt) migrationPrompt.style.display = 'none';
-            } else {
-                if (migrationPrompt) migrationPrompt.style.display = 'flex';
-                if (accountSection) accountSection.style.display = 'flex';
-            }
-        });
-
         allNotesData = notesData;
         renderNotes(allNotesData, collapsedDomainsState);
-      });
-    }
-    else {
+    } else {
       // Fallback to mock data for local development/testing
-      console.warn(
-        'chrome.storage.sync API not available. Loading mock data for development.'
-      );
+      console.warn('chrome.storage.sync API not available. Loading mock data for development.');
       allNotesData = mockNotesData;
       renderNotes(mockNotesData, []);
     }
@@ -850,6 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dismissMigrationBtn.addEventListener('click', () => {
         chrome.storage.local.set({ "migration_dismissed": true }, () => {
             if (migrationPrompt) migrationPrompt.style.display = 'none';
+            if (accountSection) accountSection.style.display = 'none';
         });
     });
   }

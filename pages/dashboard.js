@@ -154,8 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (notesToShow.length === 0) {
             const message = document.createElement("div");
             message.className = "no-notes-message";
-            message.textContent = searchTerm 
-                ? "No notes match your search." 
+            message.textContent = searchTerm
+                ? "No notes match your search."
                 : "No notes here. Go create some!";
             notesGrid.appendChild(message);
             return;
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const deleteBtn = card.querySelector('.delete-btn');
             const saveBtn = card.querySelector('.save-btn');
             const cancelBtn = card.querySelector('.cancel-btn');
-            
+
             let originalContent = note.content;
             let originalTitle = note.title || 'Note';
 
@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.className = "toolbar-btn";
                 button.title = btn.title;
                 button.innerHTML = `<img src="${btn.icon}" alt="${btn.title}">`;
-                
+
                 button.addEventListener('mousedown', (e) => {
                     e.preventDefault(); // Prevent contenteditable from losing focus
                     document.execCommand(btn.command, false, null);
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const newContent = noteContent.innerHTML;
                 const newTitle = noteTitle.textContent.trim() || 'Note';
                 updateNote(note.url, note, newContent, newTitle);
-                
+
                 noteTitle.contentEditable = false;
                 noteTitle.classList.remove('editing');
                 noteContent.contentEditable = false;
@@ -399,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const notesData = { ...data };
                 delete notesData.collapsed_domains;
                 allNotesData = notesData;
-                
+
                 renderDomains(allNotesData);
                 renderNotes(allNotesData);
             });
@@ -409,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderNotes({});
         }
     }
-    
+
     searchInput.addEventListener('input', () => renderNotes(allNotesData));
 
     // Initial load

@@ -90,10 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {function} onConfirm - The callback function to execute on confirmation.
    */
   function showPopupDeleteConfirmation(noteItem, onConfirm) {
-    // Prevent multiple modals on the same item
-    if (noteItem.querySelector('.popup-delete-overlay')) {
-      return;
-    }
+    if (noteItem.querySelector('.popup-delete-overlay')) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'popup-delete-overlay';
@@ -101,25 +98,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.createElement('div');
     modal.className = 'popup-delete-modal';
     modal.innerHTML = `
-            <p>Delete this note?</p>
             <div class="popup-modal-buttons">
-                <button class="confirm-delete">Delete</button>
-                <button class="cancel-delete">Cancel</button>
+                <button class="confirm-delete" title="Confirm Delete"><i class="fi fi-rr-check"></i></button>
+                <button class="cancel-delete" title="Cancel"><i class="fi fi-rr-cross-small"></i></button>
             </div>
         `;
 
     overlay.appendChild(modal);
     noteItem.appendChild(overlay);
 
+    // Trigger transition
+    setTimeout(() => overlay.classList.add('active'), 10);
+
+    const closeOverlay = () => {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 250);
+    };
+
     modal.querySelector('.confirm-delete').addEventListener('click', (e) => {
-      e.stopPropagation(); // Prevent event bubbling
+      e.stopPropagation();
       onConfirm();
-      overlay.remove();
+      closeOverlay();
     });
 
     modal.querySelector('.cancel-delete').addEventListener('click', (e) => {
       e.stopPropagation();
-      overlay.remove();
+      closeOverlay();
     });
   }
 

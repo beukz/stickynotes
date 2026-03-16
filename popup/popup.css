@@ -981,31 +981,59 @@ p.ap-msg-text {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    text-align: center;
-    padding: 10px;
+    padding: 5px;
     box-sizing: border-box;
-    border-radius: 4px;
-    /* Match note-item's radius */
+    border-radius: 0;
+    /* Square borders to fit note exactly */
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
-.popup-delete-modal p {
-    margin-bottom: 10px;
-    font-size: 0.9rem;
+.popup-delete-overlay.active {
+    opacity: 1;
+}
+
+.popup-delete-modal {
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 100%;
+}
+
+.popup-delete-overlay.active .popup-delete-modal {
+    transform: scale(1);
+}
+
+.popup-modal-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
 }
 
 .popup-modal-buttons button {
-    padding: 5px 10px;
+    flex: 1;
+    max-width: 35px;
+    height: 35px;
+    padding: 0;
     border: none;
-    border-radius: 3px;
+    border-radius: 30px;
+    /* Square icons */
     cursor: pointer;
-    font-size: 0.8rem;
-    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.popup-modal-buttons button i {
+    font-size: 1rem;
+    margin-top: 3px;
 }
 
 .popup-modal-buttons .confirm-delete {
@@ -1015,15 +1043,17 @@ p.ap-msg-text {
 
 .popup-modal-buttons .confirm-delete:hover {
     background-color: var(--dBtnColorHover);
+    transform: scale(1.1);
 }
 
 .popup-modal-buttons .cancel-delete {
-    background-color: #95a5a6;
-    color: white;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
 .popup-modal-buttons .cancel-delete:hover {
-    background-color: #7f8c8d;
+    background-color: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
 }
 
 /* Supabase Auth Section */

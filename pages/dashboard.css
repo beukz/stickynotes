@@ -22,7 +22,7 @@
     --shadow-sm: 0 1px 2px rgba(15, 15, 15, 0.1);
     --shadow-md: 0 4px 6px -1px rgba(15, 15, 15, 0.1), 0 2px 4px -1px rgba(15, 15, 15, 0.06);
     --shadow-lg: 0 10px 20px -5px rgba(15, 15, 15, 0.15);
-    --sidebar-width: 260px;
+    --sidebar-width: 240px;
     --header-height: 54px;
 }
 
@@ -79,14 +79,51 @@ body {
     overflow-y: auto;
 }
 
-.domain-nav h3 {
+.sidebar-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.sidebar-section-header:hover {
+    background-color: rgba(55, 53, 47, 0.04);
+}
+
+.sidebar-section-header h3 {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0 0.75rem;
-    margin: 1.5rem 0 0.5rem 0;
+    /* text-transform: uppercase; */
+    letter-spacing: 0.02em;
+    padding: 0;
+    margin: 0;
+}
+
+.toggle-icon {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.toggle-icon.collapsed {
+    transform: rotate(-90deg);
+}
+
+.domain-list {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.domain-list.collapsed {
+    display: none;
 }
 
 .domain-link {
@@ -99,7 +136,7 @@ body {
     border-radius: 7px;
     transition: background-color 0.15s ease;
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
 }
 
 .domain-link:hover {
@@ -129,6 +166,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 /* --- Main Content --- */
@@ -231,15 +269,28 @@ body {
 
 .note-card-footer {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+}
+
+.footer-right {
+    display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 1rem;
-    padding-top: 0.5rem;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
-.note-card:hover .note-card-footer {
+.note-card:hover .footer-right {
     opacity: 1;
 }
 

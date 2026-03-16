@@ -1,3 +1,6 @@
+import { selectRows, updateRows, deleteRows } from "../supabase/client.js";
+import { getSession } from "../supabase/auth.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const domainNav = document.getElementById("domain-nav");
     const notesGrid = document.getElementById("notes-grid");
@@ -48,9 +51,27 @@ document.addEventListener("DOMContentLoaded", () => {
         myNotesLink.innerHTML = `<i class="fi fi-rr-document"></i> <span>My Notes</span>`;
         domainNav.appendChild(myNotesLink);
 
-        const domainsHeader = document.createElement('h3');
-        domainsHeader.textContent = 'Websites';
-        domainNav.appendChild(domainsHeader);
+        const domainsHeaderContainer = document.createElement('div');
+        domainsHeaderContainer.className = 'sidebar-section-header';
+        
+        const isCollapsed = localStorage.getItem('websites_section_collapsed') === 'true';
+        
+        domainsHeaderContainer.innerHTML = `
+            <h3>Websites</h3>
+            <i class="fi fi-rr-angle-small-down toggle-icon ${isCollapsed ? 'collapsed' : ''}"></i>
+        `;
+        
+        domainNav.appendChild(domainsHeaderContainer);
+
+        const domainList = document.createElement('div');
+        domainList.className = `domain-list ${isCollapsed ? 'collapsed' : ''}`;
+        domainNav.appendChild(domainList);
+
+        domainsHeaderContainer.addEventListener('click', () => {
+            const nowCollapsed = domainList.classList.toggle('collapsed');
+            domainsHeaderContainer.querySelector('.toggle-icon').classList.toggle('collapsed');
+            localStorage.setItem('websites_section_collapsed', nowCollapsed);
+        });
 
         const sortedDomains = Object.keys(groupedNotes).sort();
 
@@ -63,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>${domain}</span>
             `;
             domainLink.addEventListener('click', () => setActiveDomain(domain));
-            domainNav.appendChild(domainLink);
+            domainList.appendChild(domainLink);
         }
     }
 
@@ -187,24 +208,29 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 </div>
                 <div class="note-card-footer">
-                    <button class="note-action-btn edit-btn" title="Edit Note">
-                        <i class="fi fi-rr-pencil"></i>
-                    </button>
-                    <button class="note-action-btn visit-btn" title="Go to Note">
-                        <i class="fi fi-rr-arrow-up-right-from-square"></i>
-                    </button>
-                    <button class="note-action-btn copy-btn" title="Copy Note Content">
-                        <i class="fi fi-rr-copy"></i>
-                    </button>
-                    <button class="note-action-btn delete-btn" title="Delete Note">
-                        <i class="fi fi-rr-trash"></i>
-                    </button>
-                    <button class="note-action-btn save-btn" title="Save Changes">
-                        <i class="fi fi-rr-check"></i>
-                    </button>
-                    <button class="note-action-btn cancel-btn" title="Cancel Edit">
-                        <i class="fi fi-rr-cross-small"></i>
-                    </button>
+                    <div class="footer-left">
+                        ${note.source === 'cloud' ? '<i class="fi fi-rr-cloud-share" style="font-size: 0.9rem; color: #2383e2; opacity: 0.8;" title="Cloud Note"></i>' : ''}
+                    </div>
+                    <div class="footer-right">
+                        <button class="note-action-btn edit-btn" title="Edit Note">
+                            <i class="fi fi-rr-pencil"></i>
+                        </button>
+                        <button class="note-action-btn visit-btn" title="Go to Note">
+                            <i class="fi fi-rr-arrow-up-right-from-square"></i>
+                        </button>
+                        <button class="note-action-btn copy-btn" title="Copy Note Content">
+                            <i class="fi fi-rr-copy"></i>
+                        </button>
+                        <button class="note-action-btn delete-btn" title="Delete Note">
+                            <i class="fi fi-rr-trash"></i>
+                        </button>
+                        <button class="note-action-btn save-btn" title="Save Changes">
+                            <i class="fi fi-rr-check"></i>
+                        </button>
+                        <button class="note-action-btn cancel-btn" title="Cancel Edit">
+                            <i class="fi fi-rr-cross-small"></i>
+                        </button>
+                    </div>
                 </div>
             `;
 
@@ -315,7 +341,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function updateNote(url, originalNote, newContent, newTitle) {
+    async function updateNote(url, originalNote, newContent, newTitle) {
+        if (originalNote.source === 'cloud') {
+            const session = await getSession();
+            if (!session?.access_token) return;
+
+            try {
+                await updateRows("sticky_notes", `id=eq.${originalNote.id}`, {
+                    content: newContent,
+                    title: newTitle
+                }, session.access_token);
+                // Update local model
+                originalNote.content = newContent;
+                originalNote.title = newTitle;
+            } catch (error) {
+                console.error("Error updating cloud note:", error);
+            }
+            return;
+        }
+
         if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
             console.warn('Storage API not available. Cannot update note.');
             return;
@@ -350,7 +394,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function deleteNote(url, noteToDelete) {
+    async function deleteNote(url, noteToDelete) {
+        if (noteToDelete.source === 'cloud') {
+            const session = await getSession();
+            if (!session?.access_token) return;
+
+            try {
+                await deleteRows("sticky_notes", `id=eq.${noteToDelete.id}`, session.access_token);
+                loadAllData(); // Refresh to remove from view
+            } catch (error) {
+                console.error("Error deleting cloud note:", error);
+            }
+            return;
+        }
+
         chrome.storage.sync.get(url, (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error retrieving notes for deletion:", chrome.runtime.lastError);
@@ -389,25 +446,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function loadAllData() {
+    async function loadAllData() {
+        let localData = {};
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
-            chrome.storage.sync.get(null, (data) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error retrieving data:", chrome.runtime.lastError);
-                    return;
-                }
-                const notesData = { ...data };
-                delete notesData.collapsed_domains;
-                allNotesData = notesData;
-
-                renderDomains(allNotesData);
-                renderNotes(allNotesData);
-            });
+            const data = await new Promise(resolve => chrome.storage.sync.get(null, resolve));
+            localData = { ...data };
+            delete localData.collapsed_domains;
         } else {
-            console.warn("chrome.storage.sync API not available. Dashboard will be empty.");
-            renderDomains({});
-            renderNotes({});
+            console.warn("chrome.storage.sync API not available.");
         }
+
+        let cloudNotesByUrl = {};
+        try {
+            const session = await getSession();
+            if (session?.user) {
+                const cloudNotes = await selectRows("sticky_notes", `user_id=eq.${session.user.id}`, session.access_token);
+                cloudNotes.forEach(note => {
+                    if (!cloudNotesByUrl[note.url]) cloudNotesByUrl[note.url] = [];
+                    cloudNotesByUrl[note.url].push({ ...note, source: 'cloud' });
+                });
+            }
+        } catch (error) {
+            console.error("Error loading cloud notes:", error);
+        }
+
+        // Merge local and cloud data
+        const mergedData = { ...localData };
+        for (const [url, notes] of Object.entries(cloudNotesByUrl)) {
+            if (!mergedData[url]) {
+                mergedData[url] = notes;
+            } else {
+                mergedData[url] = [...mergedData[url], ...notes];
+            }
+        }
+
+        allNotesData = mergedData;
+        renderDomains(allNotesData);
+        renderNotes(allNotesData);
     }
 
     searchInput.addEventListener('input', () => renderNotes(allNotesData));

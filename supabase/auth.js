@@ -73,7 +73,55 @@ async function removeLocal(keys) {
 
 export async function getSession() {
   const data = await getLocal([STORAGE_KEY]);
-  return data[STORAGE_KEY] || null;
+  let session = data[STORAGE_KEY] || null;
+
+  if (session && session.access_token && session.expires_at) {
+    const expiresAt = session.expires_at * 1000; // access_token expiry in ms
+    const now = Date.now();
+    const margin = 5 * 60 * 1000; // 5 minute safety margin
+
+    if (now > expiresAt - margin) {
+      console.log("[Auth] Session expiring soon, attempting refresh...");
+      try {
+        session = await refreshSession(session.refresh_token);
+      } catch (error) {
+        console.error("[Auth] Session refresh failed:", error);
+        // If refresh fails, we might still return the old session and let the API 401
+        // OR we sign out if the refresh token is also invalid.
+        // For now, let's try to return null if token is actually expired.
+        if (now > expiresAt) return null;
+      }
+    }
+  }
+
+  return session;
+}
+
+export async function refreshSession(refreshToken) {
+  if (!refreshToken) throw new Error("No refresh token available");
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 400 || res.status === 401) {
+      // Refresh token likely expired or revoked
+      await signOut();
+      throw new Error("Session expired. Please sign in again.");
+    }
+    throw new Error(`Refresh failed (${res.status}): ${json?.error_description || json?.msg || JSON.stringify(json)}`);
+  }
+
+  // Store new session
+  await setLocal({ [STORAGE_KEY]: json });
+  return json;
 }
 
 export async function signOut() {

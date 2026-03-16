@@ -547,19 +547,25 @@ document.addEventListener('DOMContentLoaded', () => {
           console.error('Error retrieving data:', chrome.runtime.lastError);
           return;
         }
-        collapsedDomainsState = data.collapsed_domains || [];
         const notesData = { ...data };
+        const collapsedDomainsState = data.collapsed_domains || [];
         delete notesData.collapsed_domains;
-        delete notesData.migration_log; // Hide internal logs from UI rendering
+        delete notesData.migration_log;
 
-        // Handle migration prompt visibility
-        if (data.migration_log) {
-            if (migrationPrompt) migrationPrompt.style.display = 'none';
-            if (accountSection) accountSection.style.display = 'none';
-        } else {
-            if (migrationPrompt) migrationPrompt.style.display = 'flex';
-            if (accountSection) accountSection.style.display = 'flex';
-        }
+        // Check if there are any actual notes in local sync storage
+        const hasLocalNotes = Object.keys(notesData).some(key => Array.isArray(notesData[key]) && notesData[key].length > 0);
+
+        // Check if user has already dismissed the prompt in local storage
+        chrome.storage.local.get("migration_dismissed", (localData) => {
+            const isDismissed = localData.migration_dismissed;
+            
+            if (data.migration_log || isDismissed || !hasLocalNotes) {
+                if (migrationPrompt) migrationPrompt.style.display = 'none';
+            } else {
+                if (migrationPrompt) migrationPrompt.style.display = 'flex';
+                if (accountSection) accountSection.style.display = 'flex';
+            }
+        });
 
         allNotesData = notesData;
         renderNotes(allNotesData, collapsedDomainsState);
@@ -836,6 +842,15 @@ document.addEventListener('DOMContentLoaded', () => {
       await startGoogleSignIn();
     }
   });
+
+  const dismissMigrationBtn = document.getElementById('dismiss-migration-btn');
+  if (dismissMigrationBtn) {
+    dismissMigrationBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ "migration_dismissed": true }, () => {
+            if (migrationPrompt) migrationPrompt.style.display = 'none';
+        });
+    });
+  }
 
   // Load notes when the popup is opened
   loadNotes();

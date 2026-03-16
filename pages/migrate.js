@@ -1,5 +1,5 @@
 // pages/migrate.js
-import { insertRows } from "../supabase/client.js";
+import { insertRows, selectRows } from "../supabase/client.js";
 import { getSession } from "../supabase/auth.js";
 
 const scanBtn = document.getElementById("scan-btn");
@@ -18,6 +18,11 @@ function isNotesKey(key) {
   if (!key) return false;
   if (key === "collapsed_domains") return false;
   return true;
+}
+
+function getNoteSignature(note) {
+  // Use a combination of properties to identify a unique note
+  return `${note.url}|${note.title}|${note.content}|${note.top}|${note.left}`;
 }
 
 function normalizeNote(url, note, userId = null) {
@@ -117,10 +122,31 @@ async function migrate() {
   const migrationId = `mig_${Date.now()}`;
 
   try {
-    setStatus("Syncing with Cloud...\n\nJust a moment.");
+    setStatus("Syncing with Database...\n\nChecking for existing notes to avoid duplicates.");
+
+    // 1. Fetch existing cloud notes for the user to prevent duplicates
+    const existingNotes = await selectRows("sticky_notes", `user_id=eq.${userId}`, session.access_token);
+    const existingSignatures = new Set(existingNotes.map(getNoteSignature));
+
+    // 2. Filter out duplicates from scanned rows
+    const notesToMigrate = scanned.rows.filter(row => {
+      const sig = getNoteSignature(row);
+      return !existingSignatures.has(sig);
+    });
+
+    const skippedCount = scanned.rows.length - notesToMigrate.length;
+
+    if (notesToMigrate.length === 0) {
+      setStatus(`All ${scanned.noteCount} notes already exist in the database. No new notes to migrate.`, "ok");
+      scanBtn.disabled = false;
+      migrateBtn.disabled = false;
+      return;
+    }
+
+    setStatus(`Syncing with Database...\n\nFound ${notesToMigrate.length} new notes (Skipped ${skippedCount} duplicates).`);
 
     // Batch inserts to avoid request size limits.
-    const batches = chunk(scanned.rows, 200);
+    const batches = chunk(notesToMigrate, 200);
 
     for (let i = 0; i < batches.length; i++) {
       setStatus(`Uploading batch ${i + 1}/${batches.length}...`);
@@ -146,7 +172,7 @@ async function migrate() {
     });
 
     setStatus(
-      `Migration complete.\n\nUploaded: ${scanned.noteCount} notes\nMigration ID: ${migrationId}\n\nLocal notes were NOT deleted.`,
+      `Migration complete.\n\nUploaded: ${notesToMigrate.length} notes\nSkipped: ${skippedCount} duplicates\nMigration ID: ${migrationId}\n\nLocal notes were NOT deleted.`,
       "ok"
     );
 

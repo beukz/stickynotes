@@ -167,7 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    for (const [domain, entries] of Object.entries(groupedNotes)) {
+    const sortedDomains = Object.keys(groupedNotes).sort((a, b) => a.localeCompare(b));
+    for (const domain of sortedDomains) {
+      const entries = groupedNotes[domain];
       const totalNotes = entries.reduce(
         (sum, entry) => sum + entry.notes.length,
         0

@@ -369,7 +369,7 @@
         });
 
         // Title Editing
-        titleDisplay.addEventListener("click", () => {
+        titleDisplay.addEventListener("dblclick", () => {
             titleDisplay.style.display = "none";
             titleInput.style.display = "block";
             titleInput.focus();

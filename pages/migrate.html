@@ -31,6 +31,21 @@
         </div>
     </div>
 
+    <!-- Cleanup Confirmation Modal -->
+    <div id="cleanup-modal" class="modal-overlay">
+        <div class="modal-content-cleanup">
+            <div class="modal-header-simple">
+                <i class="fi fi-rr-broom"></i>
+                <h3>Clean Up Local Storage?</h3>
+            </div>
+            <p>Your notes are now safely synced to the database. Would you like to remove the local copies from this browser to keep your storage tidy?</p>
+            <div class="modal-actions-horizontal">
+                <button id="confirm-cleanup-btn" class="modal-btn-delete">Clear Local Notes</button>
+                <button id="cancel-cleanup-btn" class="modal-btn-cancel">Keep for Now</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="migrate.js"></script>
 </body>
 </html>

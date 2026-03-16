@@ -149,6 +149,11 @@ async function migrate() {
       `Migration complete.\n\nUploaded: ${scanned.noteCount} notes\nMigration ID: ${migrationId}\n\nLocal notes were NOT deleted.`,
       "ok"
     );
+
+    // Show cleanup offer after a brief delay
+    setTimeout(() => {
+        showCleanupModal();
+    }, 1500);
   } catch (e) {
     console.error(e);
     setStatus(`Migration failed:\n${String(e?.message || e)}`, "err");
@@ -166,6 +171,44 @@ migrateBtn.addEventListener("click", () => {
   migrate().catch((e) => setStatus(`Migration failed:\n${String(e?.message || e)}`, "err"));
 });
 
+
+// --- Cleanup Modal Logic ---
+const cleanupModal = document.getElementById('cleanup-modal');
+const confirmCleanupBtn = document.getElementById('confirm-cleanup-btn');
+const cancelCleanupBtn = document.getElementById('cancel-cleanup-btn');
+
+function showCleanupModal() {
+    cleanupModal.classList.add('active');
+}
+
+function hideCleanupModal() {
+    cleanupModal.classList.remove('active');
+}
+
+async function clearLocalStorage() {
+    if (!scanned || !scanned.urls) return;
+    
+    setStatus("Cleaning up local storage...");
+    
+    try {
+        await new Promise((resolve, reject) => {
+            chrome.storage.sync.remove(scanned.urls, () => {
+                if (chrome.runtime?.lastError) reject(chrome.runtime.lastError);
+                else resolve();
+            });
+        });
+        
+        setStatus("Local storage cleaned up successfully. Your notes are now only in the database.", "ok");
+        hideCleanupModal();
+    } catch (e) {
+        console.error(e);
+        setStatus(`Cleanup failed:\n${String(e?.message || e)}`, "err");
+        hideCleanupModal();
+    }
+}
+
+confirmCleanupBtn.addEventListener('click', clearLocalStorage);
+cancelCleanupBtn.addEventListener('click', hideCleanupModal);
 
 // Auto-scan on load for convenience
 scan().catch((e) => setStatus(`Scan failed:\n${String(e?.message || e)}`, "err"));

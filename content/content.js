@@ -8,6 +8,7 @@
     let contextInvalidated = false;
     let shadowRoot = null;
     let shadowHost = null;
+    let highestZ = 100000000; // Safe high base value (far from 32-bit overflow)
 
     /**
      * Checks if the extension context is still valid.
@@ -255,12 +256,28 @@
         if (id) note.dataset.id = id;
         note.dataset.color = color;
 
-        // Default position if null (for new notes)
+        // Dynamic Z-Index: Bring note to front on interaction
+        function bringToFront() {
+            note.style.zIndex = ++highestZ;
+        }
+
+        note.addEventListener("mousedown", bringToFront);
+        note.addEventListener("focusin", bringToFront, true);
+        note.addEventListener("touchstart", bringToFront, { passive: true });
+
+        // Position Calculation
         if (isNew && !top && !left) {
             const scrollX = window.scrollX || window.pageXOffset;
             const scrollY = window.scrollY || window.pageYOffset;
-            top = (scrollY + 50) + "px";
-            left = (scrollX + 50) + "px";
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Center in viewport (approx 300x200 for initial size)
+            const centerX = scrollX + (viewportWidth / 2) - 150;
+            const centerY = scrollY + (viewportHeight / 2) - 100;
+
+            top = centerY + "px";
+            left = centerX + "px";
         }
 
         note.style.top = top || "50px";
@@ -387,6 +404,7 @@
         });
 
         if (isNew) {
+            bringToFront();
             contentArea.focus();
             debouncedSave();
         }

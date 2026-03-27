@@ -698,7 +698,7 @@ body {
 .home-card {
     background: #fff;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 17px;
     overflow: hidden;
     cursor: pointer;
 }

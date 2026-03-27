@@ -1,12 +1,12 @@
 /**
- * CANX SDK v1.3.4
+ * CANX SDK v1.3.5
  * Chrome Extension Advertising Network
- * (c) 2025 CANX Platform
+ * (c) 2026 CANX Platform
  * 
  * MV3 Compliant - Privacy First
  */
 
-(function(scope) {
+(function (scope) {
     'use strict';
 
     class CanxSDK {
@@ -15,12 +15,12 @@
             this.apiKey = config.apiKey;
             this.extensionId = config.extensionId || 'unknown';
             this.debug = config.debug || false;
-            
+
             // Configuration for the Ad Network API
             // Only the URL is needed. No Supabase Secrets/Keys are stored here.
-            this.apiUrl = 'https://brhboniwoynkdfwtqffh.supabase.co';
-            
-            this._log('Initialized v1.3.4');
+            this.apiUrl = 'https://ellejtwubvqswgmtxrab.supabase.co';
+
+            this._log('Initialized v1.3.5');
         }
 
         async renderAd(container, options = {}) {
@@ -48,7 +48,7 @@
             host.id = hostId;
             host.style.display = 'block';
             host.style.width = '100%';
-            host.style.height = '100%'; 
+            host.style.height = '100%';
             container.appendChild(host);
 
             const shadow = host.attachShadow({ mode: 'closed' });
@@ -57,7 +57,7 @@
             try {
                 // Fetch Ad Decision
                 const adData = await this._fetchAdDecision(options);
-                
+
                 if (!adData) {
                     this._log('No ad fill returned');
                     if (typeof options.onNoFill === 'function') options.onNoFill();
@@ -92,11 +92,11 @@
          */
         async _fetchAdDecision(options) {
             const format = options.format || 'CARD';
-            
+
             try {
                 this._log('Fetching from Edge Network...');
                 const endpoint = this.apiUrl + '/functions/v1/get-ad-decision';
-                
+
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
@@ -111,17 +111,17 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     if (data.error) {
-                         this._error('API Error: ' + data.error);
-                         return null;
+                        this._error('API Error: ' + data.error);
+                        return null;
                     }
 
                     if (data.ad === null) {
                         this._log('No Fill');
-                        return null; 
+                        return null;
                     }
-                    
+
                     if (data.campaignId) {
                         this._log('Ad received', data.campaignId);
                         return data;
@@ -140,7 +140,7 @@
             // 1. Clear existing
             const existingContainer = shadowRoot.querySelector('.canx-ad-container');
             if (existingContainer) existingContainer.remove();
-            
+
             // 2. Inject CSS
             if (!shadowRoot.querySelector('style')) {
                 const style = document.createElement('style');
@@ -177,7 +177,7 @@
                                 setTimeout(() => {
                                     if (document.visibilityState === 'visible') {
                                         this._trackEvent('IMPRESSION', ad);
-                                        observer.disconnect(); 
+                                        observer.disconnect();
                                     }
                                 }, 1000);
                             }
@@ -199,7 +199,7 @@
         }
 
         _setupAutoRefresh(host, options) {
-            const minInterval = 30; 
+            const minInterval = 30;
             const intervalSeconds = Math.max(options.refreshInterval || 0, minInterval);
             const delayMs = intervalSeconds * 1000;
 
@@ -226,7 +226,7 @@
 
         async _trackEvent(eventType, ad) {
             if (this.debug) this._log('Tracking event', eventType);
-            
+
             if (!ad.campaignId) return;
 
             try {
@@ -254,7 +254,7 @@
             const base = ":host { font-family: -apple-system, system-ui, sans-serif; box-sizing: border-box; display: block; } .canx-ad-container { position: relative; background: #fff; overflow: hidden; box-sizing: border-box; transition: opacity 0.3s; animation: fadeIn 0.5s ease-out; cursor: pointer; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } a { text-decoration: none; color: inherit; display: block; height: 100%; } .badge { position: absolute; top: 0; right: 0; background: #f1f5f9; color: #64748b; font-size: 9px; padding: 2px 5px; border-bottom-left-radius: 4px; text-transform: uppercase; font-weight: 700; z-index: 10; font-family: sans-serif; }";
 
             if (type === 'BANNER') {
-                return base + " .canx-ad-container { border: 1px solid #e2e8f0; height: 50px; padding: 0 10px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); } .canx-ad-container:hover { border-color: #cbd5e1; } a { display: flex; align-items: center; width: 100%; height: 100%; } img { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; margin-right: 10px; flex-shrink: 0; border: 1px solid #f1f5f9; } .content { display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; padding-right: 25px; } .headline { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; } .desc { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; margin-top: 1px; }";
+                return base + " .canx-ad-container { border: 1px solid #e2e8f0; height: 50px; padding: 0 10px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); } .canx-ad-container:hover { border-color: #cbd5e1; } a { display: flex; flex-direction: row; align-items: center; width: 100%; height: 100%; } img { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; margin-right: 10px; flex-shrink: 0; border: 1px solid #f1f5f9; } .content { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-width: 0; flex: 1; padding-right: 25px; } .headline { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; text-align: left; } .desc { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; margin-top: 1px; text-align: left; }";
             }
 
             if (type === 'NATIVE') {
@@ -268,30 +268,30 @@
         _getTemplate(type, data) {
             const start = '<a href="' + data.url + '" target="_blank">';
             const end = '</a>';
-            const badge = '<div class="badge">Ad</div>';
+            const badge = '';
 
             if (type === 'BANNER') {
-                return start + 
-                       '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                       '<div class="content">' +
-                           '<div class="headline">' + data.headline + '</div>' +
-                           '<div class="desc">' + data.desc + '</div>' +
-                       '</div>' +
-                       badge + end;
+                return start +
+                    '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                    '<div class="content">' +
+                    '<div class="headline">' + data.headline + '</div>' +
+                    '<div class="desc">' + data.desc + '</div>' +
+                    '</div>' +
+                    badge + end;
             }
-            
+
             if (type === 'NATIVE') {
-                return start + 
-                       '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                       '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' + 
-                       badge + end;
+                return start +
+                    '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                    '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' +
+                    badge + end;
             }
 
             // CARD
-            return start + 
-                   '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                   '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' + 
-                   badge + end;
+            return start +
+                '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' +
+                badge + end;
         }
 
         _sanitize(str) {
@@ -304,7 +304,7 @@
                 console.log("%c[CANX] " + msg, "color: #4f46e5; font-weight: bold;", data || '');
             }
         }
-        
+
         _error(msg, err) {
             console.error("%c[CANX Error] " + msg, "color: #ef4444; font-weight: bold;", err);
         }

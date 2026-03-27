@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize the ad network (assuming CANX is globally available after import)
   // You'll need to replace 'YOUR_API_KEY' with your actual CANX API key.
-  const adNetwork = new CANX({ apiKey: '5c9a339e12824cace3a3b3fb3b1a4e5f', debug: true });
+  const adNetwork = new CANX({ apiKey: '83b1a3440da12c44cd2f847e942d6b02', debug: true });
 
   // Render the ad
   if (canxContainer) {
@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => overlay.classList.add('active'), 10);
 
     const closeOverlay = () => {
-        overlay.classList.remove('active');
-        setTimeout(() => overlay.remove(), 250);
+      overlay.classList.remove('active');
+      setTimeout(() => overlay.remove(), 250);
     };
 
     modal.querySelector('.confirm-delete').addEventListener('click', (e) => {
@@ -248,26 +248,26 @@ document.addEventListener('DOMContentLoaded', () => {
           // Add a "Show more" button if the content overflows
           // Check after appending to noteItem so we have dimensions
           requestAnimationFrame(() => {
-              if (contentContainer.scrollHeight > 120) {
-                  contentContainer.classList.add('is-truncated');
+            if (contentContainer.scrollHeight > 120) {
+              contentContainer.classList.add('is-truncated');
 
-                  const showMoreWrapper = document.createElement('div');
-                  showMoreWrapper.className = 'show-more-container';
+              const showMoreWrapper = document.createElement('div');
+              showMoreWrapper.className = 'show-more-container';
 
-                  const showMoreBtn = document.createElement('button');
-                  showMoreBtn.className = 'show-more-btn';
-                  showMoreBtn.textContent = 'Show more';
-                  
-                  showMoreBtn.addEventListener('click', (e) => {
-                      e.stopPropagation();
-                      const isExpanded = contentContainer.classList.toggle('expanded');
-                      showMoreBtn.classList.toggle('active');
-                      showMoreBtn.textContent = isExpanded ? 'Show less' : 'Show more';
-                  });
-                  
-                  showMoreWrapper.appendChild(showMoreBtn);
-                  noteItem.insertBefore(showMoreWrapper, noteOptions);
-              }
+              const showMoreBtn = document.createElement('button');
+              showMoreBtn.className = 'show-more-btn';
+              showMoreBtn.textContent = 'Show more';
+
+              showMoreBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isExpanded = contentContainer.classList.toggle('expanded');
+                showMoreBtn.classList.toggle('active');
+                showMoreBtn.textContent = isExpanded ? 'Show less' : 'Show more';
+              });
+
+              showMoreWrapper.appendChild(showMoreBtn);
+              noteItem.insertBefore(showMoreWrapper, noteOptions);
+            }
           });
 
           const noteOptions = document.createElement('div');
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // If there's a show more button, and it wasn't expanded, collapse it back
             const showBtn = noteItem.querySelector('.show-more-btn');
             if (showBtn && !showBtn.classList.contains('active')) {
-                contentContainer.classList.remove('expanded');
+              contentContainer.classList.remove('expanded');
             }
             noteOptions.classList.remove('editing');
             editButton.style.display = 'flex';
@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fetch collapsed state from storage
       const storageData = await new Promise((resolve) => {
-          chrome.storage.sync.get('collapsed_domains', (data) => resolve(data));
+        chrome.storage.sync.get('collapsed_domains', (data) => resolve(data));
       });
       collapsedDomainsState = storageData.collapsed_domains || [];
 
@@ -522,34 +522,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Unified Migration Prompt Visibility Logic
     const storageKeys = { sync: ['migration_log'], local: ['migration_dismissed'] };
     const [syncData, localData, allSyncData] = await Promise.all([
-        new Promise(resolve => chrome.storage.sync.get(storageKeys.sync, resolve)),
-        new Promise(resolve => chrome.storage.local.get(storageKeys.local, resolve)),
-        new Promise(resolve => chrome.storage.sync.get(null, resolve))
+      new Promise(resolve => chrome.storage.sync.get(storageKeys.sync, resolve)),
+      new Promise(resolve => chrome.storage.local.get(storageKeys.local, resolve)),
+      new Promise(resolve => chrome.storage.sync.get(null, resolve))
     ]);
 
     const isMigrated = !!syncData.migration_log;
     const isDismissed = !!localData.migration_dismissed;
-    const hasLocalNotes = Object.keys(allSyncData).some(key => 
-        !['collapsed_domains', 'migration_log'].includes(key) && 
-        Array.isArray(allSyncData[key]) && allSyncData[key].length > 0
+    const hasLocalNotes = Object.keys(allSyncData).some(key =>
+      !['collapsed_domains', 'migration_log'].includes(key) &&
+      Array.isArray(allSyncData[key]) && allSyncData[key].length > 0
     );
 
     const shouldShowPrompt = !isMigrated && !isDismissed && hasLocalNotes;
 
     if (shouldShowPrompt) {
-        if (migrationPrompt) migrationPrompt.style.display = 'flex';
-        if (accountSection) accountSection.style.display = 'flex';
+      if (migrationPrompt) migrationPrompt.style.display = 'flex';
+      if (accountSection) accountSection.style.display = 'flex';
     } else {
-        if (migrationPrompt) migrationPrompt.style.display = 'none';
-        // Only hide accountSection if it doesn't contain other future tools/info
-        if (accountSection) accountSection.style.display = 'none';
+      if (migrationPrompt) migrationPrompt.style.display = 'none';
+      // Only hide accountSection if it doesn't contain other future tools/info
+      if (accountSection) accountSection.style.display = 'none';
     }
 
     if (currentUser && session?.access_token) {
       authContainer.style.display = 'flex';
       // Account section visibility is handled by shouldShowPrompt above
       googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign out';
-      
+
       await loadSupabaseNotes(session.access_token);
       return;
     }
@@ -557,16 +557,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show login button if not signed in
     authContainer.style.display = 'flex';
     googleBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo"> Sign in';
-    
+
     // Check if we are in a real extension environment
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-        const notesData = { ...allSyncData };
-        const collapsedDomainsState = allSyncData.collapsed_domains || [];
-        delete notesData.collapsed_domains;
-        delete notesData.migration_log;
+      const notesData = { ...allSyncData };
+      const collapsedDomainsState = allSyncData.collapsed_domains || [];
+      delete notesData.collapsed_domains;
+      delete notesData.migration_log;
 
-        allNotesData = notesData;
-        renderNotes(allNotesData, collapsedDomainsState);
+      allNotesData = notesData;
+      renderNotes(allNotesData, collapsedDomainsState);
     } else {
       // Fallback to mock data for local development/testing
       console.warn('chrome.storage.sync API not available. Loading mock data for development.');
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function debouncedLoadNotes() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
-        loadNotes();
+      loadNotes();
     }, 1000);
   }
 
@@ -799,8 +799,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === "supabaseChange") {
-        console.log('Supabase Realtime change detected, reloading popup.');
-        loadNotes();
+      console.log('Supabase Realtime change detected, reloading popup.');
+      loadNotes();
     }
   });
 
@@ -840,10 +840,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const dismissMigrationBtn = document.getElementById('dismiss-migration-btn');
   if (dismissMigrationBtn) {
     dismissMigrationBtn.addEventListener('click', () => {
-        chrome.storage.local.set({ "migration_dismissed": true }, () => {
-            if (migrationPrompt) migrationPrompt.style.display = 'none';
-            if (accountSection) accountSection.style.display = 'none';
-        });
+      chrome.storage.local.set({ "migration_dismissed": true }, () => {
+        if (migrationPrompt) migrationPrompt.style.display = 'none';
+        if (accountSection) accountSection.style.display = 'none';
+      });
     });
   }
 

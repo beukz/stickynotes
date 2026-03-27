@@ -114,11 +114,20 @@
 
     function getEffectiveUrl() {
         const url = new URL(window.location.href);
-        return url.origin + url.pathname;
+        let path = url.pathname;
+        if (path.length > 1 && path.endsWith('/')) {
+            path = path.slice(0, -1);
+        }
+        // Include search for better specificity, as requested by "URL specific"
+        return url.origin + path + url.search;
     }
 
     async function loadNotes() {
         if (!isExtensionValid()) return;
+        
+        // Immediately remove existing notes to prevent leakage during navigation
+        removeAllStickyNotes();
+        
         try {
             const urlKey = getEffectiveUrl();
             const user = await checkAuth();
@@ -564,12 +573,35 @@
 
     function observePageChanges() {
         try {
-            const observer = new MutationObserver(() => {
+            const checkUrlChange = () => {
+                if (!isExtensionValid()) return;
                 if (window.location.href !== lastUrl) {
                     lastUrl = window.location.href;
                     loadNotes();
-                    return;
                 }
+            };
+
+            // Listen for SPA navigation events
+            window.addEventListener('popstate', checkUrlChange);
+            window.addEventListener('hashchange', checkUrlChange);
+
+            // Monkey-patch pushState and replaceState to catch SPA transitions
+            const originalPushState = history.pushState;
+            const originalReplaceState = history.replaceState;
+
+            history.pushState = function() {
+                originalPushState.apply(this, arguments);
+                checkUrlChange();
+            };
+
+            history.replaceState = function() {
+                originalReplaceState.apply(this, arguments);
+                checkUrlChange();
+            };
+
+            const observer = new MutationObserver(() => {
+                checkUrlChange();
+                
                 if (notesExistInStorage && shadowRoot?.querySelectorAll('.sticky-note').length === 0) {
                     clearTimeout(noteCheckDebounce);
                     noteCheckDebounce = setTimeout(() => {

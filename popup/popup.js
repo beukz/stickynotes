@@ -19,9 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const canxContainer = document.getElementById('canx-ad-banner-slot');
 
-  // Initialize the ad network (assuming CANX is globally available after import)
-  // You'll need to replace 'YOUR_API_KEY' with your actual CANX API key.
-  const adNetwork = new CANX({ apiKey: '83b1a3440da12c44cd2f847e942d6b02', debug: true });
+  // Initialize the CANX ad network
+  const adNetwork = new CANX({ apiKey: '83b1a3440da12c44cd2f847e942d6b02', debug: false });
 
   // Render the ad
   if (canxContainer) {

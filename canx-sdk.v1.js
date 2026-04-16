@@ -1,26 +1,33 @@
 /**
- * CANX SDK v1.3.5
+ * CANX SDK v1.4.0
  * Chrome Extension Advertising Network
  * (c) 2026 CANX Platform
  * 
  * MV3 Compliant - Privacy First
  */
 
-(function (scope) {
+(function(scope) {
     'use strict';
 
     class CanxSDK {
         constructor(config) {
             if (!config.apiKey) throw new Error("CANX: apiKey is required");
             this.apiKey = config.apiKey;
-            this.extensionId = config.extensionId || 'unknown';
+            
+            // Priority: config.extensionId > chrome.runtime.id > 'unknown'
+            this.extensionId = config.extensionId || 
+                               (typeof chrome !== 'undefined' && 
+                                chrome.runtime && 
+                                chrome.runtime.id) || 
+                               'unknown';
+                               
             this.debug = config.debug || false;
-
+            
             // Configuration for the Ad Network API
             // Only the URL is needed. No Supabase Secrets/Keys are stored here.
             this.apiUrl = 'https://ellejtwubvqswgmtxrab.supabase.co';
-
-            this._log('Initialized v1.3.5');
+            
+            this._log('Initialized v1.4.0 (ID: ' + this.extensionId + ')');
         }
 
         async renderAd(container, options = {}) {
@@ -48,7 +55,7 @@
             host.id = hostId;
             host.style.display = 'block';
             host.style.width = '100%';
-            host.style.height = '100%';
+            host.style.height = '100%'; 
             container.appendChild(host);
 
             const shadow = host.attachShadow({ mode: 'closed' });
@@ -57,7 +64,7 @@
             try {
                 // Fetch Ad Decision
                 const adData = await this._fetchAdDecision(options);
-
+                
                 if (!adData) {
                     this._log('No ad fill returned');
                     if (typeof options.onNoFill === 'function') options.onNoFill();
@@ -92,11 +99,11 @@
          */
         async _fetchAdDecision(options) {
             const format = options.format || 'CARD';
-
+            
             try {
                 this._log('Fetching from Edge Network...');
                 const endpoint = this.apiUrl + '/functions/v1/get-ad-decision';
-
+                
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
@@ -104,6 +111,7 @@
                     },
                     body: JSON.stringify({
                         sdkKey: this.apiKey,
+                        extensionId: this.extensionId,
                         format: format,
                         debug: this.debug
                     })
@@ -111,17 +119,17 @@
 
                 if (response.ok) {
                     const data = await response.json();
-
+                    
                     if (data.error) {
-                        this._error('API Error: ' + data.error);
-                        return null;
+                         this._error('API Error: ' + data.error);
+                         return null;
                     }
 
                     if (data.ad === null) {
                         this._log('No Fill');
-                        return null;
+                        return null; 
                     }
-
+                    
                     if (data.campaignId) {
                         this._log('Ad received', data.campaignId);
                         return data;
@@ -140,7 +148,7 @@
             // 1. Clear existing
             const existingContainer = shadowRoot.querySelector('.canx-ad-container');
             if (existingContainer) existingContainer.remove();
-
+            
             // 2. Inject CSS
             if (!shadowRoot.querySelector('style')) {
                 const style = document.createElement('style');
@@ -148,14 +156,19 @@
                 shadowRoot.appendChild(style);
             }
 
-            // 3. Sanitize
+            // 3. Sanitize and prepare URL
+            let destUrl = ad.destinationUrl || ad.destination_url || ad.link || ad.url || '';
+            if (destUrl && !/^https?:\/\//i.test(destUrl)) {
+                destUrl = 'https://' + destUrl;
+            }
+
             const safeAd = {
-                img: this._sanitize(ad.imageUrl),
-                headline: this._sanitize(ad.headline),
-                desc: this._sanitize(ad.description),
-                url: this._sanitize(ad.destinationUrl),
-                cta: this._sanitize(ad.ctaText || 'Open'),
-                alt: this._sanitize(ad.headline)
+                img: this._sanitize(ad.imageUrl || ad.image_url),
+                headline: this._sanitize(ad.headline || ad.title),
+                desc: this._sanitize(ad.description || ad.desc || ad.body),
+                url: this._sanitize(destUrl),
+                cta: this._sanitize(ad.ctaText || ad.cta_text || 'Open'),
+                alt: this._sanitize(ad.headline || ad.title)
             };
 
             // 4. Render
@@ -177,7 +190,7 @@
                                 setTimeout(() => {
                                     if (document.visibilityState === 'visible') {
                                         this._trackEvent('IMPRESSION', ad);
-                                        observer.disconnect();
+                                        observer.disconnect(); 
                                     }
                                 }, 1000);
                             }
@@ -189,8 +202,19 @@
                 }
 
                 if (link) {
-                    link.addEventListener('click', () => {
+                    link.addEventListener('click', (e) => {
+                        const href = link.getAttribute('href');
+                        if (!href || href === '' || href.startsWith('chrome-extension://')) {
+                            e.preventDefault();
+                            return;
+                        }
                         this._trackEvent('CLICK', ad);
+                        
+                        // Option: Force open with API for reliability
+                        if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+                            e.preventDefault();
+                            chrome.tabs.create({ url: href });
+                        }
                     });
                 }
             } catch (error) {
@@ -199,7 +223,7 @@
         }
 
         _setupAutoRefresh(host, options) {
-            const minInterval = 30;
+            const minInterval = 30; 
             const intervalSeconds = Math.max(options.refreshInterval || 0, minInterval);
             const delayMs = intervalSeconds * 1000;
 
@@ -226,7 +250,7 @@
 
         async _trackEvent(eventType, ad) {
             if (this.debug) this._log('Tracking event', eventType);
-
+            
             if (!ad.campaignId) return;
 
             try {
@@ -240,6 +264,7 @@
                         eventType: eventType,
                         campaignId: ad.campaignId,
                         sdkKey: this.apiKey,
+                        extensionId: this.extensionId,
                         timestamp: new Date().toISOString()
                     }),
                     keepalive: true
@@ -268,30 +293,30 @@
         _getTemplate(type, data) {
             const start = '<a href="' + data.url + '" target="_blank">';
             const end = '</a>';
-            const badge = '';
+            const badge = '<div class="badge">Ad</div>';
 
             if (type === 'BANNER') {
-                return start +
-                    '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                    '<div class="content">' +
-                    '<div class="headline">' + data.headline + '</div>' +
-                    '<div class="desc">' + data.desc + '</div>' +
-                    '</div>' +
-                    badge + end;
+                return start + 
+                       '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                       '<div class="content">' +
+                           '<div class="headline">' + data.headline + '</div>' +
+                           '<div class="desc">' + data.desc + '</div>' +
+                       '</div>' +
+                       badge + end;
             }
-
+            
             if (type === 'NATIVE') {
-                return start +
-                    '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                    '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' +
-                    badge + end;
+                return start + 
+                       '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                       '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' + 
+                       badge + end;
             }
 
             // CARD
-            return start +
-                '<img src="' + data.img + '" alt="' + data.alt + '" />' +
-                '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' +
-                badge + end;
+            return start + 
+                   '<img src="' + data.img + '" alt="' + data.alt + '" />' +
+                   '<div class="content"><div class="headline">' + data.headline + '</div><div class="desc">' + data.desc + '</div></div>' + 
+                   badge + end;
         }
 
         _sanitize(str) {
@@ -304,7 +329,7 @@
                 console.log("%c[CANX] " + msg, "color: #4f46e5; font-weight: bold;", data || '');
             }
         }
-
+        
         _error(msg, err) {
             console.error("%c[CANX Error] " + msg, "color: #ef4444; font-weight: bold;", err);
         }

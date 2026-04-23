@@ -158,6 +158,8 @@ export async function startGoogleSignIn() {
   url.searchParams.set("redirect_to", redirectTo);
   url.searchParams.set("code_challenge", challenge);
   url.searchParams.set("code_challenge_method", "s256");
+  url.searchParams.set("access_type", "offline");
+  url.searchParams.set("prompt", "consent");
 
   // Open in a new tab (most reliable for extensions)
   chrome.tabs.create({ url: url.toString() });

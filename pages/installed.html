@@ -1,64 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to Sticky Notes!</title>
     <link rel="icon" href="../assets/pin.png" type="image/png" />
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css"
+    />
     <link rel="stylesheet" href="pages.css" />
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <img src="../assets/pin.png" alt="Sticky Notes Icon" class="logo">
-            <h1>Welcome to Sticky Notes!</h1>
-            <p>Your extension is installed. Here are a few tips to get started.</p>
-        </div>
+      <div class="header">
+        <img src="../assets/pin.png" alt="Sticky Notes Icon" class="logo" />
+        <h1>Welcome to Sticky Notes!</h1>
+        <p>Your extension is installed. Here are a few tips to get started.</p>
+      </div>
 
-        <div class="pin-instruction">
-            <h2>1. Pin the Extension</h2>
-            <p>
-                For easy access, click the puzzle icon <i class="fi fi-rr-puzzle-piece"></i> in your toolbar and pin <strong>Sticky Notes</strong>.
-            </p>
-        </div>
+      <div class="pin-instruction">
+        <h2>1. Pin the Extension</h2>
+        <p>
+          For easy access, click the puzzle icon
+          <i class="fi fi-rr-puzzle-piece"></i> in your toolbar and pin
+          <strong>Sticky Notes</strong>.
+        </p>
+      </div>
 
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fi fi-rr-keyboard"></i>
-                </div>
-                <h3>Create with a Shortcut</h3>
-                <p>Press <strong>Ctrl + Q</strong> (or <strong>⌘ + Q</strong>) on any page.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fi fi-rr-mouse"></i>
-                </div>
-                <h3>Create with Right-Click</h3>
-                <p>Right-click on a page and select "Create Sticky Note".</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fi fi-rr-apps"></i>
-                </div>
-                <h3>View All Notes</h3>
-                <p>Click the extension icon to see all your notes in one place.</p>
-            </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <i class="fi fi-rr-keyboard"></i>
+          </div>
+          <h3>Create with a Shortcut</h3>
+          <p>
+            Press <strong>Ctrl + Q</strong> (or <strong>⌘ + Q</strong>) on any
+            page.
+          </p>
         </div>
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <i class="fi fi-rr-mouse"></i>
+          </div>
+          <h3>Create with Right-Click</h3>
+          <p>Right-click on a page and select "Create Sticky Note".</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-wrapper">
+            <i class="fi fi-rr-apps"></i>
+          </div>
+          <h3>View All Notes</h3>
+          <p>Click the extension icon to see all your notes in one place.</p>
+        </div>
+      </div>
 
-        <div class="footer">
-            <p>Happy note-taking! 🎉</p>
-        </div>
+      <div class="footer">
+        <p>Happy note-taking! 🎉</p>
+      </div>
     </div>
 
     <!-- Confetti Trigger Button -->
     <button id="confetti-trigger" title="More confetti!">
-        <i class="fi fi-rr-sparkles"></i>
+      <i class="fi fi-rr-sparkles"></i>
     </button>
 
     <!-- JavaScript for confetti -->
     <script src="confetti.js"></script>
     <script src="pages.js"></script>
-</body>
+  </body>
 </html>

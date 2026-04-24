@@ -1,51 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sync Your Notes to Cloud</title>
-    <link rel="stylesheet" href="migrate.css">
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
-</head>
-<body>
+    <link rel="stylesheet" href="migrate.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css"
+    />
+  </head>
+  <body>
     <div class="migrate-container">
-        <div class="icon-box">
-            <i class="fi fi-rr-cloud-share"></i>
-        </div>
-        <h1>Power Up Your Sync</h1>
-        <p>
-            Copy your local browser notes into our Secure Database. 
-            Once synced, your notes will follow you wherever you log in.
-        </p>
+      <div class="icon-box">
+        <i class="fi fi-rr-cloud-share"></i>
+      </div>
+      <h1>Power Up Your Sync</h1>
+      <p>
+        Copy your local browser notes into our Secure Database. Once synced,
+        your notes will follow you wherever you log in.
+      </p>
 
-        <div id="status" class="status-box">Ready to scan your notes.</div>
+      <div id="status" class="status-box">Ready to scan your notes.</div>
 
-        <div class="actions">
-            <button id="scan-btn">Scan Local Notes</button>
-            <button id="migrate-btn" disabled>Upload to Database</button>
-        </div>
+      <div class="actions">
+        <button id="scan-btn">Scan Local Notes</button>
+        <button id="migrate-btn" disabled>Upload to Database</button>
+      </div>
 
-        <div class="footer-link">
-            <p>Your local notes will remain untouched during this process.</p>
-            <a href="dashboard.html">Back to Dashboard</a>
-        </div>
+      <div class="footer-link">
+        <p>Your local notes will remain untouched during this process.</p>
+        <a href="dashboard.html">Back to Dashboard</a>
+      </div>
     </div>
 
     <!-- Cleanup Confirmation Modal -->
     <div id="cleanup-modal" class="modal-overlay">
-        <div class="modal-content-cleanup">
-            <div class="modal-header-simple">
-                <i class="fi fi-rr-broom"></i>
-                <h3>Clean Up Local Storage?</h3>
-            </div>
-            <p>Your notes are now safely synced to the database. Would you like to remove the local copies from this browser to keep your storage tidy?</p>
-            <div class="modal-actions-horizontal">
-                <button id="confirm-cleanup-btn" class="modal-btn-delete">Clear Local Notes</button>
-                <button id="cancel-cleanup-btn" class="modal-btn-cancel">Keep for Now</button>
-            </div>
+      <div class="modal-content-cleanup">
+        <div class="modal-header-simple">
+          <i class="fi fi-rr-broom"></i>
+          <h3>Clean Up Local Storage?</h3>
         </div>
+        <p>
+          Your notes are now safely synced to the database. Would you like to
+          remove the local copies from this browser to keep your storage tidy?
+        </p>
+        <div class="modal-actions-horizontal">
+          <button id="confirm-cleanup-btn" class="modal-btn-delete">
+            Clear Local Notes
+          </button>
+          <button id="cancel-cleanup-btn" class="modal-btn-cancel">
+            Keep for Now
+          </button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="migrate.js"></script>
-</body>
+  </body>
 </html>

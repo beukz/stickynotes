@@ -1,178 +1,225 @@
 /* General Reset & Font Setup */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 @font-face {
-    font-family: "Inter", sans-serif;
-    src: url("../font/Inter.ttc") format("truetype");
-    font-weight: normal;
-    font-style: normal;
+  font-family: "Inter";
+  src: url("../font/Inter.ttc") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
 }
 
 :root {
-    --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --color-background: #f7f7f7;
-    --color-text: #333;
-    --color-text-light: #666;
-    --color-primary: #ffd165; /* Same as sticky note header */
-    --color-card-bg: #ffffff;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --font-primary:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --color-background: #fafafa;
+  --color-text: #111111;
+  --color-text-light: #666666;
+  --color-primary: #f2f2f2;
+  --color-primary-hover: #ebebeb;
+  --color-accent: #000000;
+  --color-card-bg: rgba(255, 255, 255, 0.8);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --spring-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-    font-family: var(--font-primary);
-    background-color: var(--color-background);
-    color: var(--color-text);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
+  font-family: var(--font-primary);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Main Container */
+/* Main Container - Glassmorphism */
 .container {
-    background-color: var(--color-card-bg);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    max-width: 800px;
-    width: 100%;
-    padding: 3rem;
-    text-align: center;
+  background: var(--color-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: var(--shadow-subtle);
+  max-width: 800px;
+  width: 100%;
+  padding: 3.5rem 4rem;
+  text-align: center;
+  transition: var(--spring-transition);
 }
 
 /* Header */
 .header {
-    margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .header .logo {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1rem;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  box-shadow: var(--shadow-subtle);
+  border: 1px solid var(--border-color);
 }
 
 .header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
 }
 
 .header p {
-    font-size: 1.1rem;
-    color: var(--color-text-light);
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+  font-weight: 400;
 }
 
 /* Pinning Instruction */
 .pin-instruction {
-    background-color: #fff9e6;
-    border: 1px solid #ffeec2;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2.5rem;
-    text-align: left;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 3rem;
+  text-align: left;
+  transition: var(--spring-transition);
+}
+
+.pin-instruction:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .pin-instruction h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
 .pin-instruction p {
-    font-size: 1rem;
-    color: var(--color-text-light);
-    line-height: 1.6;
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  line-height: 1.6;
 }
 
 .pin-instruction i {
-    color: var(--color-primary);
-    vertical-align: middle;
-    font-size: 1.2rem;
+  color: var(--color-text);
+  vertical-align: middle;
+  font-size: 1.2rem;
+  margin: 0 4px;
 }
 
 /* Features Grid */
 .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .feature-card {
-    background-color: #f9f9f9;
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: var(--spring-transition);
+  box-shadow: var(--shadow-subtle);
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(0, 0, 0, 0.12);
+  background: #ffffff;
 }
 
 .icon-wrapper {
-    background-color: var(--color-primary);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 1rem;
+  background-color: var(--color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  transition: var(--spring-transition);
+}
+
+.feature-card:hover .icon-wrapper {
+  background-color: var(--color-primary-hover);
+  color: var(--color-accent);
 }
 
 .icon-wrapper i {
-    font-size: 1.5rem;
-    color: #333;
+  font-size: 1.25rem;
+  color: var(--color-text);
 }
 
 .feature-card h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
 .feature-card p {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-    line-height: 1.5;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  line-height: 1.6;
 }
 
 /* Footer */
 .footer {
-    font-size: 1.1rem;
-    color: var(--color-text-light);
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Confetti Trigger Button */
 #confetti-trigger {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 56px;
-    height: 56px;
-    background-color: var(--color-primary);
-    color: #333;
-    border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    z-index: 1000;
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 52px;
+  height: 52px;
+  background-color: #ffffff;
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+  border-radius: 26px;
+  box-shadow: var(--shadow-subtle);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: var(--spring-transition);
+  z-index: 1000;
 }
 
 #confetti-trigger:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-hover);
+  background-color: var(--color-background);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 #confetti-trigger i {
-    font-size: 1.5rem;
-    line-height: 1; /* Fix for icon alignment */
+  font-size: 1.25rem;
+  line-height: 1;
 }

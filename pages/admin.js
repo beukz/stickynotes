@@ -65,7 +65,8 @@ function renderUsers(users) {
         tr.innerHTML = `
             <td class="user-id">${user.id}</td>
             <td>${user.email || "N/A"}</td>
-            <td>${user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never"}</td>
+            <td><span class="badge role-${user.role}">${user.role || 'user'}</span></td>
+            <td><span class="badge plan-${user.plan}">${user.plan || 'free'}</span></td>
             <td>${new Date(user.created_at).toLocaleDateString()}</td>
             <td class="actions">
                 <button class="action-btn" title="View Details"><i class="fi fi-rr-eye"></i></button>
@@ -79,6 +80,7 @@ searchInput.addEventListener("input", (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = allUsers.filter(u => 
         (u.email && u.email.toLowerCase().includes(term)) || 
+        (u.full_name && u.full_name.toLowerCase().includes(term)) || 
         u.id.toLowerCase().includes(term)
     );
     renderUsers(filtered);

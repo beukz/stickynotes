@@ -26,24 +26,30 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) throw new Error('Invalid token')
 
-    // 2. Authorization: Check if user is admin
-    // Update this list with actual admin emails
-    const adminEmails = ['beukzgroup@gmail.com', 'beukz@example.com'] 
-    if (!adminEmails.includes(user.email?.toLowerCase() ?? '')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
+    // 2. Authorization: Check if user is admin via database
+    const { data: callerData, error: callerError } = await supabaseClient
+      .from('stickynotes_users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (callerError || callerData?.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Admin privileges required.' }), { 
         status: 403, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       })
     }
 
-    // 3. Fetch all users using Service Role Key
+    // 3. Fetch all users from stickynotes_users using Service Role Key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Using the admin API to list users
-    const { data: { users }, error: fetchError } = await supabaseAdmin.auth.admin.listUsers()
+    const { data: users, error: fetchError } = await supabaseAdmin
+      .from('stickynotes_users')
+      .select('*')
+      .order('created_at', { ascending: false })
 
     if (fetchError) throw fetchError
 

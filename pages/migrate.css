@@ -1,51 +1,5 @@
 /* pages/migrate.css */
 
-:root {
-  --bg-color: #fafafa;
-  --card-bg: #ffffff;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --text-primary: #111111;
-  --text-secondary: #666666;
-  --accent-color: #000000;
-  --accent-hover: #333333;
-  --primary-color: #111111;
-  --primary-hover: #333333;
-  --danger-color: #e5484d;
-  --danger-hover: #dc2626;
-  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
-  --spring-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family:
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  background: var(--bg-color);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 .migrate-container {
   width: 100%;
   max-width: 500px;

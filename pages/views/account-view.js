@@ -36,16 +36,16 @@ export async function mount(container) {
             syncStatus.textContent = `Syncing as: ${currentUser.email}`;
             syncStatus.className = "account-status-box ok";
             
-            const dashBtn = document.createElement("button");
-            dashBtn.innerHTML = `<i class="fi fi-rr-apps" style="margin-right: 8px;"></i> Open Web Dashboard`;
-            dashBtn.onclick = () => window.open("https://supabase.com/dashboard/project/qrnnthitqgpiowixmlpd", "_blank");
+            const migrateBtn = document.createElement("button");
+            migrateBtn.innerHTML = `<i class="fi fi-rr-cloud-upload" style="margin-right: 8px;"></i> Migrate Local Data`;
+            migrateBtn.onclick = () => window.location.hash = "#migrate";
             
             const logoutBtn = document.createElement("button");
             logoutBtn.innerHTML = `<i class="fi fi-rr-exit" style="margin-right: 8px;"></i> Sign Out`;
             logoutBtn.className = "secondary";
             logoutBtn.onclick = handleLogout;
             
-            authButtons.appendChild(dashBtn);
+            authButtons.appendChild(migrateBtn);
             authButtons.appendChild(logoutBtn);
         } else {
             // Logged out

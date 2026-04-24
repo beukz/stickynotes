@@ -31,11 +31,11 @@ function setStatus(text, kind = "") {
     const session = await exchangeCodeForSession(code);
 
     const userEmail = session?.user?.email || "(unknown)";
-    setStatus(`Signed in successfully as: ${userEmail}\n\nYou can close this tab.`, "ok");
+    setStatus(`Signed in successfully as: ${userEmail}\n\nRedirecting to dashboard...`, "ok");
 
-    // Optional: close automatically after a short delay
+    // Redirect to dashboard after a short delay
     setTimeout(() => {
-      try { window.close(); } catch {}
+      window.location.replace("app.html#home");
     }, 1200);
   } catch (e) {
     console.error(e);

@@ -13,6 +13,7 @@ const views = {
     notifications: () => import("./views/notifications-view.js"),
     admin:         () => import("./views/admin-view.js"),
     account:       () => import("./views/account-view.js"),
+    migrate:       () => import("./views/migrate-view.js"),
 };
 
 // ── Navigate to a view ──

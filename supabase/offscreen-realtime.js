@@ -1,83 +1,62 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./client.js";
-import { getSession } from "./auth.js";
-
-// We'll use the Realtime SDK via a CDN since we're in an offscreen doc (DOM available)
-const REALTIME_SDK_URL = "https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.10.2/dist/main/index.js";
+// session is retrieved via the background service worker (see initRealtime)
 
 async function initRealtime() {
     const response = await chrome.runtime.sendMessage({ action: "getSession" });
     const session = response?.session;
 
-    // Supabase Realtime via REST/WS
-    let wsUrl = `${SUPABASE_URL.replace("http", "ws")}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}`;
-    if (session?.access_token) {
-        wsUrl += `&Authorization=Bearer ${session.access_token}`;
-    }
-
+    // Supabase Realtime WebSocket (Phoenix protocol)
+    // NOTE: Offscreen docs in extensions enforce CSP 'self', so we avoid external SDK imports.
+    const wsBase = SUPABASE_URL.replace(/^http/i, "ws");
+    let wsUrl = `${wsBase}/realtime/v1/websocket?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}&vsn=1.0.0`;
     const socket = new WebSocket(wsUrl);
+
+    const accessToken = session?.access_token || null;
+
+    function joinTopic(topic, ref, postgres_changes) {
+        const payload = {
+            config: { postgres_changes },
+        };
+        if (accessToken) payload.access_token = accessToken;
+        socket.send(JSON.stringify({ topic, event: "phx_join", payload, ref: String(ref) }));
+    }
 
     socket.onopen = () => {
         console.log("Realtime socket open");
-
-        // Subscribe to sticky_notes
-        const subscribeMsg = {
-            topic: "realtime:public:sticky_notes",
-            event: "phx_join",
-            payload: {
-                config: {
-                    postgres_changes: [
-                        { event: "*", schema: "public", table: "sticky_notes" }
-                    ]
-                }
-            },
-            ref: "1"
-        };
-        socket.send(JSON.stringify(subscribeMsg));
-
-        // Subscribe to stickynotes_notifications
-        const subscribeNotifMsg = {
-            topic: "realtime:public:stickynotes_notifications",
-            event: "phx_join",
-            payload: {
-                config: {
-                    postgres_changes: [
-                        { event: "INSERT", schema: "public", table: "stickynotes_notifications" }
-                    ]
-                }
-            },
-            ref: "2"
-        };
-        socket.send(JSON.stringify(subscribeNotifMsg));
+        joinTopic("realtime:public:sticky_notes", 1, [{ event: "*", schema: "public", table: "sticky_notes" }]);
+        joinTopic("realtime:public:stickynotes_notifications", 2, [{ event: "INSERT", schema: "public", table: "stickynotes_notifications" }]);
     };
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+
         if (data.event === "postgres_changes") {
             const payload = data.payload;
-            console.log("Change detected:", payload);
+            if (!payload) return;
 
-            if (payload.table === "stickynotes_notifications" && data.topic === "realtime:public:stickynotes_notifications") {
-                // Broadcast new notification for background script to handle alerts
+            if (payload.table === "stickynotes_notifications") {
                 chrome.runtime.sendMessage({
                     action: "newNotification",
-                    notification: payload.record
+                    notification: payload.record || payload.new || payload,
                 });
             } else {
-                // Broadcast to all extension parts for syncing
                 chrome.runtime.sendMessage({
                     action: "supabaseChange",
-                    payload: payload
+                    payload,
                 });
             }
         }
-
-        // Pharos/Phoenix heartbeat
-        if (data.event === "phx_reply" && (data.topic === "realtime:public:sticky_notes" || data.topic === "realtime:public:stickynotes_notifications")) {
-            // subscribed!
-        }
     };
 
-    // Heartbeat every 30s
+    socket.onerror = (e) => {
+        console.error("Realtime socket error", e);
+    };
+
+    socket.onclose = (e) => {
+        console.warn("Realtime socket closed", e?.code, e?.reason);
+    };
+
+    // Heartbeat every 25s
     setInterval(() => {
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
@@ -87,7 +66,7 @@ async function initRealtime() {
                 ref: Date.now().toString()
             }));
         }
-    }, 30000);
+    }, 25000);
 }
 
 initRealtime();

@@ -1,3 +1,5 @@
+import { getUserRole } from "../supabase/auth.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     const notesListEl = document.getElementById('notes-list');
     const newNoteBtn = document.getElementById('new-note-btn');
@@ -8,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const slashCommandMenu = document.getElementById('slash-command-menu');
     const floatingToolbar = document.getElementById('floating-toolbar');
     const mainEditor = document.querySelector('.main-editor');
+    const adminSidebarLink = document.getElementById('admin-sidebar-link');
 
     let notes = [];
     let activeNoteId = null;
@@ -16,8 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function checkAuth() {
         return new Promise((resolve) => {
-            chrome.storage.local.get("supabase_session", (data) => {
+            chrome.storage.local.get("supabase_session", async (data) => {
                 currentUser = data.supabase_session?.user || null;
+                if (currentUser && adminSidebarLink) {
+                    try {
+                        const role = await getUserRole();
+                        if (role === 'admin') {
+                            adminSidebarLink.classList.remove('hidden');
+                        }
+                    } catch (e) {
+                        console.error("Error checking admin role:", e);
+                    }
+                }
                 resolve(currentUser);
             });
         });

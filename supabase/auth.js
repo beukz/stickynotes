@@ -156,6 +156,7 @@ export async function startGoogleSignIn() {
   const url = new URL(`${SUPABASE_URL}/auth/v1/authorize`);
   url.searchParams.set("provider", "google");
   url.searchParams.set("redirect_to", redirectTo);
+  url.searchParams.set("data", JSON.stringify({ source: "extension" }));
   url.searchParams.set("code_challenge", challenge);
   url.searchParams.set("code_challenge_method", "s256");
   url.searchParams.set("access_type", "offline");
@@ -192,4 +193,23 @@ export async function exchangeCodeForSession(code) {
   // Store session locally
   await setLocal({ [STORAGE_KEY]: json, pkce_verifier: null });
   return json;
+}
+
+export async function getUserRole() {
+  const session = await getSession();
+  if (!session?.user) return null;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/stickynotes_users?id=eq.${session.user.id}&select=role`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`
+      }
+    });
+    const data = await res.json().catch(() => []);
+    return data[0]?.role || "user";
+  } catch (error) {
+    console.error("[Auth] Error fetching role:", error);
+    return "user";
+  }
 }

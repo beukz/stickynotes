@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Sticky Notes</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="back-btn" class="icon-btn"><i class="fi fi-rr-arrow-left"></i></button>
+                <h1>Admin Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="stats">
+                    <span id="user-count">Total Users: 0</span>
+                </div>
+                <button id="refresh-btn" class="primary-btn"><i class="fi fi-rr-refresh"></i> Refresh</button>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <div class="search-bar">
+                <i class="fi fi-rr-search"></i>
+                <input type="text" id="search-input" placeholder="Search users by email or ID...">
+            </div>
+
+            <div class="table-container">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Last Sign In</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body">
+                        <!-- User rows will be injected here -->
+                    </tbody>
+                </table>
+                <div id="loading-state" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Fetching users...</p>
+                </div>
+                <div id="error-state" class="error hidden">
+                    <i class="fi fi-rr-exclamation"></i>
+                    <p id="error-msg">Failed to load users.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

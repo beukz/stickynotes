@@ -48,6 +48,7 @@
         "pages/account.html",
         "pages/auth-callback.html",
         "pages/notes.html",
+        "pages/admin.html",
         "pages/changelog.html",
         "assets/bold.svg",
         "assets/italic.svg",

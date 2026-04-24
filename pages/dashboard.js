@@ -61,6 +61,13 @@ document.addEventListener("DOMContentLoaded", () => {
         myNotesLink.innerHTML = `<i class="fi fi-rr-document"></i> <span>My Notes</span>`;
         domainNav.appendChild(myNotesLink);
 
+        // "Account" link
+        const accountLink = document.createElement("a");
+        accountLink.className = "domain-link";
+        accountLink.href = "account.html";
+        accountLink.innerHTML = `<i class="fi fi-rr-user"></i> <span>Account</span>`;
+        domainNav.appendChild(accountLink);
+
         const domainsHeaderContainer = document.createElement('div');
         domainsHeaderContainer.className = 'sidebar-section-header';
         

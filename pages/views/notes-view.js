@@ -2,13 +2,17 @@ export function template() {
     return `
         <!-- Secondary Sidebar: Notes List -->
         <aside class="notes-sidebar">
-          <div class="sidebar-header" style="justify-content: space-between;">
-            <h2 style="margin: 0;">My Notes</h2>
-            <button id="new-note-btn" title="New Note" style="background: none; border: none; cursor: pointer; color: #9ca3af;">
+          <div class="sidebar-header">
+            <h2>My Notes</h2>
+            <button id="new-note-btn" title="New Note">
               <i class="fi fi-rr-plus"></i>
             </button>
           </div>
-          <div class="notes-list" id="notes-list" style="flex: 1; overflow-y: auto;">
+          <div class="search-notes">
+            <i class="fi fi-rr-search"></i>
+            <input type="text" id="search-notes-input" placeholder="Search notes..." />
+          </div>
+          <div class="notes-list" id="notes-list">
             <!-- List of notes will be populated here -->
           </div>
         </aside>

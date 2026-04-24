@@ -2,6 +2,7 @@
 export function initNotesView(container) {
     const notesListEl = container.querySelector('#notes-list');
     const newNoteBtn = container.querySelector('#new-note-btn');
+    const searchInput = container.querySelector('#search-notes-input');
     const editorPlaceholder = container.querySelector('#editor-placeholder');
     const editorContent = container.querySelector('#editor-content');
     const noteTitleInput = container.querySelector('#note-title-input');
@@ -14,6 +15,7 @@ export function initNotesView(container) {
 
     let notes = [];
     let activeNoteId = null;
+    let searchQuery = "";
     let saveTimeout;
     let currentUser = null;
 
@@ -115,16 +117,31 @@ export function initNotesView(container) {
 
     function renderNotesList() {
         notesListEl.innerHTML = '';
-        if (notes.length === 0) {
-            notesListEl.innerHTML = '<p class="no-notes">No notes yet.</p>';
+        
+        const filteredNotes = notes.filter(note => {
+            if (!searchQuery) return true;
+            const q = searchQuery.toLowerCase();
+            return (note.title || '').toLowerCase().includes(q) || 
+                   (note.content || '').toLowerCase().includes(q);
+        });
+
+        if (filteredNotes.length === 0) {
+            notesListEl.innerHTML = `<p class="no-notes">${searchQuery ? 'No matching notes.' : 'No notes yet.'}</p>`;
             return;
         }
-        notes.forEach(note => {
+        filteredNotes.forEach(note => {
             const item = document.createElement('div');
             item.className = 'note-item';
             item.dataset.id = note.id;
-            item.textContent = note.title || 'Untitled';
             if (note.id === activeNoteId) item.classList.add('active');
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'note-item-title';
+            titleSpan.textContent = note.title || 'Untitled';
+            titleSpan.style.flex = "1";
+            titleSpan.style.overflow = "hidden";
+            titleSpan.style.textOverflow = "ellipsis";
+            titleSpan.style.whiteSpace = "nowrap";
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-note-btn';
@@ -135,6 +152,7 @@ export function initNotesView(container) {
                 deleteNote(note.id);
             });
 
+            item.appendChild(titleSpan);
             item.appendChild(deleteBtn);
             item.addEventListener('click', () => selectNote(note.id));
             notesListEl.appendChild(item);
@@ -157,6 +175,13 @@ export function initNotesView(container) {
         const newNote = { id: Date.now().toString(), title: '', content: '', lastModified: Date.now() };
         notes.unshift(newNote);
         activeNoteId = newNote.id;
+        
+        // Clear search when creating a new note to ensure it's visible
+        if (searchQuery) {
+            searchQuery = "";
+            if (searchInput) searchInput.value = "";
+        }
+
         renderNotesList();
         selectNote(newNote.id);
         noteTitleInput.focus();
@@ -360,6 +385,12 @@ export function initNotesView(container) {
     newNoteBtn.addEventListener('click', createNewNote);
     noteTitleInput.addEventListener('input', updateNote);
     noteEditor.addEventListener('input', updateNote);
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderNotesList();
+        });
+    }
 
     const keyUpHandler = (e) => {
         if (slashMenuActive && ['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;

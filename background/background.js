@@ -82,7 +82,7 @@ async function handleNewNotification(notification) {
   if (shouldShow) {
     chrome.notifications.create({
       type: "basic",
-      iconUrl: "../assets/pin.png",
+      iconUrl: chrome.runtime.getURL("assets/pin.png"),
       title: notification.title,
       message: notification.message,
       priority: 2,

@@ -319,13 +319,34 @@ body {
 .empty-notifications i {
   font-size: 2rem;
   margin-bottom: 12px;
-  display: block;
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 .empty-notifications p {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  margin: 0;
 }
+
+.dropdown-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+  background-color: #fafafa;
+}
+
+.view-all-link {
+  color: #007aff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.view-all-link:hover {
+  color: #005bb5;
+  text-decoration: underline;
+}
+
 
 .dashboard-link {
   display: flex;

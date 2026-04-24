@@ -1052,20 +1052,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const readIds = await this.getReadIds();
       notificationList.innerHTML = "";
 
-      if (notifications.length === 0) {
+      const unreadNotifications = notifications.filter(n => !readIds.includes(n.id));
+
+      if (unreadNotifications.length === 0) {
         notificationList.innerHTML = `
           <div class="empty-notifications">
             <i class="fi fi-rr-bell"></i>
-            <p>No notifications yet</p>
+            <p>No new notifications</p>
           </div>
         `;
         return;
       }
 
-      notifications.forEach((n) => {
-        const isUnread = !readIds.includes(n.id);
+      unreadNotifications.forEach((n) => {
         const item = document.createElement("div");
-        item.className = `notification-item ${isUnread ? "unread" : ""}`;
+        item.className = "notification-item unread";
         item.innerHTML = `
           <h4>${n.title}</h4>
           <p>${n.message}</p>
@@ -1073,10 +1074,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         item.addEventListener("click", async () => {
-          if (isUnread) {
-            await this.markAsRead(n.id);
-            this.render();
-          }
+          await this.markAsRead(n.id);
+          this.render();
         });
 
         notificationList.appendChild(item);

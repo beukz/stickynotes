@@ -1,4 +1,4 @@
-// This is a refactored version of notes.js adapted for the SPA router
+// This is a refactored version of notes.js adapted for the SPA router using Editor.js
 export function initNotesView(container) {
     const notesListEl = container.querySelector('#notes-list');
     const newNoteBtn = container.querySelector('#new-note-btn');
@@ -7,18 +7,272 @@ export function initNotesView(container) {
     const editorContent = container.querySelector('#editor-content');
     const noteTitleInput = container.querySelector('#note-title-input');
     const noteDate = container.querySelector('#note-date');
-    const noteEditor = container.querySelector('#note-editor');
-    const slashCommandMenu = container.querySelector('#slash-command-menu');
-    const floatingToolbar = container.querySelector('#floating-toolbar');
     const mainEditor = container.querySelector('.main-editor');
     
-    if (!notesListEl || !noteEditor) return () => {};
+    if (!notesListEl || !noteTitleInput) return () => {};
 
     let notes = [];
     let activeNoteId = null;
     let searchQuery = "";
     let saveTimeout;
     let currentUser = null;
+    let editor = null;
+    const STORAGE_KEY = 'dashboard_notes';
+
+    /**
+     * ModernEditor: A bespoke, robust block-based editor.
+     */
+    class ModernEditor {
+        constructor(containerId, options = {}) {
+            this.container = document.getElementById(containerId);
+            this.onChange = options.onChange || (() => {});
+            this.blocks = [];
+            this.activeBlockId = null;
+            this.slashMenu = null;
+            this.init();
+        }
+
+        init() {
+            this.container.innerHTML = '';
+            this.container.classList.add('modern-editor');
+            this.container.addEventListener('keydown', (e) => this.handleKeyDown(e));
+            this.container.addEventListener('input', (e) => this.handleInput(e));
+        }
+
+        render(data) {
+            this.container.innerHTML = '';
+            this.blocks = [];
+            const blocksData = this.parseInputData(data);
+            if (blocksData.length === 0) {
+                this.addBlock('paragraph');
+            } else {
+                blocksData.forEach(block => {
+                    this.addBlock(block.type, block.content, false);
+                });
+            }
+            if (this.blocks.length > 0) this.focusBlock(this.blocks[0].id);
+        }
+
+        parseInputData(data) {
+            if (!data) return [];
+            let blocks = [];
+            try {
+                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                if (Array.isArray(parsed)) return parsed;
+                if (parsed.blocks) {
+                    return parsed.blocks.map(b => ({
+                        type: b.type === 'header' ? `h${b.data.level || 2}` : b.type,
+                        content: b.data.text || b.data.items?.join('<br>') || ''
+                    }));
+                }
+            } catch(e) {
+                // Fallback to HTML parsing
+                const div = document.createElement('div');
+                div.innerHTML = data;
+                if (div.children.length > 0) {
+                    return Array.from(div.children).map(child => ({
+                        type: child.tagName.toLowerCase().startsWith('h') ? child.tagName.toLowerCase() : 'paragraph',
+                        content: child.innerHTML
+                    }));
+                }
+                return [{ type: 'paragraph', content: String(data) }];
+            }
+            return [];
+        }
+
+        createBlockId() { return 'block-' + Math.random().toString(36).substr(2, 9); }
+
+        addBlock(type = 'paragraph', content = '', shouldFocus = true, afterId = null) {
+            const id = this.createBlockId();
+            const block = { id, type, content };
+            const blockEl = this.createBlockElement(block);
+            if (afterId) {
+                const afterEl = document.getElementById(afterId);
+                const index = this.blocks.findIndex(b => b.id === afterId);
+                this.blocks.splice(index + 1, 0, block);
+                afterEl.after(blockEl);
+            } else {
+                this.blocks.push(block);
+                this.container.appendChild(blockEl);
+            }
+            if (shouldFocus) this.focusBlock(id);
+            return id;
+        }
+
+        createBlockElement(block) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `editor-block block-${block.type}`;
+            wrapper.id = block.id;
+            const content = document.createElement('div');
+            content.className = 'block-content';
+            content.contentEditable = true;
+            content.innerHTML = block.content;
+            content.dataset.placeholder = this.getPlaceholderForType(block.type);
+            wrapper.appendChild(content);
+            content.addEventListener('input', () => {
+                const b = this.blocks.find(b => b.id === block.id);
+                if (b) b.content = content.innerHTML;
+                this.onChange();
+            });
+            return wrapper;
+        }
+
+        getPlaceholderForType(type) {
+            if (type === 'paragraph') return 'Start writing...';
+            if (type.startsWith('h')) return 'Heading...';
+            return '';
+        }
+
+        focusBlock(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const content = el.querySelector('.block-content');
+                content.focus();
+                this.activeBlockId = id;
+                const range = document.createRange();
+                const selection = window.getSelection();
+                range.selectNodeContents(content);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+
+        handleKeyDown(e) {
+            const blockEl = e.target.closest('.editor-block');
+            if (!blockEl) return;
+            const id = blockEl.id;
+            const index = this.blocks.findIndex(b => b.id === id);
+
+            if (this.slashMenu) {
+                if (e.key === 'ArrowDown') { e.preventDefault(); this.moveMenuSelection(1); return; }
+                if (e.key === 'ArrowUp') { e.preventDefault(); this.moveMenuSelection(-1); return; }
+                if (e.key === 'Enter') { e.preventDefault(); this.selectMenuItem(); return; }
+                if (e.key === 'Escape') { e.preventDefault(); this.hideSlashMenu(); return; }
+            }
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.addBlock('paragraph', '', true, id);
+            }
+            if (e.key === 'Backspace') {
+                const content = e.target;
+                if (content.innerText.length === 0 || content.innerHTML === '' || content.innerHTML === '<br>') {
+                    if (this.blocks.length > 1) {
+                        e.preventDefault();
+                        const prevId = index > 0 ? this.blocks[index-1].id : null;
+                        this.removeBlock(id);
+                        if (prevId) this.focusBlock(prevId);
+                    }
+                }
+            }
+            if (e.key === 'ArrowUp' && index > 0) { e.preventDefault(); this.focusBlock(this.blocks[index-1].id); }
+            if (e.key === 'ArrowDown' && index < this.blocks.length - 1) { e.preventDefault(); this.focusBlock(this.blocks[index+1].id); }
+        }
+
+        handleInput(e) {
+            const content = e.target;
+            const text = content.innerText;
+            
+            if (text === '/') {
+                this.showSlashMenu(content.closest('.editor-block').id);
+            } else if (!text.includes('/')) {
+                this.hideSlashMenu();
+            }
+
+            if (text.startsWith('# ')) this.updateBlockType(content.closest('.editor-block').id, 'h1', text.substring(2));
+            else if (text.startsWith('## ')) this.updateBlockType(content.closest('.editor-block').id, 'h2', text.substring(3));
+            else if (text.startsWith('### ')) this.updateBlockType(content.closest('.editor-block').id, 'h3', text.substring(4));
+        }
+
+        updateBlockType(id, newType, newContent = null) {
+            const index = this.blocks.findIndex(b => b.id === id);
+            if (index === -1) return;
+            this.blocks[index].type = newType;
+            if (newContent !== null) this.blocks[index].content = newContent;
+            const oldEl = document.getElementById(id);
+            const newEl = this.createBlockElement(this.blocks[index]);
+            oldEl.replaceWith(newEl);
+            this.focusBlock(id);
+            this.onChange();
+        }
+
+        removeBlock(id) {
+            const index = this.blocks.findIndex(b => b.id === id);
+            if (index !== -1) {
+                this.blocks.splice(index, 1);
+                document.getElementById(id).remove();
+                this.onChange();
+            }
+        }
+
+        showSlashMenu(blockId) {
+            this.hideSlashMenu();
+            const blockEl = document.getElementById(blockId);
+            const menu = document.createElement('div');
+            menu.className = 'slash-menu';
+            
+            const items = [
+                { type: 'paragraph', label: 'Text', desc: 'Just start writing plain text.', icon: 'fi-rr-text' },
+                { type: 'h1', label: 'Heading 1', desc: 'Big section heading.', icon: 'fi-rr-h1' },
+                { type: 'h2', label: 'Heading 2', desc: 'Medium section heading.', icon: 'fi-rr-h2' },
+                { type: 'h3', label: 'Heading 3', desc: 'Small section heading.', icon: 'fi-rr-h3' }
+            ];
+
+            menu.innerHTML = items.map((item, i) => `
+                <div class="slash-menu-item ${i === 0 ? 'active' : ''}" data-type="${item.type}">
+                    <i class="fi ${item.icon}"></i>
+                    <div class="slash-menu-item-info">
+                        <span class="slash-menu-item-title">${item.label}</span>
+                        <span class="slash-menu-item-desc">${item.desc}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.body.appendChild(menu);
+            
+            const rect = blockEl.getBoundingClientRect();
+            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            menu.style.left = `${rect.left + window.scrollX}px`;
+            
+            this.slashMenu = menu;
+            this.menuSelectedIndex = 0;
+
+            menu.querySelectorAll('.slash-menu-item').forEach((item, i) => {
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    this.menuSelectedIndex = i;
+                    this.selectMenuItem();
+                };
+            });
+        }
+
+        moveMenuSelection(dir) {
+            const items = this.slashMenu.querySelectorAll('.slash-menu-item');
+            items[this.menuSelectedIndex].classList.remove('active');
+            this.menuSelectedIndex = (this.menuSelectedIndex + dir + items.length) % items.length;
+            items[this.menuSelectedIndex].classList.add('active');
+            items[this.menuSelectedIndex].scrollIntoView({ block: 'nearest' });
+        }
+
+        selectMenuItem() {
+            const items = this.slashMenu.querySelectorAll('.slash-menu-item');
+            const type = items[this.menuSelectedIndex].dataset.type;
+            this.updateBlockType(this.activeBlockId, type, '');
+            this.hideSlashMenu();
+        }
+
+        hideSlashMenu() {
+            if (this.slashMenu) {
+                this.slashMenu.remove();
+                this.slashMenu = null;
+            }
+        }
+
+        save() {
+            return JSON.stringify(this.blocks.map(b => ({ type: b.type, content: b.content })));
+        }
+    }
 
     async function checkAuth() {
         return new Promise((resolve) => {
@@ -28,21 +282,6 @@ export function initNotesView(container) {
             });
         });
     }
-
-    let slashMenuActive = false;
-    let activeCommandIndex = 0;
-    let currentSlashCommandBlock = null;
-    const STORAGE_KEY = 'dashboard_notes';
-
-    const commands = [
-        { id: 'h1', label: 'Heading 1', description: 'Large section heading.', icon: '<i class="fi fi-rr-h1"></i>', action: () => document.execCommand('formatBlock', false, '<h1>') },
-        { id: 'h2', label: 'Heading 2', description: 'Medium section heading.', icon: '<i class="fi fi-rr-h2"></i>', action: () => document.execCommand('formatBlock', false, '<h2>') },
-        { id: 'h3', label: 'Heading 3', description: 'Small section heading.', icon: '<i class="fi fi-rr-h3"></i>', action: () => document.execCommand('formatBlock', false, '<h3>') },
-        { id: 'bulletList', label: 'Bulleted list', description: 'Create a simple bulleted list.', icon: '<i class="fi fi-rr-list"></i>', action: () => document.execCommand('insertUnorderedList') },
-        { id: 'numberedList', label: 'Numbered list', description: 'Create a list with numbering.', icon: '<i class="fi fi-rr-list-check"></i>', action: () => document.execCommand('insertOrderedList') },
-        { id: 'quote', label: 'Quote', description: 'Capture a quote.', icon: '<i class="fi fi-rr-quote-right"></i>', action: () => document.execCommand('formatBlock', false, '<blockquote>') },
-        { id: 'divider', label: 'Divider', description: 'Visually divide sections.', icon: '<i class="fi fi-rr-minus"></i>', action: () => document.execCommand('insertHorizontalRule') }
-    ];
 
     async function loadNotes() {
         const user = await checkAuth();
@@ -69,6 +308,8 @@ export function initNotesView(container) {
                         selectNote(requestedId);
                     } else if (notes.length > 0) {
                         selectNote(notes[0].id);
+                    } else {
+                        showPlaceholder();
                     }
                 }
             });
@@ -175,11 +416,10 @@ export function initNotesView(container) {
     }
 
     function createNewNote() {
-        const newNote = { id: Date.now().toString(), title: '', content: '', lastModified: Date.now() };
+        const newNote = { id: Date.now().toString(), title: '', content: '{}', lastModified: Date.now() };
         notes.unshift(newNote);
         activeNoteId = newNote.id;
         
-        // Clear search when creating a new note to ensure it's visible
         if (searchQuery) {
             searchQuery = "";
             if (searchInput) searchInput.value = "";
@@ -190,16 +430,42 @@ export function initNotesView(container) {
         noteTitleInput.focus();
     }
 
-    function selectNote(id) {
+    async function selectNote(id) {
         const note = notes.find(n => n.id === id);
         if (!note) {
             showPlaceholder();
             return;
         }
         activeNoteId = id;
-        noteTitleInput.value = note.title;
-        noteEditor.innerHTML = note.content;
+        noteTitleInput.value = note.title || "";
         
+        let editorData = { blocks: [] };
+        const rawContent = (note.content || "").toString().trim();
+        
+        if (rawContent) {
+            try {
+                if (rawContent.startsWith('{') || rawContent.startsWith('[')) {
+                    editorData = JSON.parse(rawContent);
+                } else {
+                    // Migration from HTML to Editor.js
+                    editorData = {
+                        blocks: [{
+                            type: 'paragraph',
+                            data: { text: rawContent }
+                        }]
+                    };
+                }
+            } catch(e) {
+                console.error("Failed to parse note content", e);
+                editorData = {
+                    blocks: [{
+                        type: 'paragraph',
+                        data: { text: rawContent }
+                    }]
+                };
+            }
+        }
+
         if (noteDate) {
             const date = new Date(note.lastModified || Date.now());
             noteDate.textContent = date.toLocaleDateString('en-US', { 
@@ -213,14 +479,23 @@ export function initNotesView(container) {
             item.classList.toggle('active', item.dataset.id === id);
         });
         showEditor();
+
+        if (!editor) {
+            editor = new ModernEditor('editorjs', {
+                onChange: () => updateNote()
+            });
+        }
+        editor.render(note.content);
     }
 
-    function updateNote() {
-        if (!activeNoteId) return;
+    async function updateNote() {
+        if (!activeNoteId || !editor) return;
+        
+        const newContent = editor.save();
+        const newTitle = noteTitleInput.value;
+
         const note = notes.find(n => n.id === activeNoteId);
         if (!note) return;
-        const newTitle = noteTitleInput.value;
-        const newContent = noteEditor.innerHTML;
 
         if (note.title === newTitle && note.content === newContent) return;
 
@@ -254,7 +529,6 @@ export function initNotesView(container) {
         overlay.appendChild(modal);
         noteItem.appendChild(overlay);
 
-        // Trigger transition
         setTimeout(() => overlay.classList.add("active"), 10);
 
         const closeOverlay = () => {
@@ -290,149 +564,10 @@ export function initNotesView(container) {
         renderNotesList();
     }
 
-    // --- Slash Command ---
-    function getParentBlock(node) {
-        while (node && node.parentNode !== noteEditor) {
-            node = node.parentNode;
-        }
-        return node;
-    }
-
-    function renderSlashMenu(filteredCommands) {
-        slashCommandMenu.innerHTML = '';
-        if (filteredCommands.length === 0) {
-            slashCommandMenu.innerHTML = '<div class="command-item">No results</div>';
-            return;
-        }
-        filteredCommands.forEach((cmd, index) => {
-            const item = document.createElement('div');
-            item.className = 'command-item';
-            if (index === activeCommandIndex) item.classList.add('active');
-            item.innerHTML = `
-                <div class="command-item-icon">${cmd.icon}</div>
-                <div class="command-item-text">
-                    <h4>${cmd.label}</h4>
-                    <p>${cmd.description}</p>
-                </div>
-            `;
-            item.addEventListener('mousedown', (e) => { e.preventDefault(); executeCommand(cmd); });
-            slashCommandMenu.appendChild(item);
-        });
-    }
-
-    function openSlashMenu(query) {
-        const filteredCommands = commands.filter(cmd =>
-            cmd.label.toLowerCase().includes(query.toLowerCase()) ||
-            cmd.id.toLowerCase().includes(query.toLowerCase())
-        );
-        if (filteredCommands.length === 0) { closeSlashMenu(); return; }
-        activeCommandIndex = 0;
-        renderSlashMenu(filteredCommands);
-        const selection = window.getSelection();
-        if (selection.rangeCount === 0) return;
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        slashCommandMenu.classList.remove('hidden');
-        const menuHeight = slashCommandMenu.offsetHeight;
-        const menuWidth = slashCommandMenu.offsetWidth;
-        let top = rect.bottom + window.scrollY + 5;
-        let left = rect.left + window.scrollX;
-        if (rect.bottom + menuHeight > window.innerHeight) top = rect.top + window.scrollY - menuHeight - 5;
-        if (rect.left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - 10;
-        if (top < window.scrollY) top = rect.bottom + window.scrollY + 5;
-        slashCommandMenu.style.top = `${top}px`;
-        slashCommandMenu.style.left = `${left}px`;
-        slashMenuActive = true;
-    }
-
-    function closeSlashMenu() { slashCommandMenu.classList.add('hidden'); slashMenuActive = false; currentSlashCommandBlock = null; }
-
-    function executeCommand(command) {
-        if (!currentSlashCommandBlock) return;
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(currentSlashCommandBlock);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand('delete', false, null);
-        command.action();
-        closeSlashMenu();
-        updateNote();
-    }
-
-    function handleSlashNav(e) {
-        if (!slashMenuActive) return;
-        const items = slashCommandMenu.querySelectorAll('.command-item');
-        if (items.length === 0 || items[0].textContent === 'No results') return;
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            activeCommandIndex = (activeCommandIndex + 1) % items.length;
-            items.forEach((item, index) => item.classList.toggle('active', index === activeCommandIndex));
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            activeCommandIndex = (activeCommandIndex - 1 + items.length) % items.length;
-            items.forEach((item, index) => item.classList.toggle('active', index === activeCommandIndex));
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const query = currentSlashCommandBlock.textContent.substring(1);
-            const filteredCommands = commands.filter(cmd => cmd.label.toLowerCase().includes(query.toLowerCase()));
-            if (filteredCommands[activeCommandIndex]) executeCommand(filteredCommands[activeCommandIndex]);
-        } else if (e.key === 'Escape') { e.preventDefault(); closeSlashMenu(); }
-    }
-
-    function handleMarkdownShortcuts(e) {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const node = selection.anchorNode;
-        if (!node || node.nodeType !== Node.TEXT_NODE) return;
-        const block = getParentBlock(node);
-        if (!block) return;
-        const text = block.textContent;
-        const applyShortcut = (command, value, length) => {
-            const range = document.createRange();
-            range.setStart(block.firstChild, 0);
-            range.setEnd(block.firstChild, length);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            document.execCommand('delete', false, null);
-            document.execCommand(command, false, value);
-            updateNote();
-        };
-        if (e.key === ' ') {
-            if (selection.anchorOffset !== text.length) return;
-            if (text.startsWith('# ')) applyShortcut('formatBlock', '<h1>', 2);
-            else if (text.startsWith('## ')) applyShortcut('formatBlock', '<h2>', 3);
-            else if (text.startsWith('### ')) applyShortcut('formatBlock', '<h3>', 4);
-            else if (text.startsWith('> ')) applyShortcut('formatBlock', '<blockquote>', 2);
-            else if (text.startsWith('* ') || text.startsWith('- ')) applyShortcut('insertUnorderedList', null, 2);
-            else if (/^1\. $/.test(text)) applyShortcut('insertOrderedList', null, 3);
-        }
-    }
-
-    function updateToolbarPosition() {
-        const selection = window.getSelection();
-        if (!selection.isCollapsed && noteEditor.contains(selection.anchorNode)) {
-            const range = selection.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            const containerRect = mainEditor.getBoundingClientRect();
-            floatingToolbar.classList.remove('hidden');
-            const toolbarRect = floatingToolbar.getBoundingClientRect();
-            let top = rect.top - containerRect.top + mainEditor.scrollTop - toolbarRect.height - 8;
-            let left = rect.left - containerRect.left + mainEditor.scrollLeft + (rect.width / 2) - (toolbarRect.width / 2);
-            if (top < mainEditor.scrollTop) top = rect.bottom - containerRect.top + mainEditor.scrollTop + 8;
-            if (left < mainEditor.scrollLeft) left = mainEditor.scrollLeft + 8;
-            if (left + toolbarRect.width > mainEditor.scrollLeft + containerRect.width) left = mainEditor.scrollLeft + containerRect.width - toolbarRect.width - 8;
-            floatingToolbar.style.top = `${top}px`;
-            floatingToolbar.style.left = `${left}px`;
-        } else {
-            floatingToolbar.classList.add('hidden');
-        }
-    }
-
     // Event Listeners
     newNoteBtn.addEventListener('click', createNewNote);
     noteTitleInput.addEventListener('input', updateNote);
-    noteEditor.addEventListener('input', updateNote);
+    
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
@@ -440,49 +575,17 @@ export function initNotesView(container) {
         });
     }
 
-    const keyUpHandler = (e) => {
-        if (slashMenuActive && ['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) return;
-        if (e.key === ' ' || e.key === 'Enter') handleMarkdownShortcuts(e);
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const block = getParentBlock(selection.anchorNode);
-        if (block && block.textContent.startsWith('/')) {
-            currentSlashCommandBlock = block;
-            openSlashMenu(block.textContent.substring(1));
-        } else { closeSlashMenu(); }
-    };
-    noteEditor.addEventListener('keyup', keyUpHandler);
-    noteEditor.addEventListener('keydown', handleSlashNav, true);
-
-    const selectionChangeHandler = () => {
-        if (document.activeElement === noteEditor) setTimeout(updateToolbarPosition, 1);
-    };
-    document.addEventListener('selectionchange', selectionChangeHandler);
-
     const bodyClickHandler = (e) => {
-        if (slashMenuActive && !slashCommandMenu.contains(e.target) && !noteEditor.contains(e.target)) closeSlashMenu();
-        if (!noteEditor.contains(e.target) && !floatingToolbar.contains(e.target)) floatingToolbar.classList.add('hidden');
-    };
-    document.addEventListener('click', bodyClickHandler);
-
-    const scrollHandler = () => { if (!floatingToolbar.classList.contains('hidden')) updateToolbarPosition(); };
-    mainEditor.addEventListener('scroll', scrollHandler);
-
-    const toolbarMouseDownHandler = (e) => {
-        e.preventDefault();
-        const button = e.target.closest('button');
-        if (button) {
-            document.execCommand(button.dataset.command, false, null);
-            updateNote();
+        if (editor && editor.slashMenu && !editor.slashMenu.contains(e.target)) {
+            editor.hideSlashMenu();
         }
     };
-    floatingToolbar.addEventListener('mousedown', toolbarMouseDownHandler);
+    document.addEventListener('click', bodyClickHandler);
 
     loadNotes();
 
     return () => {
-        // Cleanup global listeners
-        document.removeEventListener('selectionchange', selectionChangeHandler);
         document.removeEventListener('click', bodyClickHandler);
+        // Custom editor cleanup if needed
     };
 }

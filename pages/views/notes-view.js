@@ -36,19 +36,9 @@ export function template() {
                 </div>
               </div>
             </div>
-            <div
-              id="note-editor"
-              contenteditable="true"
-              data-placeholder="Start writing..."
-            ></div>
+            <div id="editorjs"></div>
           </div>
-          <div id="slash-command-menu" class="hidden"></div>
-          <div id="floating-toolbar" class="hidden">
-            <button data-command="bold" title="Bold"><i class="fi fi-rr-bold"></i></button>
-            <button data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
-            <button data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
-            <button data-command="strikeThrough" title="Strikethrough"><i class="fi fi-rr-strikethrough"></i></button>
-          </div>
+          <!-- Editor.js handles its own toolbar and slash menu -->
         </main>
     `;
 }

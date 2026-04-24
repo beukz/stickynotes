@@ -16,6 +16,7 @@ export function template() {
                 <div class="actions">
                     <button id="scan-btn" class="secondary-btn">Scan Local Storage</button>
                     <button id="migrate-btn" class="primary-btn" disabled>Migrate to Database</button>
+                    <button id="manual-cleanup-btn" class="secondary-btn" style="margin-top: 10px; color: #ef4444; border-color: rgba(239, 68, 68, 0.1);">Clear Local Storage</button>
                 </div>
 
                 <div class="footer-link" style="margin-top: 32px;">
@@ -30,8 +31,8 @@ export function template() {
                 <div class="modal-content-cleanup">
                     <div class="modal-header-simple">
                         <i class="fi fi-rr-trash"></i>
-                        <h3>Cleanup Local Notes?</h3>
-                        <p>Migration successful! Would you like to remove the local copies now that they are in the cloud?</p>
+                        <h3 id="modal-title">Cleanup Local Notes?</h3>
+                        <p id="modal-desc">Migration successful! Would you like to remove the local copies now that they are in the cloud?</p>
                     </div>
                     <div class="modal-actions-horizontal">
                         <button id="cancel-cleanup-btn" class="modal-btn-cancel">Keep Local</button>
@@ -46,8 +47,11 @@ export function template() {
 export async function mount(container) {
     const scanBtn = container.querySelector("#scan-btn");
     const migrateBtn = container.querySelector("#migrate-btn");
+    const manualCleanupBtn = container.querySelector("#manual-cleanup-btn");
     const statusEl = container.querySelector("#status");
     const cleanupModal = container.querySelector("#cleanup-modal");
+    const modalTitle = container.querySelector("#modal-title");
+    const modalDesc = container.querySelector("#modal-desc");
     const confirmCleanupBtn = container.querySelector("#confirm-cleanup-btn");
     const cancelCleanupBtn = container.querySelector("#cancel-cleanup-btn");
 
@@ -162,6 +166,10 @@ export async function mount(container) {
             }
 
             setStatus(`Migration complete! Uploaded: ${notesToMigrate.length}.`, "ok");
+            
+            // Show success version of modal
+            modalTitle.textContent = "Migration Successful!";
+            modalDesc.textContent = "Would you like to remove the local copies now that they are securely in the cloud?";
             cleanupModal.classList.add("active");
         } catch (e) {
             console.error(e);
@@ -174,13 +182,31 @@ export async function mount(container) {
 
     scanBtn.onclick = scan;
     migrateBtn.onclick = migrate;
+
+    manualCleanupBtn.onclick = async () => {
+        // Ensure we have scanned
+        if (!scanned) await scan();
+        
+        if (!scanned || scanned.noteCount === 0) {
+            setStatus("No local notes found to clear.", "warn");
+            return;
+        }
+
+        // Show warning version of modal
+        modalTitle.textContent = "Clear Local Storage?";
+        modalDesc.innerHTML = `<span style="color: #ef4444; font-weight: 600;">Warning:</span> This will permanently delete all ${scanned.noteCount} local notes. Ensure they are synced to the cloud first, otherwise they will be <span style="font-weight: 600;">lost forever</span>.`;
+        cleanupModal.classList.add("active");
+    };
+
     cancelCleanupBtn.onclick = () => cleanupModal.classList.remove("active");
     confirmCleanupBtn.onclick = async () => {
         if (!scanned?.urls) return;
         setStatus("Cleaning up...");
         chrome.storage.sync.remove(scanned.urls, () => {
             cleanupModal.classList.remove("active");
-            setStatus("Cleanup complete. Notes are only in cloud.", "ok");
+            setStatus("Cleanup complete. Local storage is empty.", "ok");
+            scanned = null; // Reset
+            migrateBtn.disabled = true;
         });
     };
 

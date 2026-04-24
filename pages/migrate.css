@@ -1,5 +1,19 @@
 /* pages/migrate.css */
 
+:root {
+  --primary-color: #000000;
+  --primary-hover: #262626;
+  --danger-color: #e5484d;
+  --danger-hover: #dc2626;
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --spring-transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --bounce-transition: all 0.4s cubic-bezier(0.25, 1.15, 0.4, 1);
+}
+
 .migrate-container {
   width: 100%;
   max-width: 500px;
@@ -87,9 +101,13 @@ button {
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--spring-transition);
+  transition: var(--bounce-transition);
   border: 1px solid transparent;
   font-family: inherit;
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 #migrate-btn {
@@ -144,17 +162,20 @@ button {
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   transition: var(--spring-transition);
 }
 
 .modal-overlay.active {
-  display: flex;
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-content-cleanup {
@@ -165,8 +186,8 @@ button {
   border-radius: 24px;
   box-shadow: var(--shadow-hover);
   border: 1px solid var(--border-color);
-  transform: translateY(10px) scale(0.95);
-  transition: var(--spring-transition);
+  transform: translateY(20px) scale(0.9);
+  transition: var(--bounce-transition);
   text-align: center;
 }
 

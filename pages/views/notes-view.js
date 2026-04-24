@@ -25,12 +25,17 @@ export function template() {
           </div>
           <div id="editor-content" class="hidden">
             <div class="editor-meta-header">
-              <span id="note-date">April 24, 2024</span>
-              <div class="share-btn-wrapper" data-tooltip="Coming Soon">
-                <i class="fi fi-rr-share"></i>
+              <div class="header-left">
+                <input type="text" id="note-title-input" placeholder="Untitled" />
+              </div>
+              <div class="header-right">
+                <span id="note-date">April 24, 2024</span>
+                <span class="header-divider">|</span>
+                <div class="share-btn-wrapper" data-tooltip="Coming Soon">
+                  <i class="fi fi-rr-share"></i>
+                </div>
               </div>
             </div>
-            <input type="text" id="note-title-input" placeholder="Untitled" />
             <div
               id="note-editor"
               contenteditable="true"

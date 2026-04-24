@@ -247,7 +247,7 @@
 /* --- Main Editor --- */
 .main-editor {
   flex: 1;
-  padding: 16px 48px;
+  padding: 0 48px 32px; /* Remove top padding */
   overflow-y: auto;
   position: relative;
   min-width: 0;
@@ -281,21 +281,57 @@
 }
 
 .editor-meta-header {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0 -48px 28px; /* Negative margin to span full width */
-  padding: 0 48px 12px; /* Add padding back inside */
+  padding: 12px 48px; /* Align with editor content */
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   color: #9ca3af;
   font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 0;
+  margin-right: 24px;
+}
+
+#note-title-input {
+  width: 100%;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0;
+  outline: none;
+  color: #0a0a0a;
+  font-family: inherit;
+  background: transparent;
+  text-overflow: ellipsis;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 #note-date {
   color: #9ca3af;
+}
+
+.header-divider {
+  color: rgba(0, 0, 0, 0.30);
+  font-size: 0.7rem;
+  font-weight: 300;
 }
 
 .share-btn-wrapper {
@@ -345,28 +381,12 @@
   transform: translateY(8px) scale(1);
 }
 
-#note-title-input {
-  width: 100%;
-  border: none;
-  font-size: 2.5rem;
-  font-weight: 700;
-  padding: 0;
-  margin-bottom: 1.5rem;
-  outline: none;
-  color: #0a0a0a;
-  font-family: inherit;
-  background: transparent;
-}
-
-#note-title-input::placeholder {
-  color: #d1d5db;
-}
-
 #note-editor {
   outline: none;
   line-height: 1.7;
   font-size: 1rem;
   color: #374151;
+  margin-top: 24px;
 }
 
 #note-editor:empty:before {

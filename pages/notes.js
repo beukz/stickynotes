@@ -1,6 +1,9 @@
 import { getUserRole } from "../supabase/auth.js";
+import { initSidebar } from "./sidebar.js";
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await initSidebar();
+
     const notesListEl = document.getElementById('notes-list');
     const newNoteBtn = document.getElementById('new-note-btn');
     const editorPlaceholder = document.getElementById('editor-placeholder');
@@ -10,8 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const slashCommandMenu = document.getElementById('slash-command-menu');
     const floatingToolbar = document.getElementById('floating-toolbar');
     const mainEditor = document.querySelector('.main-editor');
-    const adminSidebarLink = document.getElementById('admin-sidebar-link');
-
+    
     let notes = [];
     let activeNoteId = null;
     let saveTimeout;
@@ -19,18 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function checkAuth() {
         return new Promise((resolve) => {
-            chrome.storage.local.get("supabase_session", async (data) => {
+            chrome.storage.local.get("supabase_session", (data) => {
                 currentUser = data.supabase_session?.user || null;
-                if (currentUser && adminSidebarLink) {
-                    try {
-                        const role = await getUserRole();
-                        if (role === 'admin') {
-                            adminSidebarLink.classList.remove('hidden');
-                        }
-                    } catch (e) {
-                        console.error("Error checking admin role:", e);
-                    }
-                }
                 resolve(currentUser);
             });
         });

@@ -1,6 +1,6 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../supabase/client.js";
 import { getSession } from "../supabase/auth.js";
-
+import { initSidebar } from "./sidebar.js";
 const notificationList = document.getElementById("notification-list");
 const loadingState = document.getElementById("loading-state");
 const errorState = document.getElementById("error-state");
@@ -183,4 +183,7 @@ markAllReadBtn.addEventListener("click", async () => {
 });
 
 // Init
-document.addEventListener("DOMContentLoaded", loadNotifications);
+document.addEventListener("DOMContentLoaded", async () => {
+    await initSidebar();
+    await loadNotifications();
+});

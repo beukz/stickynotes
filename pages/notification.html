@@ -5,38 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications - Sticky Notes</title>
     <link rel="stylesheet" href="notification.css">
+    <link rel="stylesheet" href="sidebar.css">
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 </head>
 <body>
-    <div class="notification-page-container">
-        <header class="page-header">
-            <div class="header-left">
-                <h1>Notifications</h1>
-            </div>
-            <div class="header-right">
-                <button id="mark-all-read-btn" class="secondary-btn"><i class="fi fi-rr-check-double"></i> Mark all as read</button>
-            </div>
-        </header>
+    <div class="app-layout">
+        <!-- Global Sidebar Injected Here -->
+        <aside id="app-sidebar"></aside>
 
-        <main class="page-main">
-            <div id="loading-state" class="state-container hidden">
-                <i class="fi fi-rr-spinner spin"></i>
-                <p>Loading notifications...</p>
-            </div>
+        <main class="app-main" style="overflow-y: auto;">
+            <div class="notification-page-container">
+                <header class="page-header">
+                    <div class="header-left">
+                        <h1>Notifications</h1>
+                    </div>
+                    <div class="header-right">
+                        <button id="mark-all-read-btn" class="secondary-btn"><i class="fi fi-rr-check-double"></i> Mark all as read</button>
+                    </div>
+                </header>
 
-            <div id="error-state" class="state-container error-state hidden">
-                <i class="fi fi-rr-triangle-warning"></i>
-                <p id="error-msg">Failed to load notifications.</p>
-            </div>
+                <main class="page-main">
+                    <div id="loading-state" class="state-container hidden">
+                        <i class="fi fi-rr-spinner spin"></i>
+                        <p>Loading notifications...</p>
+                    </div>
 
-            <div id="empty-state" class="state-container hidden">
-                <i class="fi fi-rr-bell"></i>
-                <p>You're all caught up!</p>
-                <span class="sub-text">No notifications found.</span>
-            </div>
+                    <div id="error-state" class="state-container error-state hidden">
+                        <i class="fi fi-rr-triangle-warning"></i>
+                        <p id="error-msg">Failed to load notifications.</p>
+                    </div>
 
-            <div id="notification-list" class="full-notification-list">
-                <!-- Notifications dynamically loaded here -->
+                    <div id="empty-state" class="state-container hidden">
+                        <i class="fi fi-rr-bell"></i>
+                        <p>You're all caught up!</p>
+                        <span class="sub-text">No notifications found.</span>
+                    </div>
+
+                    <div id="notification-list" class="full-notification-list">
+                        <!-- Notifications dynamically loaded here -->
+                    </div>
+                </main>
             </div>
         </main>
     </div>

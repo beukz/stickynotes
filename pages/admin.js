@@ -1,11 +1,11 @@
 import { getSession, getUserRole } from "../supabase/auth.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../supabase/client.js";
+import { initSidebar } from "./sidebar.js";
 
-const usersBody = document.getElementById("users-body");
+const usersBody = document.getElementById("users-tbody");
 const userCountEl = document.getElementById("user-count");
 const searchInput = document.getElementById("search-input");
 const refreshBtn = document.getElementById("refresh-btn");
-const backBtn = document.getElementById("back-btn");
 const loadingState = document.getElementById("loading-state");
 const errorState = document.getElementById("error-state");
 const errorMsg = document.getElementById("error-msg");
@@ -92,7 +92,6 @@ searchInput.addEventListener("input", (e) => {
 });
 
 refreshBtn.addEventListener("click", fetchUsers);
-backBtn.addEventListener("click", () => window.location.href = "account.html");
 
 notificationForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -147,4 +146,7 @@ function showToast(msg) {
 }
 
 // Initial fetch
-fetchUsers();
+document.addEventListener("DOMContentLoaded", async () => {
+    await initSidebar();
+    fetchUsers();
+});

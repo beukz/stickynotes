@@ -1,4 +1,5 @@
 import { getSession, startGoogleSignIn, signOut, getUserRole } from "../supabase/auth.js";
+import { initSidebar } from "./sidebar.js";
 
 const statusEl = document.getElementById("status");
 const googleBtn = document.getElementById("google-btn");
@@ -48,4 +49,7 @@ openSupabaseBtn.addEventListener("click", () => {
   window.open("https://supabase.com/dashboard/project/qrnnthitqgpiowixmlpd", "_blank");
 });
 
-refresh().catch((e) => setStatus(`Failed to load session:\n${String(e?.message || e)}`, "warn"));
+document.addEventListener("DOMContentLoaded", async () => {
+    await initSidebar();
+    refresh().catch((e) => setStatus(`Failed to load session:\n${String(e?.message || e)}`, "warn"));
+});

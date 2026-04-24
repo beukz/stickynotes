@@ -624,6 +624,19 @@
   visibility: visible;
 }
 
+.toolbar-main, .toolbar-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 0 4px;
+}
+
 .toolbar-btn {
   background: transparent;
   border: none;
@@ -645,6 +658,21 @@
 
 .toolbar-btn i {
   font-size: 0.85rem;
+}
+
+.link-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  padding: 0 8px;
+  width: 180px;
+  color: #111;
+  font-family: inherit;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* Animations and Utils */

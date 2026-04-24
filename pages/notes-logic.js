@@ -59,28 +59,93 @@ export function initNotesView(container) {
             const toolbar = document.createElement('div');
             toolbar.className = 'inline-toolbar';
             toolbar.innerHTML = `
-                <button class="toolbar-btn" data-command="bold" title="Bold"><i class="fi fi-rr-bold"></i></button>
-                <button class="toolbar-btn" data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
-                <button class="toolbar-btn" data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
+                <div class="toolbar-main">
+                    <button class="toolbar-btn" data-command="bold" title="Bold"><i class="fi fi-rr-bold"></i></button>
+                    <button class="toolbar-btn" data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
+                    <button class="toolbar-btn" data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
+                    <div class="toolbar-separator"></div>
+                    <button class="toolbar-btn" id="link-btn" title="Add Link"><i class="fi fi-rr-link"></i></button>
+                    <button class="toolbar-btn hidden" id="unlink-btn" title="Remove Link"><i class="fi fi-rr-link-slash"></i></button>
+                </div>
+                <div class="toolbar-link hidden">
+                    <input type="text" class="link-input" placeholder="Paste or type a link...">
+                    <button class="toolbar-btn link-confirm"><i class="fi fi-rr-check"></i></button>
+                    <button class="toolbar-btn link-cancel"><i class="fi fi-rr-cross-small"></i></button>
+                </div>
             `;
             
-            toolbar.querySelectorAll('.toolbar-btn').forEach(btn => {
+            toolbar.querySelectorAll('.toolbar-main .toolbar-btn[data-command]').forEach(btn => {
                 btn.onmousedown = (e) => {
                     e.preventDefault();
-                    const command = btn.dataset.command;
-                    document.execCommand(command, false, null);
+                    document.execCommand(btn.dataset.command, false, null);
                     this.onChange();
                 };
             });
+
+            const linkBtn = toolbar.querySelector('#link-btn');
+            const unlinkBtn = toolbar.querySelector('#unlink-btn');
+            const linkInput = toolbar.querySelector('.link-input');
+            const linkConfirm = toolbar.querySelector('.link-confirm');
+            const linkCancel = toolbar.querySelector('.link-cancel');
+
+            linkBtn.onmousedown = (e) => {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    this.savedRange = selection.getRangeAt(0);
+                    toolbar.querySelector('.toolbar-main').classList.add('hidden');
+                    toolbar.querySelector('.toolbar-link').classList.remove('hidden');
+                    setTimeout(() => linkInput.focus(), 10);
+                }
+            };
+
+            unlinkBtn.onmousedown = (e) => {
+                e.preventDefault();
+                document.execCommand('unlink', false, null);
+                this.onChange();
+                this.handleSelectionChange();
+            };
+
+            linkConfirm.onclick = () => this.applyLink(linkInput.value);
+            linkInput.onkeydown = (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); this.applyLink(linkInput.value); }
+                if (e.key === 'Escape') { e.preventDefault(); this.resetToolbar(); }
+            };
+            linkCancel.onclick = () => this.resetToolbar();
 
             document.body.appendChild(toolbar);
             this.inlineToolbar = toolbar;
         }
 
+        applyLink(url) {
+            if (!url) return;
+            if (!url.startsWith('http') && !url.startsWith('mailto:')) url = 'https://' + url;
+            
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(this.savedRange);
+            
+            document.execCommand('createLink', false, url);
+            this.onChange();
+            this.resetToolbar();
+            this.hideInlineToolbar();
+        }
+
+        resetToolbar() {
+            this.inlineToolbar.querySelector('.toolbar-main').classList.remove('hidden');
+            this.inlineToolbar.querySelector('.toolbar-link').classList.add('hidden');
+            this.inlineToolbar.querySelector('.link-input').value = '';
+            this.savedRange = null;
+        }
+
         handleSelectionChange() {
             const selection = window.getSelection();
             if (selection.isCollapsed || !selection.toString().trim()) {
-                this.hideInlineToolbar();
+                if (this.inlineToolbar && !this.inlineToolbar.querySelector('.toolbar-link').classList.contains('hidden')) {
+                    // Don't hide if link input is active
+                } else {
+                    this.hideInlineToolbar();
+                }
                 return;
             }
 
@@ -91,6 +156,19 @@ export function initNotesView(container) {
             if (!blockContent || !this.container.contains(blockContent)) {
                 this.hideInlineToolbar();
                 return;
+            }
+
+            // Detect existing link
+            const parentLink = (commonAncestor.nodeType === 1 ? commonAncestor : commonAncestor.parentElement).closest('a');
+            const unlinkBtn = this.inlineToolbar.querySelector('#unlink-btn');
+            const linkBtn = this.inlineToolbar.querySelector('#link-btn');
+            
+            if (parentLink) {
+                unlinkBtn.classList.remove('hidden');
+                linkBtn.classList.add('hidden');
+            } else {
+                unlinkBtn.classList.add('hidden');
+                linkBtn.classList.remove('hidden');
             }
 
             const rect = range.getBoundingClientRect();
@@ -105,7 +183,10 @@ export function initNotesView(container) {
         }
 
         hideInlineToolbar() {
-            if (this.inlineToolbar) this.inlineToolbar.classList.remove('active');
+            if (this.inlineToolbar) {
+                this.inlineToolbar.classList.remove('active');
+                this.resetToolbar();
+            }
         }
 
         render(data) {

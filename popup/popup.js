@@ -991,7 +991,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ).length;
 
       if (unreadCount > 0) {
-        notificationBadge.textContent = unreadCount > 9 ? "9+" : unreadCount;
         notificationBadge.style.display = "flex";
       } else {
         notificationBadge.style.display = "none";

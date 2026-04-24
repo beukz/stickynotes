@@ -7,10 +7,12 @@ const REALTIME_SDK_URL = "https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.1
 async function initRealtime() {
     const response = await chrome.runtime.sendMessage({ action: "getSession" });
     const session = response?.session;
-    if (!session?.access_token) return;
 
     // Supabase Realtime via REST/WS
-    const wsUrl = `${SUPABASE_URL.replace("http", "ws")}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}&Authorization=Bearer ${session.access_token}`;
+    let wsUrl = `${SUPABASE_URL.replace("http", "ws")}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}`;
+    if (session?.access_token) {
+        wsUrl += `&Authorization=Bearer ${session.access_token}`;
+    }
 
     const socket = new WebSocket(wsUrl);
 

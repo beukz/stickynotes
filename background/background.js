@@ -166,19 +166,18 @@ async function setupOffscreen() {
   });
 }
 
-// Check session on startup and setup offscreen if needed
-getSession().then(session => {
-  if (session) setupOffscreen();
-});
+// Setup offscreen document on startup (for realtime notifications and sync)
+setupOffscreen();
 
-// Watch for session changes in storage to toggle offscreen
+// Watch for session changes in storage to restart offscreen (updates the token)
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && changes.supabase_session) {
-    if (changes.supabase_session.newValue) setupOffscreen();
-    else {
-      chrome.offscreen.hasDocument().then(has => {
-        if (has) chrome.offscreen.closeDocument();
-      });
-    }
+    chrome.offscreen.hasDocument().then(has => {
+      if (has) {
+        chrome.offscreen.closeDocument().then(() => setupOffscreen());
+      } else {
+        setupOffscreen();
+      }
+    });
   }
 });

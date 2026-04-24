@@ -23,6 +23,39 @@
         </header>
 
         <main class="admin-main">
+            <section class="notification-management">
+                <div class="section-header">
+                    <h2><i class="fi fi-rr-bell"></i> Send Broadcast</h2>
+                    <p>Send a message to all or specific users immediately.</p>
+                </div>
+                <form id="notification-form" class="notification-form">
+                    <div class="form-group">
+                        <label for="notif-title">Title</label>
+                        <input type="text" id="notif-title" placeholder="e.g. New Feature Update" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notif-message">Message</label>
+                        <textarea id="notif-message" placeholder="What would you like to tell your users?" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="notif-target">Target Audience</label>
+                            <select id="notif-target" required>
+                                <option value="all">Everyone (Incl. Guests)</option>
+                                <option value="signed_up">Signed-up Users Only</option>
+                                <option value="free">Free Plan Users Only</option>
+                                <option value="pro">Pro Users Only</option>
+                            </select>
+                        </div>
+                        <button type="submit" id="send-notif-btn" class="primary-btn">
+                            <i class="fi fi-rr-paper-plane"></i> Send Notification
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <div class="section-divider"></div>
+
             <div class="search-bar">
                 <i class="fi fi-rr-search"></i>
                 <input type="text" id="search-input" placeholder="Search users by email or ID...">

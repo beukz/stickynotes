@@ -51,6 +51,45 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
+async function handleNewNotification(notification) {
+  const session = await getSession();
+  const isGuest = !session?.user;
+
+  let shouldShow = false;
+  if (notification.target_group === "all") shouldShow = true;
+  else if (!isGuest) {
+    if (notification.target_group === "signed_up") shouldShow = true;
+    else {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/stickynotes_users?id=eq.${session.user.id}`,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          },
+        );
+        const users = await res.json();
+        const plan = users?.[0]?.plan || "free";
+        if (notification.target_group === plan) shouldShow = true;
+      } catch (e) {
+        console.error("Error fetching user plan for targeting:", e);
+      }
+    }
+  }
+
+  if (shouldShow) {
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "../assets/pin.png",
+      title: notification.title,
+      message: notification.message,
+      priority: 2,
+    });
+  }
+}
+
 // --- Supabase Proxy ---
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "supabaseAction") {
@@ -70,6 +109,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     });
     return false; // No response needed
+  }
+
+  if (request.action === "newNotification") {
+    handleNewNotification(request.notification);
+    return false;
   }
 
   if (request.action === "getSession") {

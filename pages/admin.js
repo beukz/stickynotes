@@ -9,6 +9,11 @@ const backBtn = document.getElementById("back-btn");
 const loadingState = document.getElementById("loading-state");
 const errorState = document.getElementById("error-state");
 const errorMsg = document.getElementById("error-msg");
+const notificationForm = document.getElementById("notification-form");
+const notifTitle = document.getElementById("notif-title");
+const notifMessage = document.getElementById("notif-message");
+const notifTarget = document.getElementById("notif-target");
+const sendNotifBtn = document.getElementById("send-notif-btn");
 
 let allUsers = [];
 
@@ -88,6 +93,58 @@ searchInput.addEventListener("input", (e) => {
 
 refreshBtn.addEventListener("click", fetchUsers);
 backBtn.addEventListener("click", () => window.location.href = "account.html");
+
+notificationForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = notifTitle.value;
+    const message = notifMessage.value;
+    const target = notifTarget.value;
+
+    sendNotifBtn.disabled = true;
+    sendNotifBtn.innerHTML = '<i class="fi fi-rr-spinner spin"></i> Sending...';
+
+    try {
+        const session = await getSession();
+        if (!session) throw new Error("Not authenticated");
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/stickynotes_notifications`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.access_token}`,
+                "apikey": SUPABASE_ANON_KEY,
+                "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({
+                title,
+                message,
+                target_group: target
+            })
+        });
+
+        if (!res.ok) throw new Error("Failed to send notification");
+
+        showToast("Notification broadcasted successfully!");
+        notificationForm.reset();
+    } catch (err) {
+        alert("Error sending notification: " + err.message);
+    } finally {
+        sendNotifBtn.disabled = false;
+        sendNotifBtn.innerHTML = '<i class="fi fi-rr-paper-plane"></i> Send Notification';
+    }
+});
+
+function showToast(msg) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = `<i class="fi fi-rr-check-circle"></i> ${msg}`;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(20px)";
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
 
 // Initial fetch
 fetchUsers();

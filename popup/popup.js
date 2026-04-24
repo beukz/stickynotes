@@ -1,6 +1,6 @@
 import "/canx-sdk.v1.js";
 import { getSession, startGoogleSignIn, signOut } from "../supabase/auth.js";
-import { selectRows } from "../supabase/client.js";
+import { selectRows, insertRows, SUPABASE_URL, SUPABASE_ANON_KEY } from "../supabase/client.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const notesContainer = document.getElementById("notes-container");
@@ -912,6 +912,211 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // --- Notification System ---
+  const notificationBtn = document.getElementById("notification-btn");
+  const notificationDropdown = document.getElementById("notification-dropdown");
+  const notificationBadge = document.getElementById("notification-badge");
+  const notificationList = document.getElementById("notification-list");
+  const markAllReadBtn = document.getElementById("mark-all-read-btn");
+
+  let notifications = [];
+  let userPlan = "free";
+
+  const NotificationManager = {
+    async init() {
+      this.attachEventListeners();
+      await this.load();
+    },
+
+    attachEventListeners() {
+      notificationBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isVisible = notificationDropdown.style.display === "flex";
+        notificationDropdown.style.display = isVisible ? "none" : "flex";
+        if (!isVisible) this.render();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
+          notificationDropdown.style.display = "none";
+        }
+      });
+
+      markAllReadBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await this.markAllAsRead();
+      });
+    },
+
+    async load() {
+      try {
+        const session = await getSession();
+        const isGuest = !session?.user;
+
+        // Fetch user plan if signed in
+        if (!isGuest) {
+          const userProfile = await selectRows(
+            "stickynotes_users",
+            `id=eq.${session.user.id}`,
+            session.access_token,
+          );
+          userPlan = userProfile?.[0]?.plan || "free";
+        }
+
+        // Fetch all relevant notifications
+        const allNotifications = await selectRows(
+          "stickynotes_notifications",
+          "order=created_at.desc",
+        );
+
+        // Filter based on user status and plan
+        notifications = allNotifications.filter((n) => {
+          if (n.target_group === "all") return true;
+          if (isGuest) return false;
+          if (n.target_group === "signed_up") return true;
+          return n.target_group === userPlan;
+        });
+
+        await this.updateBadge();
+      } catch (err) {
+        console.error("Error loading notifications:", err);
+      }
+    },
+
+    async updateBadge() {
+      const readIds = await this.getReadIds();
+      const unreadCount = notifications.filter(
+        (n) => !readIds.includes(n.id),
+      ).length;
+
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount > 9 ? "9+" : unreadCount;
+        notificationBadge.style.display = "flex";
+      } else {
+        notificationBadge.style.display = "none";
+      }
+    },
+
+    async getReadIds() {
+      const session = await getSession();
+      if (!session?.user) {
+        const data = await new Promise((r) =>
+          chrome.storage.local.get("read_notifications", r),
+        );
+        return data.read_notifications || [];
+      } else {
+        try {
+          const reads = await selectRows(
+            "stickynotes_notification_reads",
+            `user_id=eq.${session.user.id}`,
+            session.access_token,
+          );
+          return reads.map((r) => r.notification_id);
+        } catch (e) {
+          console.error("Error fetching read status:", e);
+          return [];
+        }
+      }
+    },
+
+    async markAllAsRead() {
+      const session = await getSession();
+      const unreadIds = await this.getUnreadIds();
+
+      if (unreadIds.length === 0) return;
+
+      if (!session?.user) {
+        const readIds = await this.getReadIds();
+        const newReadIds = [...new Set([...readIds, ...unreadIds])];
+        await new Promise((r) =>
+          chrome.storage.local.set({ read_notifications: newReadIds }, r),
+        );
+      } else {
+        // Use insertRows for each to handle read status
+        // Alternatively, a bulk insert could be done if the API supports it cleanly
+        for (const id of unreadIds) {
+          await this.markAsRead(id, session);
+        }
+      }
+
+      await this.updateBadge();
+      this.render();
+    },
+
+    async getUnreadIds() {
+      const readIds = await this.getReadIds();
+      return notifications.map((n) => n.id).filter((id) => !readIds.includes(id));
+    },
+
+    async render() {
+      const readIds = await this.getReadIds();
+      notificationList.innerHTML = "";
+
+      if (notifications.length === 0) {
+        notificationList.innerHTML = `
+          <div class="empty-notifications">
+            <i class="fi fi-rr-bell"></i>
+            <p>No notifications yet</p>
+          </div>
+        `;
+        return;
+      }
+
+      notifications.forEach((n) => {
+        const isUnread = !readIds.includes(n.id);
+        const item = document.createElement("div");
+        item.className = `notification-item ${isUnread ? "unread" : ""}`;
+        item.innerHTML = `
+          <h4>${n.title}</h4>
+          <p>${n.message}</p>
+          <span class="time">${new Date(n.created_at).toLocaleDateString()}</span>
+        `;
+
+        item.addEventListener("click", async () => {
+          if (isUnread) {
+            await this.markAsRead(n.id);
+            this.render();
+          }
+        });
+
+        notificationList.appendChild(item);
+      });
+    },
+
+    async markAsRead(id, providedSession = null) {
+      const session = providedSession || (await getSession());
+      if (!session?.user) {
+        const readIds = await this.getReadIds();
+        if (!readIds.includes(id)) {
+          readIds.push(id);
+          await new Promise((r) =>
+            chrome.storage.local.set({ read_notifications: readIds }, r),
+          );
+        }
+      } else {
+        try {
+          // Manually handle UPSERT via fetch to use "resolution=merge-duplicates"
+          await fetch(`${SUPABASE_URL}/rest/v1/stickynotes_notification_reads`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${session.access_token}`,
+              "Content-Type": "application/json",
+              Prefer: "resolution=merge-duplicates",
+            },
+            body: JSON.stringify({ user_id: session.user.id, notification_id: id }),
+          });
+        } catch (e) {
+          console.error("Error marking as read:", e);
+        }
+      }
+      await this.updateBadge();
+    },
+  };
+
+  // Initialize notifications
+  NotificationManager.init();
 
   // Load notes when the popup is opened
   loadNotes();

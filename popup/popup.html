@@ -26,6 +26,21 @@
           <i class="fi fi-rr-search"></i>
           <input type="text" id="search-input" placeholder="Search notes..." />
         </div>
+        <div class="notification-container">
+          <button id="notification-btn" class="notification-btn" title="Notifications">
+            <i class="fi fi-rr-bell"></i>
+            <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+          </button>
+          <div id="notification-dropdown" class="notification-dropdown" style="display: none;">
+            <div class="dropdown-header">
+              <h3>Notifications</h3>
+              <button id="mark-all-read-btn" class="text-btn">Mark all read</button>
+            </div>
+            <div id="notification-list" class="notification-list">
+              <!-- Notifications will be loaded here -->
+            </div>
+          </div>
+        </div>
         <a href="../pages/dashboard.html" target="_blank" class="dashboard-link" title="Open Dashboard">
           <i class="fi fi-rr-dashboard-panel"></i>
         </a>

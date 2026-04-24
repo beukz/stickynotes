@@ -74,6 +74,7 @@
 
                 this._renderSafeContent(shadow, adData);
                 this._setupTracking(shadow, adData);
+                if (typeof options.onFill === 'function') options.onFill(adData);
 
                 if (options.refreshInterval) {
                     this._setupAutoRefresh(host, options);

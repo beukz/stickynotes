@@ -25,9 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Render the ad
   if (canxContainer) {
+    // Default hidden until we confirm fill
+    canxContainer.style.display = "none";
     adNetwork.renderAd(canxContainer, {
       format: "BANNER",
       placement: "popup_main", // optional analytics tag
+      onFill: () => {
+        canxContainer.style.display = "flex";
+      },
+      onNoFill: () => {
+        canxContainer.style.display = "none";
+      },
     });
   }
 

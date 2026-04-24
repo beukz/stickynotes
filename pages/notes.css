@@ -247,7 +247,7 @@
 /* --- Main Editor --- */
 .main-editor {
   flex: 1;
-  padding: 32px 48px;
+  padding: 16px 48px;
   overflow-y: auto;
   position: relative;
   min-width: 0;
@@ -280,6 +280,71 @@
   display: none;
 }
 
+.editor-meta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -48px 28px; /* Negative margin to span full width */
+  padding: 0 48px 12px; /* Add padding back inside */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+#note-date {
+  color: #9ca3af;
+}
+
+.share-btn-wrapper {
+  position: relative;
+  cursor: help;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.share-btn-wrapper:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #0a0a0a;
+}
+
+/* Custom Tooltip */
+.share-btn-wrapper[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 100%; /* Move to bottom */
+  right: 0;
+  transform: translateY(8px) scale(0.95); /* Animate from bottom */
+  background: #111;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-transform: none;
+  letter-spacing: normal;
+  z-index: 10;
+}
+
+.share-btn-wrapper:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(8px) scale(1);
+}
+
 #note-title-input {
   width: 100%;
   border: none;
@@ -288,8 +353,9 @@
   padding: 0;
   margin-bottom: 1.5rem;
   outline: none;
-  color: var(--text-primary);
-  font-family: var(--font-primary);
+  color: #0a0a0a;
+  font-family: inherit;
+  background: transparent;
 }
 
 #note-title-input::placeholder {

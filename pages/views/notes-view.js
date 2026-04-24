@@ -24,6 +24,12 @@ export function template() {
             <p>Your personal space for thoughts, ideas, and plans.</p>
           </div>
           <div id="editor-content" class="hidden">
+            <div class="editor-meta-header">
+              <span id="note-date">April 24, 2024</span>
+              <div class="share-btn-wrapper" data-tooltip="Coming Soon">
+                <i class="fi fi-rr-share"></i>
+              </div>
+            </div>
             <input type="text" id="note-title-input" placeholder="Untitled" />
             <div
               id="note-editor"

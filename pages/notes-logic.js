@@ -6,6 +6,7 @@ export function initNotesView(container) {
     const editorPlaceholder = container.querySelector('#editor-placeholder');
     const editorContent = container.querySelector('#editor-content');
     const noteTitleInput = container.querySelector('#note-title-input');
+    const noteDate = container.querySelector('#note-date');
     const noteEditor = container.querySelector('#note-editor');
     const slashCommandMenu = container.querySelector('#slash-command-menu');
     const floatingToolbar = container.querySelector('#floating-toolbar');
@@ -198,6 +199,15 @@ export function initNotesView(container) {
         activeNoteId = id;
         noteTitleInput.value = note.title;
         noteEditor.innerHTML = note.content;
+        
+        if (noteDate) {
+            const date = new Date(note.lastModified || Date.now());
+            noteDate.textContent = date.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+        }
         
         container.querySelectorAll('.note-item').forEach(item => {
             item.classList.toggle('active', item.dataset.id === id);

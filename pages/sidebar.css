@@ -99,6 +99,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  scroll-behavior: smooth;
 }
 
 .sidebar-link {

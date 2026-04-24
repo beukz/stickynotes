@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sticky Notes</title>
+    <!-- Global -->
+    <link rel="stylesheet" href="sidebar.css" />
+    <!-- Page-specific CSS (all loaded, scoped by class names) -->
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="notes.css" />
+    <link rel="stylesheet" href="notification.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" />
+    <style>
+      /* ─── Account page (inline, small) ─── */
+      .account-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 32px;
+      }
+      .account-card-box {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 16px;
+        padding: 32px;
+      }
+      .account-card-box h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+        color: #0a0a0a;
+      }
+      .account-card-box p {
+        margin: 0 0 24px;
+        color: #6b7280;
+        line-height: 1.6;
+        font-size: 0.875rem;
+      }
+      .account-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .account-row button {
+        border: none;
+        background: #0a0a0a;
+        color: #ffffff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.8125rem;
+        transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        font-family: inherit;
+      }
+      .account-row button:hover { background: #262626; }
+      .account-row button.secondary {
+        background: #ffffff;
+        color: #0a0a0a;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      .account-row button.secondary:hover {
+        background: rgba(0, 0, 0, 0.02);
+        border-color: rgba(0, 0, 0, 0.12);
+      }
+      .account-status-box {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        white-space: pre-wrap;
+        color: #374151;
+        text-align: center;
+        line-height: 1.5;
+      }
+      .account-status-box.ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+      .account-status-box.warn { background: #fffbeb; border-color: #fef3c7; color: #92400e; }
+
+      /* ─── View transition ─── */
+      .app-main {
+        transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .app-main.view-exit {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside id="app-sidebar"></aside>
+      <main id="app-main" class="app-main">
+        <!-- View content dynamically injected here -->
+      </main>
+    </div>
+
+    <script type="module" src="router.js"></script>
+  </body>
+</html>

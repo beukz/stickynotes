@@ -72,13 +72,17 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Fade from transparent to solid white on the right */
+  background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.95) 80%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  /* Fade the blur itself using mask */
+  mask-image: linear-gradient(to right, transparent 0%, black 50%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 50%);
   z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end; /* Move buttons to the right */
   border-radius: 8px;
   opacity: 0;
   visibility: hidden;
@@ -93,7 +97,8 @@
 .popup-delete-modal {
   transform: scale(0.9);
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  width: 100%;
+  width: auto; /* Don't stretch to full width */
+  margin-right: 8px;
 }
 
 .popup-delete-overlay.active .popup-delete-modal {
@@ -103,12 +108,12 @@
 .popup-modal-buttons {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .popup-modal-buttons button {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: none;
   border-radius: 50%;

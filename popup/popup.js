@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
       allNotesData = notesData;
-      renderNotes(allNotesData, collapsedDomainsState);
+      filterAndRenderNotes(searchInput.value);
     } catch (e) {
       console.error('Failed to load Supabase notes:', e);
     }
@@ -565,12 +565,12 @@ document.addEventListener('DOMContentLoaded', () => {
       delete notesData.migration_log;
 
       allNotesData = notesData;
-      renderNotes(allNotesData, collapsedDomainsState);
+      filterAndRenderNotes(searchInput.value);
     } else {
       // Fallback to mock data for local development/testing
       console.warn('chrome.storage.sync API not available. Loading mock data for development.');
       allNotesData = mockNotesData;
-      renderNotes(mockNotesData, []);
+      filterAndRenderNotes(searchInput.value);
     }
   }
 
@@ -791,6 +791,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for changes in storage to keep the popup in sync
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
+      const changedKeys = Object.keys(changes);
+      
+      // If ONLY the collapsed state changed, we don't need to completely rebuild the DOM.
+      // The visual toggle is already handled by the click event. Rebuilding clears search state.
+      if (changedKeys.length === 1 && changedKeys[0] === 'collapsed_domains') {
+        collapsedDomainsState = changes.collapsed_domains.newValue || [];
+        return;
+      }
+      
       console.log('Storage changed, reloading popup data.');
       loadNotes();
     }

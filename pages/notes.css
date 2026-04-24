@@ -345,6 +345,18 @@
   color: #ef4444;
 }
 
+.save-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.save-info small {
+  font-size: 0.65rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
 .save-status i {
   font-size: 0.85rem;
 }
@@ -433,12 +445,12 @@
 }
 
 .block-content {
-  padding: 8px 0;
+  padding: 4px 0;
   outline: none;
   font-size: 1.05rem;
-  line-height: 1.7;
+  line-height: 1;
   color: #1f2937;
-  min-height: 1.7em;
+  min-height: 1.6em;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -542,7 +554,7 @@
 .block-quote {
   padding-left: 20px;
   border-left: 3px solid #111;
-  margin: 12px 0;
+  margin: 8px 0;
 }
 
 .block-quote .block-content {
@@ -552,7 +564,7 @@
 
 /* Divider */
 .block-divider {
-  padding: 24px 0;
+  padding: 12px 0;
   display: flex;
   align-items: center;
   cursor: default;

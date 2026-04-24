@@ -571,7 +571,15 @@ export function initNotesView(container) {
             saveStatusEl.classList.add('error');
             saveStatusEl.classList.remove('saving', 'saved');
         } else {
-            saveStatusEl.innerHTML = '<i class="fi fi-rr-check"></i><span>Saved</span>';
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            saveStatusEl.innerHTML = `
+                <i class="fi fi-rr-check"></i>
+                <div class=\"save-info\">
+                    <span>Saved</span>
+                    <small>Last saved at ${timeStr}</small>
+                </div>
+            `;
             saveStatusEl.classList.add('saved');
             saveStatusEl.classList.remove('saving', 'error');
         }

@@ -1,111 +1,140 @@
-/* pages/sidebar.css */
+/* pages/sidebar.css — Global Layout & Sidebar */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
-  --sidebar-width: 260px;
-  --sidebar-bg: #f9fafb;
-  --sidebar-border: rgba(0, 0, 0, 0.05);
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #9ca3af;
-  --accent-blue: #2563eb;
-  --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-active: rgba(0, 0, 0, 0.06);
-  --spring-transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* App Layout Wrapper */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #0a0a0a;
+  background: #fafafa;
+}
+
+:root {
+  --sidebar-width: 220px;
+  --sidebar-bg: #fafafa;
+  --sidebar-border: rgba(0, 0, 0, 0.06);
+  --text-primary: #0a0a0a;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --accent: #171717;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(0, 0, 0, 0.06);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── App Layout Shell ─── */
 .app-layout {
   display: flex;
+  width: 100%;
   height: 100vh;
-  width: 100vw;
   overflow: hidden;
-  background-color: #ffffff;
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
 }
 
 .app-main {
   flex: 1;
+  min-width: 0;            /* ← prevents flex children from overflowing */
   height: 100vh;
   overflow-y: auto;
-  position: relative;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  background: #ffffff;
 }
 
-/* Sidebar Container */
+/* ─── Sidebar ─── */
 .app-sidebar {
   width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  max-width: var(--sidebar-width);
   height: 100vh;
-  background-color: var(--sidebar-bg);
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: var(--spring-transition);
+  overflow: hidden;
   position: relative;
   z-index: 100;
 }
 
 /* Sidebar Header */
 .sidebar-header {
-  padding: 24px 20px 16px;
+  padding: 20px 16px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .sidebar-header .logo {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
 .sidebar-header h2 {
-  font-size: 1.1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-/* Navigation Links */
+/* ─── Navigation ─── */
 .sidebar-nav {
   flex: 1;
-  padding: 0 12px;
+  padding: 4px 8px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 7px 10px;
   border-radius: 8px;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  transition: var(--spring-transition);
+  transition: background 0.2s var(--ease-spring), color 0.2s var(--ease-spring);
   cursor: pointer;
   border: none;
   background: none;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .sidebar-link i {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-tertiary);
-  transition: var(--spring-transition);
+  transition: color 0.2s var(--ease-spring);
+  flex-shrink: 0;
+}
+
+.sidebar-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-link:hover {
-  background-color: var(--bg-hover);
+  background: var(--bg-hover);
   color: var(--text-primary);
 }
 
@@ -114,7 +143,7 @@
 }
 
 .sidebar-link.active {
-  background-color: var(--bg-active);
+  background: var(--bg-active);
   color: var(--text-primary);
   font-weight: 600;
 }
@@ -123,29 +152,24 @@
   color: var(--text-primary);
 }
 
-/* Hidden elements */
 .sidebar-link.hidden {
   display: none !important;
 }
 
-/* Account Section at Bottom */
+/* ─── Account Card (Footer) ─── */
 .sidebar-footer {
-  padding: 16px 12px;
+  padding: 12px 8px;
   border-top: 1px solid var(--sidebar-border);
   position: relative;
 }
 
-/* SVG Background Overlay for Account Card */
 .account-card-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(0,0,0,0.03)"/></svg>');
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='rgba(0,0,0,0.025)'/%3E%3C/svg%3E");
   z-index: 0;
   pointer-events: none;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .account-card {
@@ -153,37 +177,36 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 12px;
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
   text-decoration: none;
   color: var(--text-primary);
-  transition: var(--spring-transition);
+  transition: background 0.25s var(--ease-spring), border-color 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
 .account-card:hover {
   background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0,0,0,0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .account-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background-color: #e5e7eb;
+  background: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #9ca3af;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -198,11 +221,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
   flex: 1;
 }
 
 .account-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -210,7 +234,7 @@
 }
 
 .account-status {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
@@ -219,10 +243,15 @@
 
 /* Guest State */
 .account-card.guest .account-avatar {
-  background-color: #f3f4f6;
+  background: #f3f4f6;
   color: #6b7280;
 }
 
 .account-card.guest .account-name {
   color: var(--text-secondary);
+}
+
+/* ─── Utility ─── */
+.hidden {
+  display: none !important;
 }

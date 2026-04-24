@@ -11,76 +11,71 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: calc(100vh - 48px);
-        width: 100%;
+        flex: 1;
+        padding: 32px;
       }
       .card {
         width: 100%;
-        max-width: 500px;
+        max-width: 420px;
         background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 16px;
         padding: 32px;
-        box-shadow:
-          0 1px 3px rgba(0, 0, 0, 0.04),
-          0 1px 2px rgba(0, 0, 0, 0.02);
       }
-      h1 {
+      .card h1 {
         font-size: 1.25rem;
         font-weight: 600;
-        margin: 0 0 12px;
-        letter-spacing: -0.01em;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+        color: #0a0a0a;
       }
-      p {
+      .card p {
         margin: 0 0 24px;
-        color: #666666;
+        color: #6b7280;
         line-height: 1.6;
-        font-size: 0.95rem;
+        font-size: 0.875rem;
       }
       .row {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
       }
-      button {
-        border: 1px solid transparent;
-        background: #111111;
+      .row button {
+        border: none;
+        background: #0a0a0a;
         color: #ffffff;
-        padding: 12px 16px;
-        border-radius: 12px;
+        padding: 10px 16px;
+        border-radius: 10px;
         cursor: pointer;
         font-weight: 500;
-        font-size: 0.95rem;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        font-size: 0.8125rem;
+        transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         font-family: inherit;
       }
-      button:hover {
-        background: #333333;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      .row button:hover {
+        background: #262626;
       }
-      button.secondary {
+      .row button.secondary {
         background: #ffffff;
-        color: #111111;
+        color: #0a0a0a;
         border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       }
-      button.secondary:hover {
+      .row button.secondary:hover {
         background: rgba(0, 0, 0, 0.02);
         border-color: rgba(0, 0, 0, 0.12);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
       .status {
-        margin-top: 24px;
-        padding: 14px;
-        border-radius: 12px;
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 10px;
         background: rgba(0, 0, 0, 0.02);
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         white-space: pre-wrap;
-        color: #111111;
+        color: #374151;
         text-align: center;
+        line-height: 1.5;
       }
       .ok {
         background: #f0fdf4;

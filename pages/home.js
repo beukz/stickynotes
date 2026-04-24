@@ -8,6 +8,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const homeContent = document.getElementById("home-content");
     let allNotes = [];
 
+    // ── Determine greeting ──
+    function getGreeting() {
+        const h = new Date().getHours();
+        if (h < 12) return "Good morning";
+        if (h < 18) return "Good afternoon";
+        return "Good evening";
+    }
+
+    // ── Load Notes ──
     async function loadAllNotes() {
         let localData = {};
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
@@ -27,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error("Error loading cloud notes:", error);
         }
 
-        // Flatten local notes
         const flatLocalNotes = [];
         for (const [url, notes] of Object.entries(localData)) {
             if (Array.isArray(notes)) {
@@ -36,60 +44,89 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         allNotes = [...flatLocalNotes, ...cloudNotes];
-        
-        // Sort by created_at or assume newest at the end of cloud/local arrays
-        // Since local notes don't have created_at usually, we might rely on ID or just reverse order
-        // For now, let's reverse the array assuming newer notes were added later.
         allNotes.reverse();
-
-        renderHomeContent();
+        renderHome();
     }
 
-    function renderHomeContent() {
-        const sessionName = "there"; // We can fetch name from session if needed
+    // ── Render ──
+    function renderHome() {
+        const greeting = getGreeting();
         const recentNotes = allNotes.slice(0, 5);
 
-        let recentCardsHtml = '';
+        const noteColors = ['#fef3c7', '#eef2ff', '#f0fdf4', '#fce7f3', '#e0e7ff'];
+        const noteTextColors = ['#d97706', '#4f46e5', '#16a34a', '#db2777', '#4338ca'];
+
+        let recentHtml;
         if (recentNotes.length === 0) {
-            recentCardsHtml = `<p class="empty-state-text">No notes yet. Create one from any webpage!</p>`;
+            recentHtml = `
+                <div class="home-empty">
+                    <div class="home-empty-icon"><i class="fi fi-rr-note"></i></div>
+                    <h3>No notes yet</h3>
+                    <p>Create your first note from any webpage using the extension popup.</p>
+                </div>
+            `;
         } else {
-            recentCardsHtml = recentNotes.map(note => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = note.content;
-                const textPreview = tempDiv.textContent || 'Empty note...';
-                
+            const items = recentNotes.map((note, i) => {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = note.content || '';
+                let preview = tmp.textContent || '';
+                preview = preview.length > 60 ? preview.substring(0, 60) + '…' : preview;
+                if (!preview) preview = 'Empty note';
+
+                const bg = noteColors[i % noteColors.length];
+                const fg = noteTextColors[i % noteTextColors.length];
+
                 return `
-                    <div class="home-card recent-card">
-                        <div class="card-icon-box" style="background-color: ${note.color || '#fef3c7'}; border: 1px solid rgba(0,0,0,0.05);">
-                            <i class="fi fi-rr-document" style="color: #d97706;"></i>
+                    <div class="home-note-item" onclick="window.location.href='notes.html'">
+                        <div class="home-note-icon" style="background:${bg}; color:${fg};">
+                            <i class="fi fi-rr-document"></i>
                         </div>
-                        <div class="card-info">
-                            <span class="card-title">${note.title || 'Untitled Note'}</span>
-                            <div class="card-meta">
-                                <span class="meta-preview" style="color: var(--text-secondary); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; display: inline-block;">
-                                    ${textPreview}
-                                </span>
-                            </div>
+                        <div class="home-note-body">
+                            <div class="home-note-title">${note.title || 'Untitled Note'}</div>
+                            <div class="home-note-preview">${preview}</div>
                         </div>
+                        <span class="home-note-meta">${note.source === 'cloud' ? '☁️' : '💾'}</span>
                     </div>
                 `;
             }).join('');
+
+            recentHtml = `<div class="home-note-list">${items}</div>`;
         }
 
         homeContent.innerHTML = `
-            <div class="home-container" style="padding: 40px; max-width: 800px; margin: 0 auto;">
-                <h1 class="home-title" style="font-size: 2rem; font-weight: 600; margin-bottom: 32px; letter-spacing: -0.02em;">Good afternoon</h1>
-                
-                <section class="home-section">
-                    <div class="home-section-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--text-secondary); font-weight: 500;">
-                        <i class="fi fi-rr-time-past"></i>
-                        <span>Recently added notes</span>
-                    </div>
-                    <div class="home-cards-column" style="display: flex; flex-direction: column; gap: 12px;">
-                        ${recentCardsHtml}
-                    </div>
-                </section>
+            <div class="home-greeting">
+                <h1>${greeting}</h1>
+                <p>Here's what's happening with your notes.</p>
             </div>
+
+            <section class="home-section">
+                <div class="home-section-label">
+                    <i class="fi fi-rr-time-past"></i>
+                    <span>Recently added</span>
+                </div>
+                ${recentHtml}
+            </section>
+
+            <section class="home-section">
+                <div class="home-section-label">
+                    <i class="fi fi-rr-apps"></i>
+                    <span>Quick actions</span>
+                </div>
+                <div class="home-actions">
+                    <a href="notes.html" class="home-action-card">
+                        <div class="home-action-icon notes"><i class="fi fi-rr-document"></i></div>
+                        <span class="home-action-label">My Notes</span>
+                    </a>
+                    <a href="notification.html" class="home-action-card">
+                        <div class="home-action-icon notifs"><i class="fi fi-rr-bell"></i></div>
+                        <span class="home-action-label">Notifications</span>
+                    </a>
+                    <a href="account.html" class="home-action-card">
+                        <div class="home-action-icon account"><i class="fi fi-rr-user"></i></div>
+                        <span class="home-action-label">Account</span>
+                    </a>
+                </div>
+            </section>
         `;
     }
 

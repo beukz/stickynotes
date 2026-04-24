@@ -1,52 +1,4 @@
-/* General Reset & Font Setup */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("../font/Inter.ttc") format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-}
-
-:root {
-  --font-primary:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
-  --bg-color: #fafafa;
-  --sidebar-bg: #fafafa;
-  --text-primary: #111111;
-  --text-secondary: #666666;
-  --text-light: #999999;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --accent-color: #000000;
-  --hover-bg: rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
-  --spring-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body {
-  font-family: var(--font-primary);
-  background-color: var(--bg-color);
-  color: var(--text-primary);
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden; /* Prevent body scroll */
-}
-
-.notes-container {
-  display: flex;
-  height: 100vh;
-}
+/* notes.css — Notes editor layout (works inside app-layout) */
 
 /* --- Custom Scrollbars --- */
 ::-webkit-scrollbar {
@@ -57,111 +9,105 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* --- Sidebar --- */
+/* --- Secondary Sidebar: Notes List --- */
 .notes-sidebar {
-  width: 280px;
-  background-color: var(--sidebar-bg);
-  border-right: 1px solid var(--border-color);
+  width: 240px;
+  min-width: 240px;
+  background: #fafafa;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  transition: var(--spring-transition);
+  padding: 16px 12px;
+  overflow: hidden;
 }
 
-.sidebar-header {
+.notes-sidebar .sidebar-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 0 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
   flex-shrink: 0;
 }
 
-.sidebar-header .logo {
-  width: 24px;
-  height: 24px;
-  margin-right: 0.75rem;
-  border-radius: 6px;
-}
-
-.sidebar-header h2 {
-  font-size: 1.05rem;
+.notes-sidebar .sidebar-header h2 {
+  font-size: 0.875rem;
   font-weight: 600;
-  margin-right: auto;
   letter-spacing: -0.01em;
+  margin: 0;
+  color: #0a0a0a;
 }
 
 #new-note-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-secondary);
-  padding: 0.25rem;
+  color: #9ca3af;
+  padding: 4px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--spring-transition);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #new-note-btn:hover {
-  background-color: var(--hover-bg);
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
+  color: #0a0a0a;
 }
 
 .notes-list {
   overflow-y: auto;
-  flex-grow: 1;
+  flex: 1;
 }
 
 .note-item {
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 0.25rem;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   position: relative;
-  transition: var(--spring-transition);
-  border-left: 2px solid transparent;
-  color: var(--text-secondary);
+  transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #6b7280;
 }
 
 .note-item:hover {
-  background-color: var(--hover-bg);
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
+  color: #0a0a0a;
 }
 
 .note-item.active {
-  background-color: rgba(0, 0, 0, 0.03);
-  border-left-color: var(--accent-color);
-  font-weight: 500;
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+  color: #0a0a0a;
 }
 
 .note-item .delete-note-btn {
   position: absolute;
-  right: 8px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--text-light);
+  color: #9ca3af;
   cursor: pointer;
-  padding: 4px;
+  padding: 3px;
   border-radius: 4px;
   display: none;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   opacity: 0;
-  transition: var(--spring-transition);
+  transition: all 0.2s ease;
 }
 
 .note-item:hover .delete-note-btn {
@@ -170,51 +116,23 @@ body {
 }
 
 .note-item .delete-note-btn:hover {
-  background-color: #d1d5db;
-  color: var(--text-primary);
+  background: #fee2e2;
+  color: #ef4444;
 }
 
 .no-notes {
-  padding: 0.5rem 0.75rem;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.dashboard-link {
-  display: flex;
-  align-items: center;
-  padding: 0.6rem 0.75rem;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease;
-}
-
-.dashboard-link:hover {
-  background-color: var(--hover-bg);
-}
-
-.dashboard-link i {
-  margin-right: 0.75rem;
-  font-size: 1rem;
+  padding: 8px 10px;
+  color: #9ca3af;
+  font-size: 0.8125rem;
 }
 
 /* --- Main Editor --- */
 .main-editor {
   flex: 1;
-  padding: 2rem 4rem;
+  padding: 32px 48px;
   overflow-y: auto;
-  max-width: 800px;
-  margin: 0 auto;
   position: relative;
+  min-width: 0;
 }
 
 #editor-placeholder {
@@ -224,14 +142,19 @@ body {
   justify-content: center;
   height: 100%;
   text-align: center;
-  color: var(--text-light);
+  color: #9ca3af;
 }
 
 #editor-placeholder h2 {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-secondary);
+  margin-bottom: 4px;
+  color: #6b7280;
+}
+
+#editor-placeholder p {
+  font-size: 0.8125rem;
+  color: #9ca3af;
 }
 
 #editor-content.hidden,

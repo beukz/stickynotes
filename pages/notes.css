@@ -324,12 +324,46 @@
   letter-spacing: 0.02em;
 }
 
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.save-status.saving {
+  color: #f59e0b;
+}
+
+.save-status.saved {
+  color: #10b981;
+}
+
+.save-status.error {
+  color: #ef4444;
+}
+
+.save-status i {
+  font-size: 0.85rem;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 #note-date {
   color: #9ca3af;
 }
 
 .header-divider {
-  color: rgba(0, 0, 0, 0.30);
+  color: rgba(0, 0, 0, 0.08);
   font-size: 0.7rem;
   font-weight: 300;
 }

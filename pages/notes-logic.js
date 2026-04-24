@@ -7,6 +7,7 @@ export function initNotesView(container) {
     const editorContent = container.querySelector('#editor-content');
     const noteTitleInput = container.querySelector('#note-title-input');
     const noteDate = container.querySelector('#note-date');
+    const saveStatusEl = container.querySelector('#save-status');
     const mainEditor = container.querySelector('.main-editor');
     
     if (!notesListEl || !noteTitleInput) return () => {};
@@ -525,7 +526,6 @@ export function initNotesView(container) {
                     notes = (response.data || []).map(n => ({
                         ...n,
                         id: n.id,
-                        id_local: n.id_local || n.id,
                         lastModified: new Date(n.updated_at || n.created_at).getTime()
                     }));
                     notes.sort((a, b) => b.lastModified - a.lastModified);
@@ -560,6 +560,23 @@ export function initNotesView(container) {
         }
     }
 
+    function setSaveStatus(status) {
+        if (!saveStatusEl) return;
+        if (status === 'saving') {
+            saveStatusEl.innerHTML = '<i class="fi fi-rr-spinner animate-spin"></i><span>Saving...</span>';
+            saveStatusEl.classList.add('saving');
+            saveStatusEl.classList.remove('saved', 'error');
+        } else if (status === 'error') {
+            saveStatusEl.innerHTML = '<i class="fi fi-rr-cloud-slash"></i><span>Error</span>';
+            saveStatusEl.classList.add('error');
+            saveStatusEl.classList.remove('saving', 'saved');
+        } else {
+            saveStatusEl.innerHTML = '<i class="fi fi-rr-check"></i><span>Saved</span>';
+            saveStatusEl.classList.add('saved');
+            saveStatusEl.classList.remove('saving', 'error');
+        }
+    }
+
     async function saveNotes(note) {
         if (currentUser) {
             const isNew = !note.id.includes('-');
@@ -570,19 +587,34 @@ export function initNotesView(container) {
                 content: note.content,
                 color: note.color || "#ffd165",
                 url: note.url || "dashboard",
-                id_local: note.id_local || note.id
+                user_id: currentUser.id // Explicitly send for RLS
             };
 
             chrome.runtime.sendMessage({
                 action: "supabaseAction", method, table: "sticky_notes", query, body
             }, (response) => {
-                if (response?.success && isNew) {
-                    const newId = response.data?.[0]?.id;
-                    if (newId) note.id = newId;
+                if (response?.success) {
+                    if (isNew) {
+                        const newId = response.data?.[0]?.id;
+                        if (newId) {
+                            const oldId = note.id;
+                            note.id = newId;
+                            if (activeNoteId === oldId) {
+                                activeNoteId = newId;
+                                localStorage.setItem("activeNoteId", newId);
+                            }
+                            renderNotesList(); // Update UI with new ID
+                        }
+                    }
+                    setSaveStatus('saved');
+                } else {
+                    console.error("Supabase save error:", response?.error);
+                    setSaveStatus('error');
                 }
             });
         } else {
             await chrome.storage.local.set({ [STORAGE_KEY]: notes });
+            setSaveStatus('saved');
         }
     }
 
@@ -666,6 +698,7 @@ export function initNotesView(container) {
             return;
         }
         activeNoteId = id;
+        localStorage.setItem("activeNoteId", id);
         noteTitleInput.value = note.title || "";
         
         let editorData = { blocks: [] };
@@ -732,6 +765,7 @@ export function initNotesView(container) {
         note.content = newContent;
         note.lastModified = Date.now();
 
+        setSaveStatus('saving');
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
             notes.sort((a, b) => b.lastModified - a.lastModified);

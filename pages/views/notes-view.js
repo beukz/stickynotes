@@ -29,6 +29,11 @@ export function template() {
                 <input type="text" id="note-title-input" placeholder="Untitled" />
               </div>
               <div class="header-right">
+                <div id="save-status" class="save-status">
+                  <i class="fi fi-rr-check"></i>
+                  <span>Saved</span>
+                </div>
+                <span class="header-divider">|</span>
                 <span id="note-date">April 24, 2024</span>
                 <span class="header-divider">|</span>
                 <div class="share-btn-wrapper" data-tooltip="Coming Soon">

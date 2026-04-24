@@ -158,9 +158,7 @@
 
             // 3. Sanitize and prepare URL
             let destUrl = ad.destinationUrl || ad.destination_url || ad.link || ad.url || '';
-            if (destUrl && !/^https?:\/\//i.test(destUrl)) {
-                destUrl = 'https://' + destUrl;
-            }
+            destUrl = this._normalizeUrl(destUrl);
 
             const safeAd = {
                 img: this._sanitize(ad.imageUrl || ad.image_url),
@@ -176,6 +174,32 @@
             wrapper.className = 'canx-ad-container type-' + (ad.type || 'CARD').toLowerCase();
             wrapper.innerHTML = this._getTemplate(ad.type, safeAd);
             shadowRoot.appendChild(wrapper);
+        }
+
+        _normalizeUrl(raw) {
+            if (!raw) return '';
+            let url = String(raw).trim();
+            if (!url) return '';
+
+            // Remove any accidental repeated protocol prefixes like "https:// https://example.com"
+            url = url.replace(/^(https?:\/\/)\s+(https?:\/\/)/i, '$2');
+
+            // Fix common malformed protocol patterns: "https//example.com" or "http//example.com"
+            url = url.replace(/^https?\/\/(?!\/)/i, (m) => (m.toLowerCase().startsWith('https') ? 'https://' : 'http://'));
+            url = url.replace(/^https?:(\/\/)?/i, (m) => (m.toLowerCase().startsWith('https') ? 'https://' : 'http://'));
+
+            // If it starts with "https//" (missing colon), fix it
+            url = url.replace(/^https\/\/+/i, 'https://');
+            url = url.replace(/^http\/\/+/i, 'http://');
+
+            // If no protocol, assume https
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            // Remove stray spaces anywhere in the URL (they break chrome.tabs.create)
+            url = url.replace(/\s+/g, '');
+            return url;
         }
 
         _setupTracking(shadowRoot, ad) {

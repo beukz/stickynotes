@@ -442,6 +442,95 @@
   padding: 12px 0 6px;
 }
 
+/* Checklist */
+.block-checklist {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.block-checkbox {
+  margin-top: 10px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.block-checkbox:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.block-checkbox i {
+  font-size: 0.7rem;
+  color: #fff;
+  display: none;
+}
+
+.is-checked .block-checkbox {
+  background: #111;
+  border-color: #111;
+}
+
+.is-checked .block-checkbox i {
+  display: block;
+}
+
+.is-checked .block-content {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* Bulleted List */
+.block-bulleted-list {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.block-bulleted-list::before {
+  content: "•";
+  margin-top: 8px;
+  font-size: 1.25rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* Quote */
+.block-quote {
+  padding-left: 20px;
+  border-left: 3px solid #111;
+  margin: 12px 0;
+}
+
+.block-quote .block-content {
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Divider */
+.block-divider {
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.block-divider::after {
+  content: "";
+  height: 1px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.06);
+}
+
 /* Slash Menu (Command Palette) */
 .slash-menu {
   position: absolute;

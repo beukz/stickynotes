@@ -47,7 +47,7 @@ export function initNotesView(container) {
                 this.addBlock('paragraph');
             } else {
                 blocksData.forEach(block => {
-                    this.addBlock(block.type, block.content, false);
+                    this.addBlock(block.type, block.content, false, null, block.metadata);
                 });
             }
             if (this.blocks.length > 0) this.focusBlock(this.blocks[0].id);
@@ -55,18 +55,17 @@ export function initNotesView(container) {
 
         parseInputData(data) {
             if (!data) return [];
-            let blocks = [];
             try {
                 const parsed = typeof data === 'string' ? JSON.parse(data) : data;
                 if (Array.isArray(parsed)) return parsed;
                 if (parsed.blocks) {
                     return parsed.blocks.map(b => ({
                         type: b.type === 'header' ? `h${b.data.level || 2}` : b.type,
-                        content: b.data.text || b.data.items?.join('<br>') || ''
+                        content: b.data.text || b.data.items?.join('<br>') || '',
+                        metadata: b.data.checked !== undefined ? { checked: b.data.checked } : {}
                     }));
                 }
             } catch(e) {
-                // Fallback to HTML parsing
                 const div = document.createElement('div');
                 div.innerHTML = data;
                 if (div.children.length > 0) {
@@ -82,9 +81,9 @@ export function initNotesView(container) {
 
         createBlockId() { return 'block-' + Math.random().toString(36).substr(2, 9); }
 
-        addBlock(type = 'paragraph', content = '', shouldFocus = true, afterId = null) {
+        addBlock(type = 'paragraph', content = '', shouldFocus = true, afterId = null, metadata = {}) {
             const id = this.createBlockId();
-            const block = { id, type, content };
+            const block = { id, type, content, metadata: { ...metadata } };
             const blockEl = this.createBlockElement(block);
             if (afterId) {
                 const afterEl = document.getElementById(afterId);
@@ -102,37 +101,62 @@ export function initNotesView(container) {
         createBlockElement(block) {
             const wrapper = document.createElement('div');
             wrapper.className = `editor-block block-${block.type}`;
+            if (block.metadata?.checked) wrapper.classList.add('is-checked');
             wrapper.id = block.id;
+
+            if (block.type === 'checklist') {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'block-checkbox';
+                checkbox.innerHTML = block.metadata?.checked ? '<i class="fi fi-rr-check"></i>' : '';
+                checkbox.onclick = () => {
+                    block.metadata.checked = !block.metadata.checked;
+                    wrapper.classList.toggle('is-checked', block.metadata.checked);
+                    checkbox.innerHTML = block.metadata.checked ? '<i class="fi fi-rr-check"></i>' : '';
+                    this.onChange();
+                };
+                wrapper.appendChild(checkbox);
+            }
+
             const content = document.createElement('div');
             content.className = 'block-content';
-            content.contentEditable = true;
+            content.contentEditable = block.type !== 'divider';
             content.innerHTML = block.content;
             content.dataset.placeholder = this.getPlaceholderForType(block.type);
             wrapper.appendChild(content);
+
             content.addEventListener('input', () => {
                 const b = this.blocks.find(b => b.id === block.id);
                 if (b) b.content = content.innerHTML;
                 this.onChange();
             });
+
             return wrapper;
         }
 
         getPlaceholderForType(type) {
             if (type === 'paragraph') return 'Start writing...';
             if (type.startsWith('h')) return 'Heading...';
+            if (type === 'checklist') return 'To-do...';
+            if (type === 'bulleted-list') return 'List item...';
+            if (type === 'quote') return 'Quote...';
             return '';
         }
 
-        focusBlock(id) {
+        focusBlock(id, atStart = false) {
             const el = document.getElementById(id);
             if (el) {
                 const content = el.querySelector('.block-content');
                 content.focus();
                 this.activeBlockId = id;
-                const range = document.createRange();
                 const selection = window.getSelection();
-                range.selectNodeContents(content);
-                range.collapse(false);
+                const range = document.createRange();
+                if (atStart) {
+                    range.setStart(content, 0);
+                    range.collapse(true);
+                } else {
+                    range.selectNodeContents(content);
+                    range.collapse(false);
+                }
                 selection.removeAllRanges();
                 selection.addRange(range);
             }
@@ -143,6 +167,7 @@ export function initNotesView(container) {
             if (!blockEl) return;
             const id = blockEl.id;
             const index = this.blocks.findIndex(b => b.id === id);
+            const block = this.blocks[index];
 
             if (this.slashMenu) {
                 if (e.key === 'ArrowDown') { e.preventDefault(); this.moveMenuSelection(1); return; }
@@ -153,16 +178,40 @@ export function initNotesView(container) {
 
             if (e.key === 'Enter') {
                 e.preventDefault();
-                this.addBlock('paragraph', '', true, id);
+                // Auto-continue lists
+                const nextType = (block.type === 'checklist' || block.type === 'bulleted-list') ? block.type : 'paragraph';
+                this.addBlock(nextType, '', true, id);
             }
+
             if (e.key === 'Backspace') {
-                const content = e.target;
-                if (content.innerText.length === 0 || content.innerHTML === '' || content.innerHTML === '<br>') {
-                    if (this.blocks.length > 1) {
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const isAtStart = range.startOffset === 0 && range.endOffset === 0;
+
+                if (isAtStart || e.target.innerText.length === 0 || e.target.innerHTML === '<br>') {
+                    if (index > 0) {
                         e.preventDefault();
-                        const prevId = index > 0 ? this.blocks[index-1].id : null;
-                        this.removeBlock(id);
-                        if (prevId) this.focusBlock(prevId);
+                        const prevBlock = this.blocks[index - 1];
+                        const currentContent = e.target.innerHTML;
+                        
+                        // If it's just a type change (e.g. backspacing an empty list item to paragraph)
+                        if (block.type !== 'paragraph' && (e.target.innerText.length === 0 || e.target.innerHTML === '<br>')) {
+                            this.updateBlockType(id, 'paragraph');
+                        } else {
+                            // Merge content
+                            const prevEl = document.getElementById(prevBlock.id).querySelector('.block-content');
+                            const originalLength = prevEl.innerText.length;
+                            prevBlock.content += (currentContent === '<br>' ? '' : currentContent);
+                            prevEl.innerHTML = prevBlock.content;
+                            
+                            this.removeBlock(id);
+                            this.focusBlock(prevBlock.id);
+                            // Adjust cursor to merge point
+                            const newRange = document.createRange();
+                            const newSelection = window.getSelection();
+                            // This is a simplified merge focus
+                            this.focusBlock(prevBlock.id);
+                        }
                     }
                 }
             }
@@ -173,16 +222,22 @@ export function initNotesView(container) {
         handleInput(e) {
             const content = e.target;
             const text = content.innerText;
+            const id = content.closest('.editor-block').id;
             
             if (text === '/') {
-                this.showSlashMenu(content.closest('.editor-block').id);
+                this.showSlashMenu(id);
             } else if (!text.includes('/')) {
                 this.hideSlashMenu();
             }
 
-            if (text.startsWith('# ')) this.updateBlockType(content.closest('.editor-block').id, 'h1', text.substring(2));
-            else if (text.startsWith('## ')) this.updateBlockType(content.closest('.editor-block').id, 'h2', text.substring(3));
-            else if (text.startsWith('### ')) this.updateBlockType(content.closest('.editor-block').id, 'h3', text.substring(4));
+            // Markdown detection
+            if (text.startsWith('# ')) this.updateBlockType(id, 'h1', text.substring(2));
+            else if (text.startsWith('## ')) this.updateBlockType(id, 'h2', text.substring(3));
+            else if (text.startsWith('### ')) this.updateBlockType(id, 'h3', text.substring(4));
+            else if (text.startsWith('- ') || text.startsWith('* ')) this.updateBlockType(id, 'bulleted-list', text.substring(2));
+            else if (text.startsWith('[] ') || text.startsWith('- [ ] ')) this.updateBlockType(id, 'checklist', text.startsWith('[]') ? text.substring(3) : text.substring(6));
+            else if (text.startsWith('> ')) this.updateBlockType(id, 'quote', text.substring(2));
+            else if (text.startsWith('---')) this.updateBlockType(id, 'divider', '');
         }
 
         updateBlockType(id, newType, newContent = null) {
@@ -190,6 +245,7 @@ export function initNotesView(container) {
             if (index === -1) return;
             this.blocks[index].type = newType;
             if (newContent !== null) this.blocks[index].content = newContent;
+            
             const oldEl = document.getElementById(id);
             const newEl = this.createBlockElement(this.blocks[index]);
             oldEl.replaceWith(newEl);
@@ -201,7 +257,8 @@ export function initNotesView(container) {
             const index = this.blocks.findIndex(b => b.id === id);
             if (index !== -1) {
                 this.blocks.splice(index, 1);
-                document.getElementById(id).remove();
+                const el = document.getElementById(id);
+                if (el) el.remove();
                 this.onChange();
             }
         }
@@ -216,7 +273,11 @@ export function initNotesView(container) {
                 { type: 'paragraph', label: 'Text', desc: 'Just start writing plain text.', icon: 'fi-rr-text' },
                 { type: 'h1', label: 'Heading 1', desc: 'Big section heading.', icon: 'fi-rr-h1' },
                 { type: 'h2', label: 'Heading 2', desc: 'Medium section heading.', icon: 'fi-rr-h2' },
-                { type: 'h3', label: 'Heading 3', desc: 'Small section heading.', icon: 'fi-rr-h3' }
+                { type: 'h3', label: 'Heading 3', desc: 'Small section heading.', icon: 'fi-rr-h3' },
+                { type: 'checklist', label: 'To-do List', desc: 'Track tasks with checkboxes.', icon: 'fi-rr-list-check' },
+                { type: 'bulleted-list', label: 'Bulleted List', desc: 'Create a simple bulleted list.', icon: 'fi-rr-list-bullet' },
+                { type: 'quote', label: 'Quote', desc: 'Capture a quotation.', icon: 'fi-rr-quote-right' },
+                { type: 'divider', label: 'Divider', desc: 'Visually divide your content.', icon: 'fi-rr-minus' }
             ];
 
             menu.innerHTML = items.map((item, i) => `
@@ -232,7 +293,12 @@ export function initNotesView(container) {
             document.body.appendChild(menu);
             
             const rect = blockEl.getBoundingClientRect();
-            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            let top = rect.bottom + window.scrollY;
+            if (top + 300 > window.innerHeight + window.scrollY) {
+                top = rect.top + window.scrollY - 300; // Show above if no space
+            }
+
+            menu.style.top = `${top}px`;
             menu.style.left = `${rect.left + window.scrollX}px`;
             
             this.slashMenu = menu;
@@ -270,7 +336,11 @@ export function initNotesView(container) {
         }
 
         save() {
-            return JSON.stringify(this.blocks.map(b => ({ type: b.type, content: b.content })));
+            return JSON.stringify(this.blocks.map(b => ({ 
+                type: b.type, 
+                content: b.content,
+                metadata: b.metadata 
+            })));
         }
     }
 

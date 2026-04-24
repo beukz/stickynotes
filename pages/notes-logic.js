@@ -29,6 +29,7 @@ export function initNotesView(container) {
             this.blocks = [];
             this.activeBlockId = null;
             this.slashMenu = null;
+            this.inlineToolbar = null;
             this.init();
         }
 
@@ -37,6 +38,74 @@ export function initNotesView(container) {
             this.container.classList.add('modern-editor');
             this.container.addEventListener('keydown', (e) => this.handleKeyDown(e));
             this.container.addEventListener('input', (e) => this.handleInput(e));
+            
+            // Selection events for inline toolbar
+            document.addEventListener('selectionchange', () => this.handleSelectionChange());
+            this.initInlineToolbar();
+            
+            // Click below to focus last line
+            this.container.addEventListener('mousedown', (e) => {
+                if (e.target === this.container) {
+                    setTimeout(() => {
+                        if (this.blocks.length > 0) {
+                            this.focusBlock(this.blocks[this.blocks.length - 1].id);
+                        }
+                    }, 0);
+                }
+            });
+        }
+
+        initInlineToolbar() {
+            const toolbar = document.createElement('div');
+            toolbar.className = 'inline-toolbar';
+            toolbar.innerHTML = `
+                <button class="toolbar-btn" data-command="bold" title="Bold"><i class="fi fi-rr-bold"></i></button>
+                <button class="toolbar-btn" data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
+                <button class="toolbar-btn" data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
+            `;
+            
+            toolbar.querySelectorAll('.toolbar-btn').forEach(btn => {
+                btn.onmousedown = (e) => {
+                    e.preventDefault();
+                    const command = btn.dataset.command;
+                    document.execCommand(command, false, null);
+                    this.onChange();
+                };
+            });
+
+            document.body.appendChild(toolbar);
+            this.inlineToolbar = toolbar;
+        }
+
+        handleSelectionChange() {
+            const selection = window.getSelection();
+            if (selection.isCollapsed || !selection.toString().trim()) {
+                this.hideInlineToolbar();
+                return;
+            }
+
+            const range = selection.getRangeAt(0);
+            const commonAncestor = range.commonAncestorContainer;
+            const blockContent = (commonAncestor.nodeType === 1 ? commonAncestor : commonAncestor.parentElement).closest('.block-content');
+
+            if (!blockContent || !this.container.contains(blockContent)) {
+                this.hideInlineToolbar();
+                return;
+            }
+
+            const rect = range.getBoundingClientRect();
+            this.inlineToolbar.classList.add('active');
+            
+            const toolbarHeight = 40;
+            let top = rect.top + window.scrollY - toolbarHeight - 10;
+            let left = rect.left + window.scrollX + (rect.width / 2) - (this.inlineToolbar.offsetWidth / 2);
+
+            this.inlineToolbar.style.top = `${top}px`;
+            this.inlineToolbar.style.left = `${left}px`;
+        }
+
+        hideInlineToolbar() {
+            if (this.inlineToolbar) this.inlineToolbar.classList.remove('active');
         }
 
         render(data) {
@@ -50,7 +119,15 @@ export function initNotesView(container) {
                     this.addBlock(block.type, block.content, false, null, block.metadata);
                 });
             }
+            this.ensureLastBlockIsEmpty();
             if (this.blocks.length > 0) this.focusBlock(this.blocks[0].id);
+        }
+
+        ensureLastBlockIsEmpty() {
+            const lastBlock = this.blocks[this.blocks.length - 1];
+            if (lastBlock && (lastBlock.content.trim() !== '' && lastBlock.content !== '<br>' && lastBlock.type !== 'divider')) {
+                this.addBlock('paragraph', '', false);
+            }
         }
 
         parseInputData(data) {
@@ -127,6 +204,7 @@ export function initNotesView(container) {
             content.addEventListener('input', () => {
                 const b = this.blocks.find(b => b.id === block.id);
                 if (b) b.content = content.innerHTML;
+                this.ensureLastBlockIsEmpty();
                 this.onChange();
             });
 

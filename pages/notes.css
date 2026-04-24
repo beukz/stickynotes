@@ -456,6 +456,10 @@
 }
 
 /* Placeholders */
+.editor-block:not(:hover):not(.is-focused) .block-content:empty::before {
+  content: "";
+}
+
 .block-content:empty::before {
   content: attr(data-placeholder);
   color: #9ca3af;
@@ -544,8 +548,9 @@
 
 .block-bulleted-list::before {
   content: "•";
-  margin-top: 8px;
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #9ca3af;
   flex-shrink: 0;
 }
@@ -725,4 +730,106 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+/* Style Menu */
+.style-menu {
+  position: relative;
+}
+
+.style-toggle {
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.style-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111;
+}
+
+.style-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  width: 220px;
+  padding: 16px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: menuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.style-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.style-section label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+}
+
+.style-section select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f9fafb;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.size-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.size-controls button {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: #1f2937;
+}
+
+.size-controls button:hover {
+  background: #f3f4f6;
+}
+
+#current-size-display {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1f2937;
+  min-width: 40px;
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
 }

@@ -31,7 +31,46 @@ export function template() {
               <div class="header-right">
                 <div id="save-status" class="save-status">
                   <i class="fi fi-rr-check"></i>
-                  <span>Saved</span>
+                  <div class="save-info">
+                    <span>Saved</span>
+                  </div>
+                </div>
+                <span class="header-divider">|</span>
+                <div class="style-menu">
+                    <button class="style-toggle" title="Text Style">
+                        <i class="fi fi-rr-text-size"></i>
+                    </button>
+                    <div class="style-popup hidden">
+                        <div class="style-section">
+                            <label>Font Family</label>
+                            <select id="font-family-select">
+                                <option value="'Inter', sans-serif">Inter</option>
+                                <option value="'DM Sans', sans-serif">DM Sans</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                <option value="'Nunito', sans-serif">Nunito</option>
+                                <option value="'Source Sans 3', sans-serif">Source Sans 3</option>
+                                <option value="'Work Sans', sans-serif">Work Sans</option>
+                                <option value="'Raleway', sans-serif">Raleway</option>
+                                <option value="'Manrope', sans-serif">Manrope</option>
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Outfit', sans-serif">Outfit</option>
+                                <option value="'Lora', serif">Lora (Serif)</option>
+                                <option value="'Merriweather', serif">Merriweather (Serif)</option>
+                                <option value="'Playfair Display', serif">Playfair (Serif)</option>
+                                <option value="'Fira Code', monospace">Fira Code</option>
+                            </select>
+                        </div>
+                        <div class="style-section">
+                            <label>Font Size</label>
+                            <div class="size-controls">
+                                <button id="size-decrease"><i class="fi fi-rr-minus-small"></i></button>
+                                <span id="current-size-display">16px</span>
+                                <button id="size-increase"><i class="fi fi-rr-plus-small"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <span class="header-divider">|</span>
                 <span id="note-date">April 24, 2024</span>

@@ -65,6 +65,26 @@ export function initNotesView(container) {
                     <button class="toolbar-btn" data-command="italic" title="Italic"><i class="fi fi-rr-italic"></i></button>
                     <button class="toolbar-btn" data-command="underline" title="Underline"><i class="fi fi-rr-underline"></i></button>
                     <div class="toolbar-separator"></div>
+                    <select class="toolbar-font-select" title="Change Font">
+                        <option value="">Default</option>
+                        <option value="Inter">Inter</option>
+                        <option value="DM Sans">DM Sans</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Source Sans 3">Source Sans 3</option>
+                        <option value="Work Sans">Work Sans</option>
+                        <option value="Raleway">Raleway</option>
+                        <option value="Manrope">Manrope</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Outfit">Outfit</option>
+                        <option value="Lora">Lora (Serif)</option>
+                        <option value="Merriweather">Merriweather (Serif)</option>
+                        <option value="Playfair Display">Playfair Display (Serif)</option>
+                        <option value="Fira Code">Fira Code</option>
+                    </select>
+                    <div class="toolbar-separator"></div>
                     <button class="toolbar-btn" id="link-btn" title="Add Link"><i class="fi fi-rr-link"></i></button>
                     <button class="toolbar-btn hidden" id="unlink-btn" title="Remove Link"><i class="fi fi-rr-link-slash"></i></button>
                 </div>
@@ -82,6 +102,16 @@ export function initNotesView(container) {
                     this.onChange();
                 };
             });
+
+            const fontSelect = toolbar.querySelector('.toolbar-font-select');
+            fontSelect.onchange = () => {
+                const font = fontSelect.value;
+                if (font) {
+                    document.execCommand('fontName', false, font);
+                    this.onChange();
+                    this.hideInlineToolbar();
+                }
+            };
 
             const linkBtn = toolbar.querySelector('#link-btn');
             const unlinkBtn = toolbar.querySelector('#unlink-btn');
@@ -282,6 +312,13 @@ export function initNotesView(container) {
             content.innerHTML = block.content;
             content.dataset.placeholder = this.getPlaceholderForType(block.type);
             wrapper.appendChild(content);
+
+            content.addEventListener('focus', () => {
+                wrapper.classList.add('is-focused');
+            });
+            content.addEventListener('blur', () => {
+                wrapper.classList.remove('is-focused');
+            });
 
             content.addEventListener('input', () => {
                 const b = this.blocks.find(b => b.id === block.id);
@@ -560,24 +597,40 @@ export function initNotesView(container) {
         }
     }
 
+    let lastSavedTime = null;
+
     function setSaveStatus(status) {
         if (!saveStatusEl) return;
         if (status === 'saving') {
-            saveStatusEl.innerHTML = '<i class="fi fi-rr-spinner animate-spin"></i><span>Saving...</span>';
+            const timeInfo = lastSavedTime ? `<small>Last saved at ${lastSavedTime}</small>` : '';
+            saveStatusEl.innerHTML = `
+                <i class="fi fi-rr-spinner animate-spin"></i>
+                <div class="save-info">
+                    <span>Saving...</span>
+                    ${timeInfo}
+                </div>
+            `;
             saveStatusEl.classList.add('saving');
             saveStatusEl.classList.remove('saved', 'error');
         } else if (status === 'error') {
-            saveStatusEl.innerHTML = '<i class="fi fi-rr-cloud-slash"></i><span>Error</span>';
+            const timeInfo = lastSavedTime ? `<small>Last saved at ${lastSavedTime}</small>` : '';
+            saveStatusEl.innerHTML = `
+                <i class="fi fi-rr-cloud-slash"></i>
+                <div class="save-info">
+                    <span>Error</span>
+                    ${timeInfo}
+                </div>
+            `;
             saveStatusEl.classList.add('error');
             saveStatusEl.classList.remove('saving', 'saved');
         } else {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            lastSavedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             saveStatusEl.innerHTML = `
                 <i class="fi fi-rr-check"></i>
-                <div class=\"save-info\">
+                <div class="save-info">
                     <span>Saved</span>
-                    <small>Last saved at ${timeStr}</small>
+                    <small>Last saved at ${lastSavedTime}</small>
                 </div>
             `;
             saveStatusEl.classList.add('saved');
@@ -595,6 +648,8 @@ export function initNotesView(container) {
                 content: note.content,
                 color: note.color || "#ffd165",
                 url: note.url || "dashboard",
+                font_family: note.font_family || "'Inter', sans-serif",
+                font_size: note.font_size || 16,
                 user_id: currentUser.id // Explicitly send for RLS
             };
 
@@ -744,6 +799,26 @@ export function initNotesView(container) {
                 year: 'numeric' 
             });
         }
+
+        // Update last saved time if available
+        if (note.updated_at) {
+            const date = new Date(note.updated_at);
+            lastSavedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            setSaveStatus('saved');
+        } else {
+            lastSavedTime = null;
+            saveStatusEl.innerHTML = '<i class="fi fi-rr-check"></i><div class="save-info"><span>Saved</span></div>';
+        }
+
+        applyStyle(note);
+
+        // Used to avoid treating selection/font changes as "unsaved" on load
+        note._lastSavedState = {
+            title: note.title || "",
+            content: (note.content || "").toString(),
+            font_family: note.font_family || "'Inter', sans-serif",
+            font_size: note.font_size || 16,
+        };
         
         container.querySelectorAll('.note-item').forEach(item => {
             item.classList.toggle('active', item.dataset.id === id);
@@ -767,7 +842,31 @@ export function initNotesView(container) {
         const note = notes.find(n => n.id === activeNoteId);
         if (!note) return;
 
-        if (note.title === newTitle && note.content === newContent) return;
+        const effectiveFontFamily = note.font_family || "'Inter', sans-serif";
+        const effectiveFontSize = note.font_size || 16;
+
+        const nextState = {
+            title: newTitle,
+            content: newContent,
+            font_family: effectiveFontFamily,
+            font_size: effectiveFontSize,
+        };
+
+        const lastState = note._lastSavedState || {
+            title: note.title || "",
+            content: note.content || "",
+            font_family: note.font_family || "'Inter', sans-serif",
+            font_size: note.font_size || 16,
+        };
+
+        if (
+            lastState.title === nextState.title &&
+            lastState.content === nextState.content &&
+            lastState.font_family === nextState.font_family &&
+            lastState.font_size === nextState.font_size
+        ) {
+            return;
+        }
 
         note.title = newTitle;
         note.content = newContent;
@@ -778,6 +877,7 @@ export function initNotesView(container) {
         saveTimeout = setTimeout(async () => {
             notes.sort((a, b) => b.lastModified - a.lastModified);
             await saveNotes(note);
+            note._lastSavedState = nextState; // optimistic; updated_at handled separately
             renderNotesList();
         }, 500);
     }
@@ -846,9 +946,81 @@ export function initNotesView(container) {
         });
     }
 
+    // Style Menu Logic
+    const styleToggle = container.querySelector('.style-toggle');
+    const stylePopup = container.querySelector('.style-popup');
+    const fontFamilySelect = container.querySelector('#font-family-select');
+    const sizeDecrease = container.querySelector('#size-decrease');
+    const sizeIncrease = container.querySelector('#size-increase');
+    const currentSizeDisplay = container.querySelector('#current-size-display');
+
+    function applyStyle(note) {
+        const family = note.font_family || "'Inter', sans-serif";
+        const size = note.font_size || 16;
+        
+        const editorEl = container.querySelector('#editorjs');
+        if (editorEl) {
+            editorEl.style.fontFamily = family;
+            editorEl.style.fontSize = size + 'px';
+        }
+
+        // Update UI controls
+        if (fontFamilySelect) fontFamilySelect.value = family;
+        if (currentSizeDisplay) currentSizeDisplay.textContent = size + 'px';
+    }
+
+    if (styleToggle) {
+        styleToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            stylePopup.classList.toggle('hidden');
+        });
+    }
+
+    if (fontFamilySelect) {
+        fontFamilySelect.addEventListener('change', () => {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (note) {
+                note.font_family = fontFamilySelect.value;
+                applyStyle(note);
+                updateNote();
+            }
+        });
+    }
+
+    if (sizeDecrease) {
+        sizeDecrease.addEventListener('click', () => {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (note) {
+                const currentSize = note.font_size || 16;
+                if (currentSize > 12) {
+                    note.font_size = currentSize - 1;
+                    applyStyle(note);
+                    updateNote();
+                }
+            }
+        });
+    }
+
+    if (sizeIncrease) {
+        sizeIncrease.addEventListener('click', () => {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (note) {
+                const currentSize = note.font_size || 16;
+                if (currentSize < 32) {
+                    note.font_size = currentSize + 1;
+                    applyStyle(note);
+                    updateNote();
+                }
+            }
+        });
+    }
+
     const bodyClickHandler = (e) => {
         if (editor && editor.slashMenu && !editor.slashMenu.contains(e.target)) {
             editor.hideSlashMenu();
+        }
+        if (stylePopup && !stylePopup.contains(e.target) && !styleToggle.contains(e.target)) {
+            stylePopup.classList.add('hidden');
         }
     };
     document.addEventListener('click', bodyClickHandler);

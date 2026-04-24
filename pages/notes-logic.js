@@ -149,7 +149,9 @@ export function initNotesView(container) {
             deleteBtn.title = 'Delete Note';
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                deleteNote(note.id);
+                showDeleteConfirmation(item, () => {
+                    deleteNote(note.id);
+                });
             });
 
             item.appendChild(titleSpan);
@@ -224,9 +226,45 @@ export function initNotesView(container) {
         }, 500);
     }
 
-    async function deleteNote(id) {
-        if (!confirm('Are you sure you want to delete this note?')) return;
+    function showDeleteConfirmation(noteItem, onConfirm) {
+        if (noteItem.querySelector(".popup-delete-overlay")) return;
 
+        const overlay = document.createElement("div");
+        overlay.className = "popup-delete-overlay";
+
+        const modal = document.createElement("div");
+        modal.className = "popup-delete-modal";
+        modal.innerHTML = `
+            <div class="popup-modal-buttons">
+                <button class="confirm-delete" title="Confirm Delete"><i class="fi fi-rr-check"></i></button>
+                <button class="cancel-delete" title="Cancel"><i class="fi fi-rr-cross-small"></i></button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        noteItem.appendChild(overlay);
+
+        // Trigger transition
+        setTimeout(() => overlay.classList.add("active"), 10);
+
+        const closeOverlay = () => {
+            overlay.classList.remove("active");
+            setTimeout(() => overlay.remove(), 250);
+        };
+
+        modal.querySelector(".confirm-delete").onclick = (e) => {
+            e.stopPropagation();
+            onConfirm();
+            closeOverlay();
+        };
+
+        modal.querySelector(".cancel-delete").onclick = (e) => {
+            e.stopPropagation();
+            closeOverlay();
+        };
+    }
+
+    async function deleteNote(id) {
         if (currentUser && id.includes('-')) {
              chrome.runtime.sendMessage({
                 action: "supabaseAction", method: "DELETE", table: "sticky_notes", query: `id=eq.${id}`

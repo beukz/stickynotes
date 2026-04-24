@@ -50,17 +50,93 @@
   border: none;
   cursor: pointer;
   color: #9ca3af;
-  padding: 4px;
+  width: 28px; /* Fixed size */
+  height: 28px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 #new-note-btn:hover {
   background: rgba(0, 0, 0, 0.04);
   color: #0a0a0a;
+}
+
+/* --- Delete Confirmation Overlay (Ported from popup) --- */
+.popup-delete-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+.popup-delete-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.popup-delete-modal {
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 100%;
+}
+
+.popup-delete-overlay.active .popup-delete-modal {
+  transform: scale(1);
+}
+
+.popup-modal-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.popup-modal-buttons button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.popup-modal-buttons .confirm-delete {
+  background-color: #ef4444;
+  color: white;
+}
+
+.popup-modal-buttons .confirm-delete:hover {
+  background-color: #dc2626;
+  /* transform: scale(1.1); */
+}
+
+.popup-modal-buttons .cancel-delete {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: #374151;
+}
+
+.popup-modal-buttons .cancel-delete:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+  /* transform: scale(1.1); */
 }
 
 .search-notes {

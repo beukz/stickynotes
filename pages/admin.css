@@ -16,6 +16,92 @@
   margin-bottom: 32px;
 }
 
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Tabs ─── */
+.admin-tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  width: fit-content;
+}
+
+.admin-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-tab i {
+  font-size: 0.95rem;
+}
+
+.admin-tab:hover {
+  background: rgba(255, 255, 255, 0.75);
+  color: #111827;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.admin-tab.active {
+  background: #ffffff;
+  color: #0a0a0a;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Panels ─── */
+.admin-panel {
+  display: none;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.admin-panel.active {
+  display: block;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel-header h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  letter-spacing: -0.02em;
+}
+
+.panel-header p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -78,11 +164,147 @@
 
 /* ─── Broadcast Section ─── */
 .notification-management {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* ─── Admin: Sent notifications list ─── */
+.admin-notifications {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.admin-notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.admin-notifications-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+.secondary-btn {
   background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #111827;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.admin-notifs-state {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  padding: 10px 0;
+}
+
+.admin-notifs-state[data-type="error"] {
+  color: #ef4444;
+}
+
+.admin-notifs-state[data-type="empty"] {
+  color: #9ca3af;
+}
+
+.admin-notifs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-notif-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 24px;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.admin-notif-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.admin-notif-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.admin-notif-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  color: #374151;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.65rem;
+}
+
+.admin-notif-message {
+  font-size: 0.8125rem;
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.admin-notif-actions {
+  display: flex;
+  align-items: flex-start;
+}
+
+.admin-notif-delete {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #9ca3af;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.admin-notif-delete:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+.admin-notif-delete:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .section-header {
@@ -171,9 +393,7 @@
 }
 
 .section-divider {
-  height: 1px;
-  background: rgba(0, 0, 0, 0.06);
-  margin: 8px 0 24px;
+  display: none;
 }
 
 /* ─── Search ─── */
